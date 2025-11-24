@@ -24,13 +24,25 @@ function ensureAccount(state, address) {
   return state.accounts[address];
 }
 
+const ALLOWED_ACTIONS = ['transfer', 'stake', 'unstake'];
+
 function validateTransaction(state, transaction) {
   if (!transaction || typeof transaction !== 'object') {
     return { ok: false, reason: 'Invalid transaction payload' };
   }
   const { from, to, amount, fee, memo } = transaction;
-  if (!from || !to) {
-    return { ok: false, reason: 'Missing from or to address' };
+  const action = transaction.action || 'transfer';
+  if (!ALLOWED_ACTIONS.includes(action)) {
+    return { ok: false, reason: 'Invalid action' };
+  }
+  if (!from) {
+    return { ok: false, reason: 'Missing from address' };
+  }
+  if (action === 'transfer' && !to) {
+    return { ok: false, reason: 'Missing to address' };
+  }
+  if ((action === 'stake' || action === 'unstake') && to && to !== from) {
+    return { ok: false, reason: 'Stake/unstake must target own account' };
   }
   if (typeof amount !== 'number' || amount <= 0) {
     return { ok: false, reason: 'Amount must be positive number' };
@@ -45,6 +57,8 @@ function validateTransaction(state, transaction) {
     return { ok: false, reason: 'Memo too long (max 256 chars)' };
   }
   const senderAccount = ensureAccount(state, from);
+  const effectiveTo = to || from;
+  ensureAccount(state, effectiveTo);
   if (typeof transaction.nonce === 'number') {
     if (!Number.isInteger(transaction.nonce)) {
       return { ok: false, reason: 'Nonce must be integer' };
@@ -53,9 +67,19 @@ function validateTransaction(state, transaction) {
       return { ok: false, reason: 'Nonce must be greater than current account nonce' };
     }
   }
-  const totalCost = amount + fee;
-  if (senderAccount.balance < totalCost) {
-    return { ok: false, reason: 'Insufficient balance' };
+  if (action === 'transfer' || action === 'stake') {
+    const totalCost = amount + fee;
+    if (senderAccount.balance < totalCost) {
+      return { ok: false, reason: 'Insufficient balance' };
+    }
+  }
+  if (action === 'unstake') {
+    if (senderAccount.stake < amount) {
+      return { ok: false, reason: 'Insufficient stake to unstake' };
+    }
+    if (senderAccount.balance < fee) {
+      return { ok: false, reason: 'Insufficient balance for fee' };
+    }
   }
   return { ok: true };
 }
@@ -66,10 +90,22 @@ function applyTransaction(state, transaction) {
     throw new Error(validation.reason);
   }
   const { from, to, amount, fee } = transaction;
+  const action = transaction.action || 'transfer';
   const senderAccount = ensureAccount(state, from);
-  const receiverAccount = ensureAccount(state, to);
-  senderAccount.balance -= amount + fee;
-  receiverAccount.balance += amount;
+  const receiverAccount = ensureAccount(state, to || from);
+
+  if (action === 'transfer') {
+    senderAccount.balance -= amount + fee;
+    receiverAccount.balance += amount;
+  } else if (action === 'stake') {
+    senderAccount.balance -= amount + fee;
+    senderAccount.stake += amount;
+  } else if (action === 'unstake') {
+    senderAccount.stake -= amount;
+    senderAccount.balance += amount;
+    senderAccount.balance -= fee;
+  }
+
   if (typeof transaction.nonce === 'number' && Number.isInteger(transaction.nonce)) {
     senderAccount.nonce = Math.max(senderAccount.nonce, transaction.nonce);
   }

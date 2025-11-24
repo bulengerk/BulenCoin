@@ -111,9 +111,21 @@ run_compose_smoke() {
   docker compose -f "${COMPOSE_FILE}" up -d
 
   log "Waiting for node API..."
-  until docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status >/dev/null; do
+  ready=0
+  for _ in {1..60}; do
+    if docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
     sleep 1
   done
+
+  if [[ "${ready}" -ne 1 ]]; then
+    log "Compose node did not start; showing compose ps/logs for bulennode"
+    docker compose -f "${COMPOSE_FILE}" ps
+    docker compose -f "${COMPOSE_FILE}" logs bulennode || true
+    return 1
+  fi
 
   log "Smoke: node status"
   docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status

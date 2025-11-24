@@ -128,6 +128,7 @@ function createServer(context) {
       peers: config.peers,
       mempoolSize: mempool.length,
       accountsCount: Object.keys(state.accounts).length,
+      totalStake: Object.values(state.accounts).reduce((sum, acc) => sum + (acc.stake || 0), 0),
       protocolVersion: config.protocolVersion,
       protocolMajor: config.protocolMajor,
       metrics: {
@@ -214,6 +215,7 @@ function createServer(context) {
       nonce: typeof transaction.nonce === 'number' ? transaction.nonce : undefined,
       publicKey: transaction.publicKey,
       signature: transaction.signature,
+      action: transaction.action || 'transfer',
       memo: transaction.memo ? String(transaction.memo).slice(0, 256) : undefined,
       timestamp: transaction.timestamp || new Date().toISOString(),
     };
