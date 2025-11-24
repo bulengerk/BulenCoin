@@ -10,6 +10,7 @@ services:
       - BULEN_NODE_PROFILE=server-full
       - BULEN_REQUIRE_SIGNATURES=true
       - BULEN_ENABLE_FAUCET=false
+      - BULEN_P2P_TOKEN=devnet-p2p-token
     volumes:
       - ./data/bulennode:/app/data
     ports:
@@ -40,4 +41,3 @@ services:
       - bulennode
     ports:
       - "4300:4300"
-
