@@ -265,23 +265,27 @@ function createServer(context) {
   });
 
   app.post('/api/payments', (request, response) => {
-    const { to, amount, memo, expiresInSeconds } = request.body || {};
-    const numericAmount = Number(amount);
-    if (!to || typeof to !== 'string') {
-      response.status(400).json({ error: 'Missing destination address' });
-      return;
+    try {
+      const { to, amount, memo, expiresInSeconds } = request.body || {};
+      const numericAmount = Number(amount);
+      if (!to || typeof to !== 'string') {
+        response.status(400).json({ error: 'Missing destination address' });
+        return;
+      }
+      if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+        response.status(400).json({ error: 'Invalid amount' });
+        return;
+      }
+      const payment = payments.createPayment(context, {
+        to,
+        amount: numericAmount,
+        memo,
+        expiresInSeconds,
+      });
+      response.status(201).json(payments.paymentSummary(payment));
+    } catch (error) {
+      response.status(400).json({ error: error.message || 'Invalid payment payload' });
     }
-    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
-      response.status(400).json({ error: 'Invalid amount' });
-      return;
-    }
-    const payment = payments.createPayment(context, {
-      to,
-      amount: numericAmount,
-      memo,
-      expiresInSeconds,
-    });
-    response.status(201).json(payments.paymentSummary(payment));
   });
 
   app.get('/api/payments/:id', (request, response) => {

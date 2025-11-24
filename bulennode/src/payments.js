@@ -35,11 +35,22 @@ function createPayment(context, payload) {
   const now = Date.now();
   const expiresIn = Number(payload.expiresInSeconds || 900);
   const expiresAt = new Date(now + Math.max(60, expiresIn) * 1000).toISOString();
+  const numericAmount = Number(payload.amount);
+  if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+    throw new Error('Invalid amount');
+  }
+  if (!payload.to || typeof payload.to !== 'string') {
+    throw new Error('Missing destination address');
+  }
   const memo = normalizeMemo(payload.memo);
+  if (payload.memo && memo !== payload.memo) {
+    // Memo was truncated; reject instead of silently trimming for invoices
+    throw new Error('Memo too long (max 256 chars)');
+  }
   const payment = {
     id: payload.id || `pay_${now.toString(16)}_${Math.random().toString(16).slice(2, 8)}`,
     to: payload.to,
-    amount: Number(payload.amount),
+    amount: numericAmount,
     memo,
     createdAt: new Date(now).toISOString(),
     expiresAt,
