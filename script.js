@@ -17,6 +17,9 @@ const translations = {
     chip_mobile: 'Mobile · desktop · server ready',
     chip_uptime: 'Uptime rewards baked in',
     chip_multilingual: 'Docs: PL / EN / ES',
+    hero_highlight_api: 'On-chain payments API with memo binding',
+    hero_highlight_wallets: 'Wallet challenge/verify for MetaMask, WalletConnect, Ledger',
+    hero_highlight_tests: 'Full-stack tests ship with the stack (node + explorer + status)',
     hero_card1_title: 'Runs everywhere',
     hero_card1_body:
       'Mobile, desktop and server nodes cooperate in one network. Phones and tablets can participate without burning the battery.',
@@ -168,6 +171,9 @@ const translations = {
     chip_mobile: 'Listo para móvil · escritorio · servidor',
     chip_uptime: 'Recompensas por disponibilidad integradas',
     chip_multilingual: 'Docs: PL / EN / ES',
+    hero_highlight_api: 'API de pagos on-chain con memo',
+    hero_highlight_wallets: 'Challenge/verify de wallets: MetaMask, WalletConnect, Ledger',
+    hero_highlight_tests: 'Tests full-stack incluidos (nodo + explorer + status)',
     hero_card1_title: 'Funciona en todas partes',
     hero_card1_body:
       'Nodos móviles, de escritorio y de servidor cooperan en una sola red. Los teléfonos y las tabletas pueden participar sin destruir la batería.',
@@ -322,6 +328,9 @@ const translations = {
     chip_mobile: 'Gotowe na mobile · desktop · serwer',
     chip_uptime: 'Nagrody za uptime w rdzeniu',
     chip_multilingual: 'Docs: PL / EN / ES',
+    hero_highlight_api: 'On-chain payments API z memo do spięcia transakcji z zamówieniem',
+    hero_highlight_wallets: 'Challenge/verify dla portfeli MetaMask, WalletConnect, Ledger',
+    hero_highlight_tests: 'Full-stack testy w pakiecie (node + explorer + status)',
     hero_card1_title: 'Działa wszędzie',
     hero_card1_body:
       'W jednym łańcuchu współpracują węzły mobilne, desktopowe i serwerowe. Telefony i tablety mogą brać udział bez drastycznego drenażu baterii.',
