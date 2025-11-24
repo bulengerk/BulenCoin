@@ -59,13 +59,14 @@ run_matrix() {
       -e BULEN_NODE_PROFILE="${profile}" \
       -e BULEN_HTTP_PORT="4100" \
       -e BULEN_P2P_PORT="4101" \
+      -e NODE_ENV="development" \
       -e BULEN_REQUIRE_SIGNATURES="${require_signatures}" \
       -e BULEN_ENABLE_FAUCET="${faucet}" \
       -e BULEN_P2P_TOKEN="matrix-token" \
       -e BULEN_LOG_FORMAT="tiny" \
       "${NODE_IMAGE}" >/dev/null
 
-    for _ in {1..30}; do
+    for _ in {1..60}; do
       if curl -sf "http://127.0.0.1:${http_port}/api/status" >/dev/null 2>&1; then
         break
       fi
@@ -73,7 +74,8 @@ run_matrix() {
     done
 
     if ! curl -sf "http://127.0.0.1:${http_port}/api/status" >/dev/null 2>&1; then
-      echo "!!! status check failed for ${name}"
+      echo "!!! status check failed for ${name} (showing logs)"
+      docker logs "${name}" || true
       errors=$((errors + 1))
     fi
 
@@ -86,7 +88,11 @@ run_matrix() {
         -d '{"from":"matrix-alice","to":"matrix-bob","amount":10,"fee":0}' >/dev/null || true
     fi
 
-    docker rm -f "${name}" >/dev/null
+    if [[ "${KEEP_MATRIX_CONTAINERS:-0}" == "0" ]]; then
+      docker rm -f "${name}" >/dev/null
+    else
+      echo "Keeping container ${name} (KEEP_MATRIX_CONTAINERS=1)"
+    fi
     idx=$((idx + 1))
   done
 
