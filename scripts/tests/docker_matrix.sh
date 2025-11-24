@@ -4,7 +4,7 @@ set -euo pipefail
 # Matrix test of BulenNode across profiles and security settings using Docker.
 # Requirements: docker installed and access to the daemon (run with sudo if needed).
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 NODE_IMAGE="bulen-node-matrix"
 EXPLORER_IMAGE="bulen-explorer-matrix"
