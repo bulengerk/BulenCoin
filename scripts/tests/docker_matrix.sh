@@ -41,30 +41,32 @@ function run_check() {
   fi
 
   echo ">>> Starting ${name} (profile=${profile}, faucet=${faucet}, requireSignatures=${require_signatures}) on host port ${http_port}"
-  docker run -d --rm \
-    --name "${name}" \
-    -p "${http_port}:4100" \
-    -e BULEN_NODE_PROFILE="${profile}" \
-    -e BULEN_HTTP_PORT="4100" \
-    -e BULEN_P2P_PORT="4101" \
-    -e BULEN_REQUIRE_SIGNATURES="${require_signatures}" \
-    -e BULEN_ENABLE_FAUCET="${faucet}" \
-    -e BULEN_P2P_TOKEN="matrix-token" \
-    -e BULEN_LOG_FORMAT="tiny" \
-    "${NODE_IMAGE}" >/dev/null
+    docker run -d --rm \
+      --name "${name}" \
+      -p "${http_port}:4100" \
+      -e BULEN_NODE_PROFILE="${profile}" \
+      -e BULEN_HTTP_PORT="4100" \
+      -e BULEN_P2P_PORT="4101" \
+      -e NODE_ENV="development" \
+      -e BULEN_REQUIRE_SIGNATURES="${require_signatures}" \
+      -e BULEN_ENABLE_FAUCET="${faucet}" \
+      -e BULEN_P2P_TOKEN="matrix-token" \
+      -e BULEN_LOG_FORMAT="tiny" \
+      "${NODE_IMAGE}" >/dev/null
 
   # wait for status
-  for _ in {1..30}; do
-    if curl -sf "http://127.0.0.1:${http_port}/api/status" >/dev/null 2>&1; then
-      break
-    fi
-    sleep 1
-  done
+    for _ in {1..60}; do
+      if curl -sf "http://127.0.0.1:${http_port}/api/status" >/dev/null 2>&1; then
+        break
+      fi
+      sleep 1
+    done
 
   if ! curl -sf "http://127.0.0.1:${http_port}/api/status"; then
-    echo "!!! status check failed for ${name}"
-    errors=$((errors + 1))
-  fi
+      echo "!!! status check failed for ${name} (showing logs)"
+      docker logs "${name}" || true
+      errors=$((errors + 1))
+    fi
 
   if [[ "${faucet}" == "true" && "${require_signatures}" == "false" ]]; then
     curl -sf -X POST "http://127.0.0.1:${http_port}/api/faucet" \
@@ -75,7 +77,7 @@ function run_check() {
       -d '{"from":"matrix-alice","to":"matrix-bob","amount":10,"fee":0}' >/dev/null || true
   fi
 
-  docker rm -f "${name}" >/dev/null
+    docker rm -f "${name}" >/dev/null
   idx=$((idx + 1))
 }
 
