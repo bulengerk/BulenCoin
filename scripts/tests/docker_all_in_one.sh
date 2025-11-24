@@ -30,6 +30,7 @@ build_image_if_needed() {
 }
 
 run_matrix() {
+  local base_port="${MATRIX_BASE_PORT:-5700}"
   local profiles=(
     "desktop-full:true:true"
     "server-full:true:true"
@@ -44,7 +45,7 @@ run_matrix() {
 
   for entry in "${profiles[@]}"; do
     IFS=':' read -r profile faucet allowUnsigned <<<"${entry}"
-    local http_port=$((5700 + idx * 5))
+    local http_port=$((base_port + idx * 5))
     local name="bulen-matrix-${idx}"
     local require_signatures="true"
     if [[ "${allowUnsigned}" == "true" ]]; then
