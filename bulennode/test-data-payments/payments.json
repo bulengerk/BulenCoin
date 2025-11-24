@@ -1,0 +1,26 @@
+{
+  "payments": [
+    {
+      "id": "pay_19ab4f20953_604fd5",
+      "to": "merchant",
+      "amount": 50,
+      "memo": "order-123",
+      "createdAt": "2025-11-24T08:19:12.339Z",
+      "expiresAt": "2025-11-24T08:24:12.339Z",
+      "status": "paid",
+      "transactionId": "tx-1763972352380-319821e789fc9",
+      "blockIndex": 1
+    },
+    {
+      "id": "pay_19ab4f5c93a_833ae7",
+      "to": "merchant",
+      "amount": 50,
+      "memo": "order-123",
+      "createdAt": "2025-11-24T08:23:18.074Z",
+      "expiresAt": "2025-11-24T08:28:18.074Z",
+      "status": "paid",
+      "transactionId": "tx-1763972352380-319821e789fc9",
+      "blockIndex": 1
+    }
+  ]
+}

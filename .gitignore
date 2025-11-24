@@ -1,0 +1,23 @@
+# Node.js
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# Runtime data
+logs/
+*.log
+data/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.venv/
+
+# Rust (if used in the future)
+target/

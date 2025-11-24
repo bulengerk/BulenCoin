@@ -1,0 +1,507 @@
+{
+  "chainId": "bulencoin-devnet-1",
+  "blocks": [
+    {
+      "index": 0,
+      "previousHash": null,
+      "timestamp": "2025-11-23T22:24:44.077Z",
+      "validator": "genesis",
+      "transactions": [],
+      "hash": "0b0b12ddab0a2a4bf624fa51a4d71a577b2164b5a80088234b176ab269c80800"
+    },
+    {
+      "index": 1,
+      "previousHash": "0b0b12ddab0a2a4bf624fa51a4d71a577b2164b5a80088234b176ab269c80800",
+      "timestamp": "2025-11-23T22:24:44.284Z",
+      "validator": "node-8c7d03f9f29be",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763936684225-3c08cd98573de",
+          "from": "alice-functional",
+          "to": "bob-functional",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-23T22:24:44.225Z"
+        }
+      ],
+      "hash": "2c914b30f716cf511fab7be781992e605b753bacac560e2c38334f8890c3a680"
+    },
+    {
+      "index": 2,
+      "previousHash": "2c914b30f716cf511fab7be781992e605b753bacac560e2c38334f8890c3a680",
+      "timestamp": "2025-11-23T22:28:43.163Z",
+      "validator": "node-63a704e10101d",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763936923078-a2826cf3f5d19",
+          "from": "alice-functional",
+          "to": "bob-functional",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-23T22:28:43.078Z"
+        }
+      ],
+      "hash": "b5d3fff6e2be5812a57b10052bb8fe07980371ef9055dcc4fe052cf7827429ea"
+    },
+    {
+      "index": 3,
+      "previousHash": "b5d3fff6e2be5812a57b10052bb8fe07980371ef9055dcc4fe052cf7827429ea",
+      "timestamp": "2025-11-23T22:32:22.515Z",
+      "validator": "node-559479bad6896",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763937142437-92f23d576ab99",
+          "from": "alice-functional-19ab2d8c69e",
+          "to": "bob-functional-19ab2d8c69e",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-23T22:32:22.437Z"
+        }
+      ],
+      "hash": "104e0be5f90907fd54879e8d69915ea982d96845dd5b8fe171a8c544d3b45566"
+    },
+    {
+      "index": 4,
+      "previousHash": "104e0be5f90907fd54879e8d69915ea982d96845dd5b8fe171a8c544d3b45566",
+      "timestamp": "2025-11-23T22:34:01.112Z",
+      "validator": "node-bb873f09e00e6",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763937241045-c82cfac277499",
+          "from": "alice-functional-19ab2da47ce",
+          "to": "bob-functional-19ab2da47ce",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-23T22:34:01.045Z"
+        }
+      ],
+      "hash": "e97f2d69b3a36702b37fb4f096e2d57ab1f174fd6576532ed116c39cb63fca38"
+    },
+    {
+      "index": 5,
+      "previousHash": "e97f2d69b3a36702b37fb4f096e2d57ab1f174fd6576532ed116c39cb63fca38",
+      "timestamp": "2025-11-24T07:17:46.524Z",
+      "validator": "node-ffc65cd03702d",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763968666482-160bf01f08c31",
+          "from": "alice-functional-19ab4b9cb6c",
+          "to": "bob-functional-19ab4b9cb6c",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:17:46.482Z"
+        }
+      ],
+      "hash": "458e4618bff177e624c61ce584207c82152d6dfceb2d4148ee8b03e4104f7142"
+    },
+    {
+      "index": 6,
+      "previousHash": "458e4618bff177e624c61ce584207c82152d6dfceb2d4148ee8b03e4104f7142",
+      "timestamp": "2025-11-24T07:19:39.782Z",
+      "validator": "node-f928e08de03c7",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763968779633-c0c9469b98e3a",
+          "from": "alice-functional-19ab4bb8561",
+          "to": "bob-functional-19ab4bb8561",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:19:39.633Z"
+        }
+      ],
+      "hash": "4a3334ccca89cc6c3f642f7d1701a0d29b24198329244c4d7c599257875e0207"
+    },
+    {
+      "index": 7,
+      "previousHash": "4a3334ccca89cc6c3f642f7d1701a0d29b24198329244c4d7c599257875e0207",
+      "timestamp": "2025-11-24T07:20:16.758Z",
+      "validator": "node-c23621eb9661f",
+      "transactions": [
+        {
+          "id": "tx2"
+        }
+      ],
+      "hash": "7fd28dccc8272e137fd7408c44de1b1cc76c31f6368dd5b3ffea797fec70f0e0"
+    },
+    {
+      "index": 8,
+      "previousHash": "7fd28dccc8272e137fd7408c44de1b1cc76c31f6368dd5b3ffea797fec70f0e0",
+      "timestamp": "2025-11-24T07:20:16.959Z",
+      "validator": "node-c23621eb9661f",
+      "transactions": [
+        {
+          "id": "tx-1763968816772-cd4080a4fac61",
+          "from": "alice-functional-19ab4bc1672",
+          "to": "bob-functional-19ab4bc1672",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:20:16.772Z"
+        }
+      ],
+      "hash": "631c934bd6632ec96da2cdf73212ed94929515536f7e4a4eefac290f264c8fab"
+    },
+    {
+      "index": 9,
+      "previousHash": "631c934bd6632ec96da2cdf73212ed94929515536f7e4a4eefac290f264c8fab",
+      "timestamp": "2025-11-24T07:24:11.107Z",
+      "validator": "node-1ceb7bddb1555",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763969050973-d47c579971843",
+          "from": "alice-functional-19ab4bfa94b",
+          "to": "bob-functional-19ab4bfa94b",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:24:10.973Z"
+        }
+      ],
+      "hash": "465ef416fd9105870c757d0f4e1e74f4f5abeab19f8498d2e16a8bb6196bb43a"
+    },
+    {
+      "index": 10,
+      "previousHash": "465ef416fd9105870c757d0f4e1e74f4f5abeab19f8498d2e16a8bb6196bb43a",
+      "timestamp": "2025-11-24T08:06:49.429Z",
+      "validator": "node-a1ff378e90934",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763971609244-f0340a5190939",
+          "from": "alice-functional-19ab4e6b292",
+          "to": "bob-functional-19ab4e6b292",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:06:49.244Z"
+        }
+      ],
+      "hash": "d638aa9bc301329111a2dce584164b32806a2570cda964c17690a50e19841b87"
+    },
+    {
+      "index": 11,
+      "previousHash": "d638aa9bc301329111a2dce584164b32806a2570cda964c17690a50e19841b87",
+      "timestamp": "2025-11-24T08:09:01.985Z",
+      "validator": "node-7d1e0a674309f",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763971741977-ad09dcb13a468",
+          "from": "alice-functional-19ab4e8b90e",
+          "to": "bob-functional-19ab4e8b90e",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:09:01.977Z"
+        }
+      ],
+      "hash": "c598aa879730a8e0ac9c168e64d2591297d5839e403f3400a13678c9e8cc40f3"
+    },
+    {
+      "index": 12,
+      "previousHash": "c598aa879730a8e0ac9c168e64d2591297d5839e403f3400a13678c9e8cc40f3",
+      "timestamp": "2025-11-24T08:12:43.518Z",
+      "validator": "node-83715e5019a48",
+      "transactions": [
+        {
+          "id": "tx2"
+        }
+      ],
+      "hash": "e811e4f69b94a5fae1f4880d58054a541673e8d5fdc383d6b05b83c164b9a27b"
+    },
+    {
+      "index": 13,
+      "previousHash": "e811e4f69b94a5fae1f4880d58054a541673e8d5fdc383d6b05b83c164b9a27b",
+      "timestamp": "2025-11-24T08:12:43.718Z",
+      "validator": "node-83715e5019a48",
+      "transactions": [
+        {
+          "id": "tx-1763971963529-f16df7666ef45",
+          "from": "alice-functional-19ab4ec1a6d",
+          "to": "bob-functional-19ab4ec1a6d",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:12:43.529Z"
+        }
+      ],
+      "hash": "fb504fc02d5de66b246ee6d5dc30355ccd442f321db2c1952b8005507cfa52e3"
+    },
+    {
+      "index": 14,
+      "previousHash": "fb504fc02d5de66b246ee6d5dc30355ccd442f321db2c1952b8005507cfa52e3",
+      "timestamp": "2025-11-24T08:12:55.644Z",
+      "validator": "node-85fbdae80f5db",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763971975581-9f12268a2423c",
+          "from": "alice-functional-19ab4ec4986",
+          "to": "bob-functional-19ab4ec4986",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:12:55.581Z"
+        }
+      ],
+      "hash": "0e868773b2f8613491100ba8a50afa1ec38c710ad28ab020540be5d7ea508407"
+    },
+    {
+      "index": 15,
+      "previousHash": "0e868773b2f8613491100ba8a50afa1ec38c710ad28ab020540be5d7ea508407",
+      "timestamp": "2025-11-24T08:15:09.509Z",
+      "validator": "node-fd3eb675a012f",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763972109366-8e28448848aca",
+          "from": "alice-functional-19ab4ee5429",
+          "to": "bob-functional-19ab4ee5429",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:15:09.366Z"
+        }
+      ],
+      "hash": "63a94c3f75cc027d298d4cc4d411e90fdd5f151b181ac557710ae5d09b8bba0b"
+    },
+    {
+      "index": 16,
+      "previousHash": "63a94c3f75cc027d298d4cc4d411e90fdd5f151b181ac557710ae5d09b8bba0b",
+      "timestamp": "2025-11-24T08:19:12.706Z",
+      "validator": "node-35e49e45b28c8",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763972352676-f2f9d26866f9c",
+          "from": "alice-functional-19ab4f20a9e",
+          "to": "bob-functional-19ab4f20a9e",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:19:12.676Z"
+        }
+      ],
+      "hash": "a0797de7ef62b24546a829d8cacd424fa88627eb51efc307b6d6e5c17c07b059"
+    },
+    {
+      "index": 17,
+      "previousHash": "a0797de7ef62b24546a829d8cacd424fa88627eb51efc307b6d6e5c17c07b059",
+      "timestamp": "2025-11-24T08:23:18.388Z",
+      "validator": "node-15992f28d32ac",
+      "transactions": [
+        {
+          "id": "tx2"
+        },
+        {
+          "id": "tx-1763972598384-1b37ea18ea2b9",
+          "from": "alice-functional-19ab4f5ca66",
+          "to": "bob-functional-19ab4f5ca66",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:23:18.384Z"
+        }
+      ],
+      "hash": "16e0126337ce66946ac205b5b02bbcbff6e96998d9e4a504f4ae4652bfa8d484"
+    }
+  ],
+  "accounts": {
+    "alice": {
+      "balance": 15000,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional": {
+      "balance": 800,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional": {
+      "balance": 200,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab2d8c69e": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab2d8c69e": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab2da47ce": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab2da47ce": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4b9cb6c": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4b9cb6c": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4bb8561": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4bb8561": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4bc1672": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4bc1672": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4bfa94b": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4bfa94b": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4e6b292": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4e6b292": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4e8b90e": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4e8b90e": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4ec1a6d": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4ec1a6d": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4ec4986": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4ec4986": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4ee5429": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4ee5429": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4f20a9e": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4f20a9e": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-functional-19ab4f5ca66": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-functional-19ab4f5ca66": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    }
+  }
+}

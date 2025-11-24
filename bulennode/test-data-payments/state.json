@@ -1,0 +1,63 @@
+{
+  "chainId": "bulencoin-devnet-1",
+  "blocks": [
+    {
+      "index": 0,
+      "previousHash": null,
+      "timestamp": "2025-11-24T08:19:12.192Z",
+      "validator": "genesis",
+      "transactions": [],
+      "hash": "3fa20c70d641176814415e7ecd637886b5d4d2e3956bc3217085900699fbbbe6"
+    },
+    {
+      "index": 1,
+      "previousHash": "3fa20c70d641176814415e7ecd637886b5d4d2e3956bc3217085900699fbbbe6",
+      "timestamp": "2025-11-24T08:19:12.406Z",
+      "validator": "node-payments",
+      "transactions": [
+        {
+          "id": "tx-1763972352380-319821e789fc9",
+          "from": "alice-payments",
+          "to": "merchant",
+          "amount": 60,
+          "fee": 0,
+          "memo": "order-123",
+          "timestamp": "2025-11-24T08:19:12.380Z"
+        }
+      ],
+      "hash": "c587c7d712de64c044c2c4ba4ac28853a38501ad1c41221f3758e21a6d4eaf04"
+    },
+    {
+      "index": 2,
+      "previousHash": "c587c7d712de64c044c2c4ba4ac28853a38501ad1c41221f3758e21a6d4eaf04",
+      "timestamp": "2025-11-24T08:23:18.350Z",
+      "validator": "node-payments",
+      "transactions": [
+        {
+          "id": "tx-1763972598166-b4e82fa12424f",
+          "from": "alice-payments",
+          "to": "merchant",
+          "amount": 60,
+          "fee": 0,
+          "memo": "order-123",
+          "timestamp": "2025-11-24T08:23:18.166Z"
+        }
+      ],
+      "hash": "8b52b98fea94cb8b01860820dd712fb9cfa0764e0b6dff5568cb82f9c8f9e3d9"
+    }
+  ],
+  "accounts": {
+    "alice-payments": {
+      "balance": 280,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "merchant": {
+      "balance": 120,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    }
+  }
+}

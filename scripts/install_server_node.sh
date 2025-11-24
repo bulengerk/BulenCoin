@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Simple installer for a BulenCoin server-full node (Linux, Debian/Ubuntu-style).
+# It installs Node.js and npm if missing, installs dependencies for bulennode,
+# and prints recommended environment variables.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+echo "[BulenCoin] Installing server-full node in ${REPO_ROOT}"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[BulenCoin] Node.js not found. Attempting to install via apt (requires sudo)..."
+  sudo apt update
+  sudo apt install -y nodejs npm
+fi
+
+cd "${REPO_ROOT}/bulennode"
+echo "[BulenCoin] Installing npm dependencies for bulennode..."
+npm install
+
+cat <<EOF
+
+[BulenCoin] Server node installation finished.
+
+Recommended environment (example for a validator on a Linux server):
+
+  export BULEN_NODE_PROFILE=server-full
+  export BULEN_REQUIRE_SIGNATURES=true
+  export BULEN_ENABLE_FAUCET=false
+  export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+
+Then run:
+
+  cd "${REPO_ROOT}/bulennode"
+  npm start
+
+For long-running setups, consider adding a systemd service that:
+- runs in "${REPO_ROOT}/bulennode"
+- loads the above environment (Environment= or EnvironmentFile=)
+- executes: /usr/bin/env npm start
+
+EOF
+

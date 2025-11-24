@@ -1,0 +1,18 @@
+[Unit]
+Description=BulenCoin Node (raspberry)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bulencoin/bulennode
+EnvironmentFile=-/etc/default/bulennode-raspberry
+ExecStart=/usr/bin/env npm start
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=32768
+
+[Install]
+WantedBy=multi-user.target
+

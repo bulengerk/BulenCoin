@@ -1,0 +1,305 @@
+{
+  "chainId": "bulencoin-devnet-1",
+  "blocks": [
+    {
+      "index": 0,
+      "previousHash": null,
+      "timestamp": "2025-11-24T07:19:39.386Z",
+      "validator": "genesis",
+      "transactions": [],
+      "hash": "6a2511f011545af79a085b912d85bf8d6fde7f6007c8d373001375c8067c5386"
+    },
+    {
+      "index": 1,
+      "previousHash": "6a2511f011545af79a085b912d85bf8d6fde7f6007c8d373001375c8067c5386",
+      "timestamp": "2025-11-24T07:19:39.703Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763968779599-ba5bd1c9a4f4a",
+          "from": "alice-p2p-19ab4bb8478",
+          "to": "bob-p2p-19ab4bb8478",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:19:39.599Z"
+        }
+      ],
+      "hash": "7ce7319bd6c0d3791de8c7d12fe0cc8b802a5153ed8a22b3012d695a3348ee58"
+    },
+    {
+      "index": 2,
+      "previousHash": "7ce7319bd6c0d3791de8c7d12fe0cc8b802a5153ed8a22b3012d695a3348ee58",
+      "timestamp": "2025-11-24T07:20:16.838Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763968816679-c57cf9a24fd52",
+          "from": "alice-p2p-19ab4bc158e",
+          "to": "bob-p2p-19ab4bc158e",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:20:16.679Z"
+        }
+      ],
+      "hash": "bcd8b6d83acfae0a8cadc66ec3c5b0926309473cecfa7def1238374d84c1db48"
+    },
+    {
+      "index": 3,
+      "previousHash": "bcd8b6d83acfae0a8cadc66ec3c5b0926309473cecfa7def1238374d84c1db48",
+      "timestamp": "2025-11-24T07:24:10.990Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763969050826-0ae65f4408de8",
+          "from": "alice-p2p-19ab4bfa838",
+          "to": "bob-p2p-19ab4bfa838",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T07:24:10.826Z"
+        }
+      ],
+      "hash": "6c19c932489f903e830814b4f0857e9a2020abf60dfeb95168dd4603e3cb3729"
+    },
+    {
+      "index": 4,
+      "previousHash": "6c19c932489f903e830814b4f0857e9a2020abf60dfeb95168dd4603e3cb3729",
+      "timestamp": "2025-11-24T08:06:49.326Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763971609165-cd8812eb6fae9",
+          "from": "alice-p2p-19ab4e6b1b0",
+          "to": "bob-p2p-19ab4e6b1b0",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:06:49.165Z"
+        }
+      ],
+      "hash": "90add2b089aa467006f10c08668c7414d635ecf8cce33fd9fc48760777f46234"
+    },
+    {
+      "index": 5,
+      "previousHash": "90add2b089aa467006f10c08668c7414d635ecf8cce33fd9fc48760777f46234",
+      "timestamp": "2025-11-24T08:09:02.077Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763971741896-cff866ef84007",
+          "from": "alice-p2p-19ab4e8b848",
+          "to": "bob-p2p-19ab4e8b848",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:09:01.896Z"
+        }
+      ],
+      "hash": "4154a27c6a206537da1b12ce543a92912ba5362aab243d939caf31928cff1e87"
+    },
+    {
+      "index": 6,
+      "previousHash": "4154a27c6a206537da1b12ce543a92912ba5362aab243d939caf31928cff1e87",
+      "timestamp": "2025-11-24T08:12:43.695Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763971963404-4bd7aaa0d688b",
+          "from": "alice-p2p-19ab4ec18ba",
+          "to": "bob-p2p-19ab4ec18ba",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:12:43.404Z"
+        }
+      ],
+      "hash": "10f9ab4130d6d382f3958ebfa29744ad6b7be17940ed2d9ea775c8f4713b2ad0"
+    },
+    {
+      "index": 7,
+      "previousHash": "10f9ab4130d6d382f3958ebfa29744ad6b7be17940ed2d9ea775c8f4713b2ad0",
+      "timestamp": "2025-11-24T08:12:55.540Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763971975479-7942ccba4e397",
+          "from": "alice-p2p-19ab4ec4834",
+          "to": "bob-p2p-19ab4ec4834",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:12:55.479Z"
+        }
+      ],
+      "hash": "3f4711e11ea07f3df65bd85d575c2efce1400d24b1f6f75650dc9021471f2ee3"
+    },
+    {
+      "index": 8,
+      "previousHash": "3f4711e11ea07f3df65bd85d575c2efce1400d24b1f6f75650dc9021471f2ee3",
+      "timestamp": "2025-11-24T08:15:09.419Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763972109357-86ec48edeeafc",
+          "from": "alice-p2p-19ab4ee5334",
+          "to": "bob-p2p-19ab4ee5334",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:15:09.357Z"
+        }
+      ],
+      "hash": "843440bd9225cd3b41241c721dd511bc06b6eee3bb6f1fe8700baafaa7457b06"
+    },
+    {
+      "index": 9,
+      "previousHash": "843440bd9225cd3b41241c721dd511bc06b6eee3bb6f1fe8700baafaa7457b06",
+      "timestamp": "2025-11-24T08:19:12.517Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763972352422-6d115a636034a",
+          "from": "alice-p2p-19ab4f208cd",
+          "to": "bob-p2p-19ab4f208cd",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:19:12.422Z"
+        }
+      ],
+      "hash": "ffd2daeccfb00aa55eb4af6782587f7d7dbd7edd71155848a1515709af6f7c2e"
+    },
+    {
+      "index": 10,
+      "previousHash": "ffd2daeccfb00aa55eb4af6782587f7d7dbd7edd71155848a1515709af6f7c2e",
+      "timestamp": "2025-11-24T08:23:18.208Z",
+      "validator": "node-A",
+      "transactions": [
+        {
+          "id": "tx-1763972598081-af5e8a8ae28ce",
+          "from": "alice-p2p-19ab4f5c886",
+          "to": "bob-p2p-19ab4f5c886",
+          "amount": 100,
+          "fee": 0,
+          "timestamp": "2025-11-24T08:23:18.081Z"
+        }
+      ],
+      "hash": "5dd111ca62be821e89821a66c84d1cb9c11ca53d41191dfe51ed9cd9e2f62295"
+    }
+  ],
+  "accounts": {
+    "alice-p2p-19ab4bb8478": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4bb8478": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4bc158e": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4bc158e": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4bfa838": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4bfa838": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4e6b1b0": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4e6b1b0": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4e8b848": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4e8b848": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4ec18ba": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4ec18ba": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4ec4834": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4ec4834": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4ee5334": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4ee5334": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4f208cd": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4f208cd": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "alice-p2p-19ab4f5c886": {
+      "balance": 400,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    },
+    "bob-p2p-19ab4f5c886": {
+      "balance": 100,
+      "stake": 0,
+      "nonce": 0,
+      "reputation": 0
+    }
+  }
+}

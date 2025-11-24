@@ -1,0 +1,25 @@
+{
+  "challenges": [
+    {
+      "id": "chal_19ab4f5ca43_a2a11b5af82b",
+      "address": "addr_3fc3356e995119a3",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAE7dNzc8+6XNCI5dqe12wVkA3QScS5K/9m\ntu5/JxoZdQ58t2Yj7hisJqcElO90AUD/Qn3oA4c/KuxzWUmxpCm3GA==\n-----END PUBLIC KEY-----\n",
+      "walletType": "metamask",
+      "nonce": "d5151c5f39972657",
+      "message": "Sign this message to prove wallet ownership for BulenCoin.\nAddress: addr_3fc3356e995119a3\nWallet: metamask\nNonce: d5151c5f39972657\nIssued At: 2025-11-24T08:23:18.339Z",
+      "createdAt": "2025-11-24T08:23:18.339Z",
+      "expiresAt": "2025-11-24T08:33:18.339Z",
+      "status": "verified"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess_19ab4f5ca61_04d6a58c6574",
+      "address": "addr_3fc3356e995119a3",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAE7dNzc8+6XNCI5dqe12wVkA3QScS5K/9m\ntu5/JxoZdQ58t2Yj7hisJqcElO90AUD/Qn3oA4c/KuxzWUmxpCm3GA==\n-----END PUBLIC KEY-----\n",
+      "walletType": "metamask",
+      "createdAt": "2025-11-24T08:23:18.369Z",
+      "expiresAt": "2025-11-25T08:23:18.369Z"
+    }
+  ]
+}

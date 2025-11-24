@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BulenCoin – Lightweight Multiplatform Crypto Network</title>
+    <meta
+      name="description"
+      content="BulenCoin is a meme coin with a serious goal: a lightweight, energy‑aware Proof of Stake network that runs on phones, laptops and servers."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="bc-header">
+      <div class="bc-container bc-header-inner">
+        <div class="bc-logo">
+          <span class="bc-logo-mark">₿</span>
+          <span class="bc-logo-text">BulenCoin</span>
+        </div>
+        <nav class="bc-nav">
+          <a href="#overview" data-i18n-label="nav_overview">Overview</a>
+          <a href="#nodes" data-i18n-label="nav_nodes">Nodes</a>
+          <a href="#consensus" data-i18n-label="nav_consensus">Consensus</a>
+          <a href="#economics" data-i18n-label="nav_economics">Economics</a>
+          <a href="#apps" data-i18n-label="nav_apps">Apps</a>
+          <a href="#security" data-i18n-label="nav_security">Security</a>
+          <a href="#docs" data-i18n-label="nav_docs">Docs</a>
+          <a href="#roadmap" data-i18n-label="nav_roadmap">Roadmap</a>
+        </nav>
+        <div class="bc-lang-switch">
+          <label for="language" class="bc-lang-label" data-i18n-label="choose_language"
+            >Language</label
+          >
+          <select id="language" aria-label="Choose language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="pl">Polski</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main class="bc-main">
+      <section id="hero" class="bc-section bc-hero">
+        <div class="bc-container bc-hero-layout">
+          <div class="bc-hero-copy">
+            <p class="bc-eyebrow">Energy-aware PoS for everyday hardware</p>
+            <h1 data-i18n="hero_title">
+              BulenCoin – a meme coin with a serious distributed systems heart
+            </h1>
+            <p class="bc-hero-subtitle" data-i18n="hero_subtitle">
+              A lightweight, Proof of Stake–based network designed to run on everything from
+              smartphones to servers, rewarding users for keeping real nodes online.
+            </p>
+            <div class="bc-cta-row">
+              <a class="bc-button" href="#docs" data-i18n="hero_cta_docs">Docs & downloads</a>
+              <a
+                class="bc-button bc-button-ghost"
+                href="docs/whitesheet_investor_pl.pdf"
+                target="_blank"
+                rel="noopener"
+                data-i18n="hero_cta_whitesheet"
+                >Whitesheet (PL, PDF)</a
+              >
+            </div>
+            <div class="bc-chip-row">
+              <span class="bc-chip" data-i18n="chip_mobile">Mobile · desktop · server ready</span>
+              <span class="bc-chip" data-i18n="chip_uptime">Uptime rewards baked in</span>
+              <span class="bc-chip" data-i18n="chip_multilingual">Docs: PL / EN / ES</span>
+            </div>
+          </div>
+          <div class="bc-hero-cards">
+            <div class="bc-card">
+              <h2 data-i18n="hero_card1_title">Runs everywhere</h2>
+              <p data-i18n="hero_card1_body">
+                Mobile, desktop and server nodes cooperate in one network. Phones and
+                tablets can participate without burning the battery.
+              </p>
+            </div>
+            <div class="bc-card">
+              <h2 data-i18n="hero_card2_title">Lightweight Proof of Stake</h2>
+              <p data-i18n="hero_card2_body">
+                No mining farms. Validators are chosen by stake, device type and
+                reputation, with small committees that sign blocks.
+              </p>
+            </div>
+            <div class="bc-card">
+              <h2 data-i18n="hero_card3_title">Uptime‑based rewards</h2>
+              <p data-i18n="hero_card3_body">
+                Nodes that stay online and respond to health checks regularly earn
+                additional rewards, with parameters calibrated for everyday hardware.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="docs" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="docs_title">Documentation & downloads</h2>
+            <p data-i18n="docs_subtitle">
+              Everything in one place: spec, deployment guides, security notes, investor deck and
+              the new full-stack integration test runbook.
+            </p>
+          </div>
+          <div class="bc-docs-grid">
+            <a class="bc-doc-card" href="docs/whitesheet_investor_pl.pdf" target="_blank" rel="noopener">
+              <span class="bc-doc-pill">PDF</span>
+              <h3 data-i18n="docs_whitesheet_title">Investor whitesheet (PL)</h3>
+              <p data-i18n="docs_whitesheet_body">
+                Skrót projektu dla inwestorów: cel, produkt, ekonomia, bezpieczeństwo i plan
+                wdrożeniowy.
+              </p>
+            </a>
+            <a class="bc-doc-card" href="docs/bulencoin_spec_pl.md">
+              <span class="bc-doc-pill">Markdown</span>
+              <h3 data-i18n="docs_spec_title">Specyfikacja protokołu (PL)</h3>
+              <p data-i18n="docs_spec_body">
+                Architektura sieci, typy węzłów, konsensus, ekonomia i wymagania sprzętowe.
+              </p>
+            </a>
+            <a class="bc-doc-card" href="docs/overview_en.md">
+              <span class="bc-doc-pill">Markdown</span>
+              <h3 data-i18n="docs_overview_title">Overview (EN)</h3>
+              <p data-i18n="docs_overview_body">
+                English high-level overview of the protocol, incentives and launch phases.
+              </p>
+            </a>
+            <a class="bc-doc-card" href="docs/deployment_guide.md">
+              <span class="bc-doc-pill">Guide</span>
+              <h3 data-i18n="docs_deploy_title">Deployment guides</h3>
+              <p data-i18n="docs_deploy_body">
+                Instrukcje uruchomienia węzłów, eksploratora, status page i konfiguracji Docker.
+              </p>
+            </a>
+            <a class="bc-doc-card" href="docs/security_hardening_pl.md">
+              <span class="bc-doc-pill">Security</span>
+              <h3 data-i18n="docs_security_title">Bezpieczeństwo i zgodność</h3>
+              <p data-i18n="docs_security_body">
+                Hardening, RODO/AML/MiCA na poziomie koncepcyjnym oraz wskazówki operacyjne.
+              </p>
+            </a>
+            <a class="bc-doc-card" href="docs/testing_strategy.md">
+              <span class="bc-doc-pill">Testing</span>
+              <h3 data-i18n="docs_testing_title">Full-stack integration</h3>
+              <p data-i18n="docs_testing_body">
+                Nowy poziom testów integracyjnych: wspólne uruchomienie BulenNode, eksploratora i
+                statusu, seed kont i produkcja bloku.
+              </p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="bc-section">
+        <div class="bc-container">
+          <h2 data-i18n="overview_title">1. What is BulenCoin?</h2>
+          <p data-i18n="overview_intro">
+            BulenCoin is a meme‑themed cryptocurrency with a serious engineering goal: to
+            prove that a modern blockchain network can be maintained by the widest possible
+            spectrum of devices – from phones and tablets, through laptops and desktops, up
+            to cloud servers.
+          </p>
+          <p data-i18n="overview_goal">
+            The protocol is designed to be light enough to run in the background on a
+            typical end‑user device, while at the same time offering predictable rewards so
+            that users have a real incentive to keep their node online.
+          </p>
+          <p data-i18n="overview_layers">
+            The network consists of several logical layers: a peer‑to‑peer gossip layer
+            for blocks and transactions, a Proof of Stake–based consensus layer with
+            randomly sampled validator committees, a data layer with blocks, transactions
+            and account state, and an incentive layer that defines how nodes are rewarded
+            for honest behaviour and uptime.
+          </p>
+        </div>
+      </section>
+
+      <section id="nodes" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <h2 data-i18n="nodes_title">2. Node types in the BulenCoin network</h2>
+          <div class="bc-grid-2">
+            <article class="bc-card">
+              <h3 data-i18n="node_mobile_title">2.1 Mobile light node</h3>
+              <p data-i18n="node_mobile_body1">
+                A mobile light node is an app running on a phone or tablet. Instead of
+                storing the full chain, it keeps block headers and a small slice of the
+                recent state needed to verify its own transactions and participate in
+                consensus.
+              </p>
+              <p data-i18n="node_mobile_body2">
+                It connects to several full nodes, downloads headers and cryptographic
+                proofs, helps monitor block availability, and can join small validator
+                committees if the user has staked BulenCoin. The app contains strict
+                controls for battery and data usage, including night‑only mode and mobile
+                data limits.
+              </p>
+            </article>
+            <article class="bc-card">
+              <h3 data-i18n="node_full_title">2.2 Desktop & server full node</h3>
+              <p data-i18n="node_full_body1">
+                A full node runs on desktops, laptops or servers and stores the full block
+                history and account state. It validates all transactions and blocks and
+                provides data to light nodes.
+              </p>
+              <p data-i18n="node_full_body2">
+                Full nodes maintain peer tables, propagate new data, can become block
+                producers when staked, and may expose HTTP/WebSocket APIs to act as
+                gateways for web and mobile apps.
+              </p>
+            </article>
+          </div>
+          <div class="bc-grid-2">
+            <article class="bc-card">
+              <h3 data-i18n="node_gateway_title">2.3 Gateway node</h3>
+              <p data-i18n="node_gateway_body">
+                A gateway node is a full node with public APIs. It is used by exchanges,
+                payment processors and users who only want a wallet. Gateways expose
+                endpoints for submitting transactions, reading balances and querying
+                history, with rate limiting and basic abuse protection.
+              </p>
+            </article>
+            <article class="bc-card">
+              <h3 data-i18n="node_wallet_title">2.4 Ultra‑light wallet node</h3>
+              <p data-i18n="node_wallet_body">
+                On constrained devices, users can run a pure wallet that does not
+                participate in consensus or uptime rewards. It talks to gateways or
+                behaves as a read‑only light client, focusing on key management and user
+                experience.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="consensus" class="bc-section">
+        <div class="bc-container">
+          <h2 data-i18n="consensus_title">3. Consensus and incentives</h2>
+          <p data-i18n="consensus_intro">
+            BulenCoin uses a lightweight Proof of Stake mechanism with randomly selected
+            validator committees. Devices lock BulenCoin as stake in order to take part in
+            block production and voting.
+          </p>
+          <p data-i18n="consensus_selection">
+            In each time slot, the protocol deterministically selects a block producer and
+            a small committee of validators based on previous blocks, stake distribution
+            and node reputation. The committee must jointly sign the block for it to be
+            considered final.
+          </p>
+          <p data-i18n="consensus_device_type">
+            To encourage diversity, the algorithm can take device type into account.
+            Under‑represented categories (for example mobile phones) receive a slight
+            selection boost, as long as the node has sufficient stake and good uptime
+            history. Reputation scores reduce the chance of misbehaving nodes being
+            selected.
+          </p>
+          <h3 data-i18n="rewards_title">3.1 Reward model</h3>
+          <p data-i18n="rewards_blocks">
+            The reward model combines block rewards, transaction fees and explicit uptime
+            rewards. Block producers and committee members receive a share of the block
+            reward and fees.
+          </p>
+          <p data-i18n="rewards_uptime">
+            Uptime rewards are calculated over time windows. The network randomly samples
+            nodes and sends simple health checks; nodes that consistently respond earn an
+            additional reward proportional to stake and adjusted by device‑type
+            coefficients, so that modest hardware staying online still earns meaningful
+            income.
+          </p>
+          <p data-i18n="rewards_slashing">
+            A slashing mechanism penalises double‑signing and other consensus attacks by
+            burning part of the violator’s stake and lowering reputation.
+          </p>
+        </div>
+      </section>
+
+      <section id="apps" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <h2 data-i18n="apps_title">4. BulenNode applications</h2>
+          <div class="bc-grid-2">
+            <article class="bc-card">
+              <h3 data-i18n="apps_modules_title">4.1 Cross‑platform node architecture</h3>
+              <p data-i18n="apps_modules_body1">
+                The BulenNode client is split into modules: networking (peer discovery and
+                gossip), consensus (Proof of Stake logic), storage (block and state
+                database), wallet (keys and transactions), and resource monitoring (CPU,
+                RAM, bandwidth and battery usage).
+              </p>
+              <p data-i18n="apps_modules_body2">
+                Platform‑specific code is kept behind stable interfaces, so the same core
+                logic can run on Android, iOS, Windows, macOS and Linux.
+              </p>
+            </article>
+            <article class="bc-card">
+              <h3 data-i18n="apps_mobile_title">4.2 Mobile app</h3>
+              <p data-i18n="apps_mobile_body">
+                The mobile BulenNode app offers a light‑node mode and a wallet‑only mode.
+                Users can configure when the node may operate (for example, at night or
+                only on Wi‑Fi), how much data it can use, and whether it can join validator
+                committees directly or delegate stake to trusted validators.
+              </p>
+            </article>
+          </div>
+          <div class="bc-grid-2">
+            <article class="bc-card">
+              <h3 data-i18n="apps_desktop_title">4.3 Desktop app</h3>
+              <p data-i18n="apps_desktop_body">
+                On desktop, BulenNode can run as a full or pruned node, with a graphical
+                panel for data‑directory selection, disk limits and network ports. It can
+                also run headless as a system service.
+              </p>
+            </article>
+            <article class="bc-card">
+              <h3 data-i18n="apps_panel_title">4.4 User panel</h3>
+              <p data-i18n="apps_panel_body">
+                A built‑in dashboard shows block height, connected peers, estimated data
+                usage, active stake, reputation score and recent rewards, helping users
+                decide whether running a node is worthwhile for them.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="requirements" class="bc-section">
+        <div class="bc-container">
+          <h2 data-i18n="requirements_title">5. Technical requirements</h2>
+          <h3 data-i18n="requirements_mobile_title">5.1 Mobile nodes</h3>
+          <p data-i18n="requirements_mobile_body">
+            Target devices are mainstream smartphones from the last ~5 years, with at least
+            3 GB of RAM and a few hundred MB of free storage. CPU usage should remain low
+            and background activity must respect the platform’s power‑saving rules.
+          </p>
+          <h3 data-i18n="requirements_desktop_title">5.2 Desktop and server nodes</h3>
+          <p data-i18n="requirements_desktop_body">
+            Full nodes need at least 4 GB of RAM, several GB of disk space and a stable
+            internet connection. The protocol supports pruning and checkpoints so that disk
+            usage grows in a controlled way. Server deployments can use dedicated disks for
+            chain data.
+          </p>
+          <h3 data-i18n="requirements_network_title">5.3 Network requirements</h3>
+          <p data-i18n="requirements_network_body">
+            Nodes that want uptime rewards must be reliably online. Desktop and server
+            nodes should have reachable ports and may use NAT‑traversal techniques like
+            hole punching when behind consumer routers. Mobile users can restrict mobile
+            data usage and run mostly on Wi‑Fi.
+          </p>
+        </div>
+      </section>
+
+      <section id="economics" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <h2 data-i18n="economics_title">6. Economics of running a node</h2>
+          <p data-i18n="economics_income">
+            Node income combines block rewards, transaction‑fee share and uptime rewards.
+            In early mainnet, higher base rewards can attract pioneers; later on, fees from
+            real usage should become the dominant component.
+          </p>
+          <p data-i18n="economics_costs">
+            User‑side costs include electricity, data transfer, hardware wear and stake
+            risk. Applications should show estimated energy/data usage and clearly warn
+            about the possibility of losing part of the stake in case of misconfiguration
+            or malicious behaviour.
+          </p>
+        </div>
+      </section>
+
+      <section id="roadmap" class="bc-section">
+        <div class="bc-container">
+          <h2 data-i18n="roadmap_title">7. Launch phases and deployment</h2>
+          <h3 data-i18n="roadmap_testnet_title">7.1 Testnet</h3>
+          <p data-i18n="roadmap_testnet_body">
+            BulenCoin starts with a public testnet where reference nodes are operated by
+            the team. Users can install BulenNode, test running nodes on different
+            hardware and help tune consensus parameters without real economic value at
+            risk.
+          </p>
+          <h3 data-i18n="roadmap_mainnet_title">7.2 Mainnet bootstrap</h3>
+          <p data-i18n="roadmap_mainnet_body1">
+            After testnet stabilises, the mainnet is launched with a mix of team‑operated
+            and community full nodes. Early uptime‑reward programs encourage users to keep
+            mobile and desktop nodes online.
+          </p>
+          <p data-i18n="roadmap_mainnet_body2">
+            Setup instructions include installing BulenNode from official sources,
+            generating a wallet and seed backup, configuring resource limits, choosing
+            between full or partial node modes, and optionally delegating stake to
+            validators for users who do not want to operate validator nodes themselves.
+          </p>
+          <h3 data-i18n="roadmap_decentral_title">7.3 Full decentralisation</h3>
+          <p data-i18n="roadmap_decentral_body">
+            Over time, parameters limiting the share of blocks produced by team‑controlled
+            nodes are reduced. Community nodes with stake and a history of honest
+            behaviour take over, while team infrastructure focuses on explorers,
+            archival nodes and tooling.
+          </p>
+        </div>
+      </section>
+
+      <section id="security" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <h2 data-i18n="security_title">8. Security and supporting infrastructure</h2>
+          <h3 data-i18n="security_keys_title">8.1 Key management</h3>
+          <p data-i18n="security_keys_body">
+            BulenNode encrypts private keys with strong passwords and uses secure platform
+            modules where available (for example Android Keystore or iOS Secure Enclave).
+            Desktop apps can integrate with hardware wallets. The UI must clearly explain
+            that losing the seed phrase means losing access to funds, and that sharing it
+            with anyone is unsafe.
+          </p>
+          <h3 data-i18n="security_attacks_title">
+            8.2 Sybil, DDoS and abuse protection
+          </h3>
+          <p data-i18n="security_attacks_body">
+            Because BulenCoin expects many cheap nodes, the protocol defends against Sybil
+            attacks by tying consensus participation to stake and reputation. Networking
+            layers use peer randomisation, connection limits and basic rate‑limiting.
+            Gateways may require lightweight proof‑of‑work puzzles when establishing
+            sessions to make large‑scale abuse more expensive.
+          </p>
+          <h3 data-i18n="security_updates_title">8.3 Protocol upgrades</h3>
+          <p data-i18n="security_updates_body">
+            Nodes support rolling software updates without global shutdowns. Critical
+            hard‑fork changes are announced in advance, and clients contain warning systems
+            that inform users about approaching upgrade deadlines.
+          </p>
+          <h3 data-i18n="infra_title">8.4 Explorers, status page and telemetry</h3>
+            <p data-i18n="infra_body">
+              The BulenCoin ecosystem includes a block explorer, a public network‑status
+              page and anonymised telemetry. Telemetry is designed from day one with data
+              minimisation principles so that individual users cannot be identified.
+            </p>
+        </div>
+      </section>
+
+      <section id="faq" class="bc-section">
+        <div class="bc-container">
+          <h2 data-i18n="faq_title">9. FAQ – BulenCoin in practice</h2>
+          <div class="bc-faq">
+            <div class="bc-faq-item">
+              <h3 data-i18n="faq_q1">Is BulenCoin only a meme?</h3>
+              <p data-i18n="faq_a1">
+                No. The brand is playful, but the protocol is designed as a serious
+                experiment in running a full crypto network on mainstream devices,
+                combining research ideas from lightweight consensus, energy awareness and
+                user‑friendly node operation.
+              </p>
+            </div>
+            <div class="bc-faq-item">
+              <h3 data-i18n="faq_q2">How do I start running a node?</h3>
+              <p data-i18n="faq_a2">
+                In testnet and mainnet, you download BulenNode from official sources,
+                create a wallet and seed backup, choose your node mode (mobile light,
+                desktop full, gateway, or wallet‑only), configure resource limits, and
+                optionally stake or delegate your BulenCoin. See the deployment guide in
+                this repository for a full step‑by‑step description.
+              </p>
+            </div>
+            <div class="bc-faq-item">
+              <h3 data-i18n="faq_q3">What are the main risks?</h3>
+              <p data-i18n="faq_a3">
+                As with any cryptocurrency, there is no guaranteed profit. You can lose
+                access to your funds by losing your seed phrase, and a misconfigured or
+                malicious node may be slashed. Hardware, electricity and data usage also
+                have a cost. BulenCoin is an experimental project and should be treated as
+                such.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bc-footer">
+      <div class="bc-container bc-footer-inner">
+        <p data-i18n="footer_note">
+          BulenCoin is an experimental project. This website describes a proposed network
+          design and does not constitute financial, legal or tax advice. Operating nodes or
+          services based on this design may be regulated in your jurisdiction; you are
+          responsible for complying with local law.
+        </p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  bulennode:
+    build:
+      context: ./bulennode
+    container_name: bulennode
+    environment:
+      - NODE_ENV=production
+      - BULEN_NODE_PROFILE=server-full
+      - BULEN_REQUIRE_SIGNATURES=true
+      - BULEN_ENABLE_FAUCET=false
+    volumes:
+      - ./data/bulennode:/app/data
+    ports:
+      - "4100:4100"
+
+  explorer:
+    build:
+      context: ./explorer
+    container_name: bulen-explorer
+    environment:
+      - NODE_ENV=production
+      - EXPLORER_PORT=4200
+      - BULENNODE_API_BASE=http://bulennode:4100/api
+    depends_on:
+      - bulennode
+    ports:
+      - "4200:4200"
+
+  status:
+    build:
+      context: ./status
+    container_name: bulen-status
+    environment:
+      - NODE_ENV=production
+      - STATUS_PORT=4300
+      - STATUS_NODES=http://bulennode:4100/api/status
+    depends_on:
+      - bulennode
+    ports:
+      - "4300:4300"
+
