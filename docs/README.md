@@ -30,6 +30,8 @@ project.
   - high-level legal notes.
 - `testing_strategy.md` – test levels (service, full-stack smoke, Docker) and how to run
   them locally.
+- `payment_integration.md` – payment and wallet integration API (invoice lifecycle, memo
+  binding, signed-message wallet auth, production guardrails).
 
 ## Legal, security and overview
 

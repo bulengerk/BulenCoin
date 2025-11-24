@@ -208,6 +208,8 @@ See `CONTRIBUTING.md` for detailed contribution guidelines. In short:
   - `node --test scripts/tests/full_stack_integration_all.test.js`.
 - 30s load test for BulenNode:
   - `node --test scripts/tests/node_load_30s.test.js`.
+- payments and wallet integration API:
+  - see `docs/payment_integration.md` for endpoints and sample flows.
 
 
 ## Next steps
