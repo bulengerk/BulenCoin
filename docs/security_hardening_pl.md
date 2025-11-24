@@ -72,6 +72,8 @@ być punktem wyjścia do dalszych prac.
 - **Rate limiting i firewall**:
   - zastosuj limity zapytań per IP na poziomie reverse proxy oraz w samym node (już jest
     prosty limiter w `bulennode/src/server.js`),
+  - parametry limitera można regulować zmiennymi `BULEN_RATE_LIMIT_WINDOW_MS` /
+    `BULEN_RATE_LIMIT_MAX_REQUESTS`; dla publicznych gateway’ów ustaw je ostrożnie,
   - na firewallu ogranicz porty tylko do tych, które są potrzebne (HTTP, P2P).
 - **Ekspozycja usług**:
   - eksplorator i status‑service mogą być dostępne tylko wewnątrz VPN lub private network,
@@ -85,6 +87,8 @@ być punktem wyjścia do dalszych prac.
     błędy HTTP,
   - wykorzystaj status‑service (katalog `status/`) do okresowego zliczania stanu węzłów w
     klastrze.
+  - do Prometheusa możesz skrobać `/metrics` z BulenNode (wysokość łańcucha, mempool,
+    stake, uptime/reward, payments, wersja protokołu, parametry limitera).
 - **Alerting**:
   - skonfiguruj alerty (e‑mail, Slack) na:
     - zatrzymanie procesu node’a,
@@ -106,4 +110,3 @@ być punktem wyjścia do dalszych prac.
 - **Audyty zewnętrzne**:
   - przed produkcyjnym użyciem protokołu i implementacji klienckiej rozważ zatrudnienie
     zewnętrznego zespołu do audytu bezpieczeństwa (kod, architektura, konfiguracja).
-

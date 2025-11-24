@@ -109,6 +109,9 @@ Key environment variables:
 - `BULEN_P2P_TOKEN` – shared secret for HTTP P2P traffic (`/p2p/tx`, `/p2p/block`); nodes
   only accept P2P messages with a matching `x-bulen-p2p-token` header.
 - `BULEN_MAX_BODY_SIZE` – maximum JSON body size for requests (defaults to `128kb`).
+- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window
+  (milliseconds) and max requests per IP in that window (defaults `15000` / `60`). For
+  public gateways use stricter values or an external WAF/reverse proxy.
 - `BULEN_TELEMETRY_ENABLED` – reserved for future telemetry; the prototype does not send
   any telemetry.
 
@@ -133,6 +136,11 @@ The compose file `docker-compose.yml` starts:
 - `explorer` – explorer on port `4200`,
 - `status` – status aggregation service on port `4300` (polling `bulennode`’s `/api/status`).
 
+For observability, BulenNode exposes a Prometheus‑formatted `/metrics` endpoint with
+chain height, mempool size, stake totals, uptime/reward estimates, payments counters,
+protocol version and limiter configuration. Scrape it directly or via a reverse proxy
+with TLS/auth.
+
 # 7. Legal and compliance notes (high‑level)
 
 The repository itself:
@@ -147,4 +155,3 @@ be regulated in your jurisdiction (MiCA, AML, local financial‑services law, ta
 Before running a production BulenCoin network or offering services on top of it, obtain
 qualified legal and tax advice. The authors of this project and this repository do not
 provide legal, financial or tax advice.
-

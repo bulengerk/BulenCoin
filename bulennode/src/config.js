@@ -33,6 +33,15 @@ function getBoolEnv(name, defaultValue) {
   return defaultValue;
 }
 
+function getNumberEnv(name, defaultValue) {
+  const value = process.env[name];
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}
+
 function parsePeers(rawPeers) {
   if (!rawPeers) {
     return [];
@@ -174,13 +183,11 @@ const config = {
   nodeProfile,
   deviceClass: selectedProfile.deviceClass,
   rewardWeight: selectedProfile.rewardWeight,
-  httpPort: Number(getEnv('BULEN_HTTP_PORT', String(selectedProfile.httpPort))),
-  p2pPort: Number(getEnv('BULEN_P2P_PORT', String(selectedProfile.p2pPort))),
+  httpPort: getNumberEnv('BULEN_HTTP_PORT', selectedProfile.httpPort),
+  p2pPort: getNumberEnv('BULEN_P2P_PORT', selectedProfile.p2pPort),
   dataDir: getEnv('BULEN_DATA_DIR', path.join(projectRoot, 'data', nodeProfile)),
   peers: parsePeers(getEnv('BULEN_PEERS', '')),
-  blockIntervalMs: Number(
-    getEnv('BULEN_BLOCK_INTERVAL_MS', String(selectedProfile.blockIntervalMs)),
-  ),
+  blockIntervalMs: getNumberEnv('BULEN_BLOCK_INTERVAL_MS', selectedProfile.blockIntervalMs),
   maxBodySize: getEnv('BULEN_MAX_BODY_SIZE', '128kb'),
   requireSignatures: getBoolEnv(
     'BULEN_REQUIRE_SIGNATURES',
@@ -199,8 +206,10 @@ const config = {
   telemetryEnabled: getBoolEnv('BULEN_TELEMETRY_ENABLED', false),
   corsOrigins: parseOrigins(getEnv('BULEN_CORS_ORIGINS', '')),
   logFormat: getEnv('BULEN_LOG_FORMAT', 'dev'),
-  baseUptimeRewardPerHour: Number(getEnv('BULEN_BASE_UPTIME_REWARD', '1')),
-  uptimeWindowSeconds: Number(getEnv('BULEN_UPTIME_WINDOW_SECONDS', '300')),
+  baseUptimeRewardPerHour: getNumberEnv('BULEN_BASE_UPTIME_REWARD', 1),
+  uptimeWindowSeconds: getNumberEnv('BULEN_UPTIME_WINDOW_SECONDS', 300),
+  rateLimitWindowMs: getNumberEnv('BULEN_RATE_LIMIT_WINDOW_MS', 15 * 1000),
+  rateLimitMaxRequests: getNumberEnv('BULEN_RATE_LIMIT_MAX_REQUESTS', 60),
   protocolVersion: getEnv('BULEN_PROTOCOL_VERSION', defaultProtocolVersion),
   loyaltyBoostSteps: parseLoyaltySteps(getEnv('BULEN_LOYALTY_STEPS', '')),
   deviceProtectionBoosts: parseDeviceBoosts(getEnv('BULEN_DEVICE_PROTECTION', '')),

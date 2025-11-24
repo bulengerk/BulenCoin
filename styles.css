@@ -81,8 +81,7 @@ a:hover {
 .bc-logo {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-weight: 700;
+  gap: 0.7rem;
   color: #e9ecf6;
   letter-spacing: 0.01em;
 }
@@ -91,19 +90,30 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #67f2d6, #8d7dff);
-  color: #0c0c14;
-  font-size: 18px;
-  font-family: 'Space Grotesk', 'Manrope', sans-serif;
-  box-shadow: 0 12px 32px rgba(103, 242, 214, 0.35);
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  padding: 4px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, #66f2d7 0%, #ffa45a 50%, #ff7ed7 100%);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(255, 154, 98, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.bc-logo-bun {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 12px;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
 }
 
 .bc-logo-text {
-  font-size: 1.05rem;
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.05;
 }
 
 .bc-nav {

@@ -100,8 +100,8 @@ function createServer(context) {
   app.use(bodyParser.json({ limit: config.maxBodySize }));
   app.use(
     createRateLimiter({
-      windowMs: 15 * 1000,
-      max: 60,
+      windowMs: config.rateLimitWindowMs,
+      max: config.rateLimitMaxRequests,
     }),
   );
 
@@ -145,6 +145,73 @@ function createServer(context) {
         pending: context.payments.filter((p) => p.status === 'pending').length,
       },
     });
+  });
+
+  app.get('/metrics', (request, response) => {
+    const latest = state.blocks[state.blocks.length - 1];
+    const reward = computeRewardEstimate(config, metrics);
+    const baseLabels = {
+      chain_id: config.chainId,
+      node_id: config.nodeId,
+      role: config.nodeRole,
+      profile: config.nodeProfile,
+      device_class: config.deviceClass,
+    };
+
+    const escapeLabel = (value) => String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const formatLabels = (extra = {}) => {
+      const entries = { ...baseLabels, ...extra };
+      const parts = Object.entries(entries).map(
+        ([key, value]) => `${key}="${escapeLabel(value)}"`,
+      );
+      return parts.length ? `{${parts.join(',')}}` : '';
+    };
+
+    const lines = [];
+    lines.push(
+      `bulen_node_info${formatLabels({
+        protocol_version: config.protocolVersion,
+      })} 1`,
+    );
+    lines.push(
+      `bulen_blocks_height${formatLabels()} ${latest ? latest.index : 0}`,
+    );
+    lines.push(`bulen_blocks_total${formatLabels()} ${state.blocks.length}`);
+    lines.push(`bulen_mempool_size${formatLabels()} ${mempool.length}`);
+    lines.push(`bulen_accounts_total${formatLabels()} ${Object.keys(state.accounts).length}`);
+    lines.push(
+      `bulen_total_stake${formatLabels()} ${Object.values(state.accounts).reduce(
+        (sum, acc) => sum + (acc.stake || 0),
+        0,
+      )}`,
+    );
+    lines.push(`bulen_protocol_major${formatLabels()} ${config.protocolMajor}`);
+    lines.push(`bulen_reward_weight${formatLabels()} ${config.rewardWeight}`);
+    lines.push(`bulen_uptime_seconds${formatLabels()} ${metrics.uptimeSeconds}`);
+    lines.push(`bulen_blocks_produced${formatLabels()} ${metrics.producedBlocks}`);
+    lines.push(
+      `bulen_reward_estimate_hourly${formatLabels()} ${reward.hourly}`,
+    );
+    lines.push(`bulen_reward_estimate_total${formatLabels()} ${reward.total}`);
+    lines.push(`bulen_loyalty_boost${formatLabels()} ${reward.loyaltyBoost}`);
+    lines.push(`bulen_device_boost${formatLabels()} ${reward.deviceBoost}`);
+    lines.push(
+      `bulen_payments_total${formatLabels()} ${context.payments.length}`,
+    );
+    lines.push(
+      `bulen_payments_pending${formatLabels()} ${
+        context.payments.filter((p) => p.status === 'pending').length
+      }`,
+    );
+    lines.push(
+      `bulen_config_rate_limit_window_ms${formatLabels()} ${config.rateLimitWindowMs}`,
+    );
+    lines.push(
+      `bulen_config_rate_limit_max_requests${formatLabels()} ${config.rateLimitMaxRequests}`,
+    );
+
+    response.set('Content-Type', 'text/plain; version=0.0.4');
+    response.send(`${lines.join('\n')}\n`);
   });
 
   app.get('/api/info', (request, response) => {

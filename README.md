@@ -15,6 +15,8 @@ Additionally, it includes prototype infrastructure services implemented in Node.
 
 - `bulennode/` – a minimal BulenNode service with HTTP API, simple PoS‑like block production and basic P2P gossip over HTTP,
 - `explorer/` – a lightweight web explorer that reads chain data from a BulenNode instance.
+- `bulennode-rs/` – wip Rust rewrite of the BulenNode (HTTP API + block production + metrics).
+- deployment notes and manifests in `docs/prod_manifests.md` (reverse proxy TLS, sentry nodes, backups, monitoring).
 
 For a map of all documentation, see `docs/README.md`.
 
@@ -68,9 +70,9 @@ These defaults influence:
 - whether the faucet is enabled by default on that profile,
 - relative weight in the prototype uptime‑reward model (reported via `/api/status` as `rewardWeight`).
 
-The node also tracks basic uptime metrics and a local reward estimate (based on `rewardWeight`
-and `BULEN_BASE_UPTIME_REWARD`); these values are exposed in `/api/status.metrics` and can be
-used by external tooling to experiment with reward‑distribution formulas.
+The node also tracks basic uptime metrics and a local reward estimate (based on
+`rewardWeight` and `BULEN_BASE_UPTIME_REWARD`); these values are exposed in `/api/status`
+and via Prometheus text metrics at `/metrics` for external tooling/alerting.
 
 ### Installation helpers and systemd units
 
@@ -113,6 +115,7 @@ Security‑related configuration (environment variables):
 - `BULEN_P2P_TOKEN` – shared secret token; when set, P2P HTTP endpoints (`/p2p/tx`, `/p2p/block`) only accept requests that include the matching `x-bulen-p2p-token` header.
 - `BULEN_ENABLE_FAUCET` – controls test faucet endpoint (`/api/faucet`); defaults to `true` in development and **must** be `false` in any semi‑public deployment.
 - `BULEN_MAX_BODY_SIZE` – maximum JSON body size for API requests (default `128kb`).
+ - `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window (ms) and max burst per IP (default `15000` / `60`).
  - `BULEN_TELEMETRY_ENABLED` – reserved flag for enabling telemetry in future full clients (defaults to `false` in this prototype; no telemetry is sent by the current code).
 
 Example usage (in another terminal):
@@ -135,6 +138,10 @@ After one or two block intervals, the transaction will be included in a block an
 
 You can inspect node status at `http://localhost:4100/api/status`.
 
+Metrics endpoint (Prometheus format):
+
+- `GET /metrics` – exposes node info, height, mempool size, stake total, uptime, reward estimate, payments counts, rate‑limit config and protocol version. Useful for Prometheus scraping and Grafana dashboards.
+
 Health and metadata endpoints:
 
 - `GET /healthz` or `GET /api/health` – simple liveness probe for load balancers/monitors,
@@ -146,6 +153,22 @@ To connect multiple nodes together, start additional BulenNode instances with `B
 cd bulennode
 PORT=4102 BULEN_HTTP_PORT=4102 BULEN_NODE_ID=node2 BULEN_PEERS=localhost:4100 npm start
 ```
+
+### Rust prototype node
+
+A minimal Rust rewrite prototype lives in `bulennode-rs/`. It exposes `/healthz`,
+`/api/status`, `/api/blocks`, `/api/accounts/:address`, `/api/transactions` and
+`/metrics`, with in-memory state and periodic block production.
+
+Run it on a non-conflicting port:
+
+```bash
+cd bulennode-rs
+cargo run
+```
+
+Environment variables: `BULEN_HTTP_PORT` (default `5100`), `BULEN_BLOCK_INTERVAL_MS`,
+`BULEN_CHAIN_ID`, `BULEN_NODE_ID`.
 
 ## Running the block explorer
 

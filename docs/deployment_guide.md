@@ -143,6 +143,10 @@ Prototyp BulenNode obsługuje kilka ważnych zmiennych środowiskowych:
 - `BULEN_MAX_BODY_SIZE` – maksymalny rozmiar JSON‑owego ciała żądania obsługiwanego przez
   API (domyślnie `128kb`), co ogranicza ryzyko prostych ataków typu „payload bloat”.
 
+- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – okno limitera (w
+  milisekundach) i liczba zapytań na IP w tym oknie (domyślnie `15000` ms i `60`).
+  W publicznych gateway’ach ustawiaj ciaśniejsze wartości albo dołóż zewnętrzny WAF.
+
 Ponadto:
 
 - na wejściu API stosowany jest prosty limit liczby zapytań na IP (w pamięci),
@@ -425,6 +429,11 @@ Zalecane jest wystawienie metryk (np. Prometheus) i podstawowych dashboardów, o
 - uptime węzła,
 - liczbę błędów konsensusu / sieci,
 - podstawowe metryki ekonomiczne (otrzymane nagrody).
+
+Endpoint `/metrics` (Prometheus, tekstowy) w BulenNode wystawia m.in. wysokość łańcucha,
+rozmiar mempoola, liczbę kont i stake, estymację nagrody uptime, liczbę payments, wersję
+protokołu oraz parametry limitera. Skrob go bezpośrednio albo przez reverse proxy z
+autoryzacją/TLS.
 
 ## 6.2. Aktualizacje oprogramowania
 

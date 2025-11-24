@@ -112,12 +112,12 @@ run_compose_smoke() {
 
   log "Waiting for node API..."
   ready=0
-  for _ in {1..60}; do
-    if docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status >/dev/null 2>&1; then
+  for _ in {1..90}; do
+    if curl -sf http://127.0.0.1:4100/api/status >/dev/null 2>&1; then
       ready=1
       break
     fi
-    sleep 1
+    sleep 2
   done
 
   if [[ "${ready}" -ne 1 ]]; then
@@ -128,18 +128,18 @@ run_compose_smoke() {
   fi
 
   log "Smoke: node status"
-  docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status
+  curl -sf http://127.0.0.1:4100/api/status
   log "Smoke: explorer HTML"
-  docker compose -f "${COMPOSE_FILE}" exec -T bulen-explorer curl -sf http://localhost:4200/ | head -n 5
+  curl -sf http://127.0.0.1:4200/ | head -n 5
   log "Smoke: status aggregator"
-  docker compose -f "${COMPOSE_FILE}" exec -T bulen-status curl -sf http://localhost:4300/status
+  curl -sf http://127.0.0.1:4300/status
 
   log "Smoke: faucet + tx"
-  docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf -X POST http://localhost:4100/api/faucet \
+  curl -sf -X POST http://127.0.0.1:4100/api/faucet \
     -H 'Content-Type: application/json' -d '{"address":"docker-alice","amount":1000}' >/dev/null
-  docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf -X POST http://localhost:4100/api/transactions \
+  curl -sf -X POST http://127.0.0.1:4100/api/transactions \
     -H 'Content-Type: application/json' -d '{"from":"docker-alice","to":"docker-bob","amount":25,"fee":0}' >/dev/null || true
-  docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf "http://localhost:4100/api/blocks?limit=5&offset=0"
+  curl -sf "http://127.0.0.1:4100/api/blocks?limit=5&offset=0"
 
   log "Compose smoke done (stack left running). To stop: docker compose -f ${COMPOSE_FILE} down"
 }
@@ -154,15 +154,15 @@ run_load_30s() {
   errors=0
 
   while [ "$(date +%s)" -lt "${end}" ]; do
-    if ! docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf http://localhost:4100/api/status >/dev/null; then
+    if ! curl -sf http://127.0.0.1:4100/api/status >/dev/null; then
       errors=$((errors + 1))
     fi
     status_count=$((status_count + 1))
 
     if [ $((status_count % 5)) -eq 0 ]; then
-      docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf -X POST http://localhost:4100/api/faucet \
+      curl -sf -X POST http://127.0.0.1:4100/api/faucet \
         -H 'Content-Type: application/json' -d '{"address":"docker-load","amount":5}' >/dev/null || true
-      if docker compose -f "${COMPOSE_FILE}" exec -T bulennode curl -sf -X POST http://localhost:4100/api/transactions \
+      if curl -sf -X POST http://127.0.0.1:4100/api/transactions \
         -H 'Content-Type: application/json' -d '{"from":"docker-load","to":"sink","amount":1,"fee":0}' >/dev/null; then
         tx_count=$((tx_count + 1))
       fi
