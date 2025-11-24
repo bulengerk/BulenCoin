@@ -204,6 +204,10 @@ See `CONTRIBUTING.md` for detailed contribution guidelines. In short:
   - `node --test scripts/tests/full_stack_smoke.test.js`.
 - security guardrails test (signatures required, P2P token, rate limiter):
   - `node --test scripts/tests/security_guardrails.test.js`.
+- full-stack (payments + wallet + explorer + status):
+  - `node --test scripts/tests/full_stack_integration_all.test.js`.
+- 30s load test for BulenNode:
+  - `node --test scripts/tests/node_load_30s.test.js`.
 
 
 ## Next steps

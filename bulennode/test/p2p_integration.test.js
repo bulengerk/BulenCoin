@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer, startBlockProducer } = require('../src/server');
@@ -36,8 +38,8 @@ test('block produced on node A is propagated to node B via P2P', async () => {
   const alice = `alice-p2p-${suffix}`;
   const bob = `bob-p2p-${suffix}`;
 
-  const dataDirA = path.join(__dirname, '..', 'test-data-p2p-A');
-  const dataDirB = path.join(__dirname, '..', 'test-data-p2p-B');
+  const dataDirA = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-p2p-A-'));
+  const dataDirB = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-p2p-B-'));
 
   const configA = cloneConfig({
     nodeId: 'node-A',

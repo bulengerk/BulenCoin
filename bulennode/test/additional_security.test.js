@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer } = require('../src/server');
@@ -31,7 +33,7 @@ async function fetchJson(url, options) {
 }
 
 test('CORS, max body size and rate limiting work as expected', async () => {
-  const dataDir = path.join(__dirname, '..', 'test-data-additional-security');
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-additional-'));
   const config = cloneConfig({
     nodeId: 'node-additional-security',
     dataDir,

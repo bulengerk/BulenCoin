@@ -1,11 +1,13 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 // Configure environment before requiring config/server
 process.env.BULEN_NODE_PROFILE = 'desktop-full';
 process.env.BULEN_HTTP_PORT = '0';
-process.env.BULEN_DATA_DIR = path.join(__dirname, '..', 'test-data-security');
+process.env.BULEN_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-security-'));
 process.env.BULEN_BLOCK_INTERVAL_MS = '200';
 
 const config = require('../src/config');

@@ -13,13 +13,17 @@ This document describes the current test levels for BulenCoin services.
    dedicated ports and data directories, seeds test accounts, produces a block and checks
    that all three HTTP endpoints respond with real data.
 
-3. **Security guardrails (new):** ensures HTTP guardrails are enforced when security flags
+3. **Full-stack (all components):** adds payments + wallet session flow on top of node +
+   explorer + status. Creates an invoice, pays it, verifies explorer HTML, status
+   aggregation and wallet challenge/verify with a real signature.
+
+4. **Security guardrails:** ensures HTTP guardrails are enforced when security flags
    are on:
    - signatures are required (unsigned tx rejected, signed tx accepted),
    - P2P token is enforced on gossip endpoints,
    - rate limiter returns 429 on bursts.
 
-4. **Docker-based check:** `docker-compose up --build` for a containerised stack; useful
+5. **Docker-based check:** `docker-compose up --build` for a containerised stack; useful
    for verifying build contexts and environment variables.
 
 ## Running the full-stack smoke test
@@ -46,6 +50,19 @@ What it does:
 
 Processes are stopped automatically after the test finishes.
 
+## Running the full-stack (all components) test
+
+```bash
+node --test scripts/tests/full_stack_integration_all.test.js
+```
+
+What it does:
+
+- launches BulenNode, Explorer and Status on isolated ports,
+- creates and pays a payment invoice (with memo),
+- verifies explorer homepage and status aggregation,
+- performs wallet challenge/verify using a real signature and checks session retrieval.
+
 ## Running the security guardrails test
 
 Command (from repository root):
@@ -60,3 +77,15 @@ What it does:
 - funds a test account and verifies unsigned tx are rejected while signed tx are accepted,
 - checks P2P gossip endpoint requires the shared token,
 - sends a burst of requests to confirm the rate limiter returns HTTP 429.
+
+## Running the 30s node load test
+
+```bash
+node --test scripts/tests/node_load_30s.test.js
+```
+
+What it does:
+
+- starts BulenNode on dedicated ports,
+- for 30 seconds polls health/status and periodically sends faucet + transaction requests,
+- ensures no errors occur and a minimum number of cycles/transactions complete.

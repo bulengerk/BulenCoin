@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer, startBlockProducer } = require('../src/server');
@@ -27,7 +29,7 @@ async function fetchJson(url, options) {
 }
 
 test('payments API tracks invoices until paid', async () => {
-  const dataDir = path.join(__dirname, '..', 'test-data-payments');
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-payments-'));
   const config = cloneConfig({
     nodeId: 'node-payments',
     dataDir,

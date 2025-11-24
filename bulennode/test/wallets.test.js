@@ -2,6 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const path = require('path');
 const crypto = require('node:crypto');
+const fs = require('fs');
+const os = require('os');
 
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer } = require('../src/server');
@@ -34,7 +36,7 @@ function signMessage(privateKeyPem, message) {
 }
 
 test('wallet challenge + verify returns session', async () => {
-  const dataDir = path.join(__dirname, '..', 'test-data-wallets');
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-wallets-'));
   const config = cloneConfig({
     nodeId: 'node-wallets',
     dataDir,
