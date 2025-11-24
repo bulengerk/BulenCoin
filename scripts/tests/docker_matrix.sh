@@ -26,6 +26,7 @@ profiles=(
 )
 
 idx=0
+base_port="${MATRIX_BASE_PORT:-6700}"
 errors=0
 
 function run_check() {
@@ -33,7 +34,7 @@ function run_check() {
   local faucet="$2"
   local allowUnsigned="$3"
 
-  local http_port=$((5600 + idx * 5))
+  local http_port=$((base_port + idx * 5))
   local name="bulen-matrix-${idx}"
   local require_signatures="true"
   if [[ "${allowUnsigned}" == "true" ]]; then
