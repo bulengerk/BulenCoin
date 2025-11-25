@@ -16,7 +16,9 @@ specification, see `docs/bulencoin_spec_pl.md` (Polish).
   - `bulennode/` – minimal BulenNode service (HTTP API, simple PoS‑like block production,
     basic P2P over HTTP),
   - `explorer/` – basic block explorer reading data from BulenNode,
-  - `status/` – status aggregation service that polls multiple BulenNode instances.
+  - `status/` – status aggregation service that polls multiple BulenNode instances,
+  - `rewards-hub/` – prototype rewards leaderboard fed by uptime/stake telemetry,
+  - `sdk/` – lightweight JS/TS helpers for payments, payment links and status polling.
 - Documentation:
   - `docs/bulencoin_spec_pl.md` – full protocol spec (PL),
   - `docs/deployment_guide.md` – detailed deployment guide (PL),
@@ -66,7 +68,12 @@ Useful endpoints:
 - `GET /api/status` – node status, profile, device class, reward weight and uptime metrics,
 - `GET /api/blocks` – recent blocks (with pagination),
 - `GET /api/accounts/:address` – account balances,
+- `GET /api/mempool` – current mempool contents,
 - `POST /api/transactions` – submit a transaction,
+- `POST /api/payments` / `GET /api/payments/:id` – invoice lifecycle (supports `webhookUrl`),
+- `POST /api/payment-link` – build a BIP21-like payment link + QR code,
+- `POST /api/rewards/estimate` – reward/loyalty projection calculator,
+- `POST /api/wallets/challenge` / `POST /api/wallets/verify` – signed-message login,
 - `POST /api/faucet` – development faucet (should be disabled in public setups).
 
 To run tests:
@@ -112,8 +119,14 @@ Key environment variables:
 - `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window
   (milliseconds) and max requests per IP in that window (defaults `15000` / `60`). For
   public gateways use stricter values or an external WAF/reverse proxy.
-- `BULEN_TELEMETRY_ENABLED` – reserved for future telemetry; the prototype does not send
-  any telemetry.
+- `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` – optional shared secrets required in
+  headers for `/api/status` and `/metrics` when exposed through public gateways.
+- `BULEN_REWARDS_HUB` / `BULEN_REWARDS_TOKEN` – optional telemetry target for uptime/stake
+  reports (prototype rewards hub; best-effort).
+- `BULEN_WEBHOOK_SECRET` – if set, payment webhooks are signed with `x-bulen-signature`
+  (sha256 HMAC over the JSON body).
+- `BULEN_REWARDS_HMAC_SECRET` – if set, telemetry reports to rewards-hub are signed with
+  `x-bulen-signature` (sha256 HMAC).
 
 For detailed hardening and logging guidance, see `docs/security_hardening_pl.md`.
 
@@ -141,7 +154,21 @@ chain height, mempool size, stake totals, uptime/reward estimates, payments coun
 protocol version and limiter configuration. Scrape it directly or via a reverse proxy
 with TLS/auth.
 
-# 7. Legal and compliance notes (high‑level)
+# 7. Human-friendly security defaults and setup
+
+- **Production builds hard-default:** `BULEN_REQUIRE_SIGNATURES=true`, `BULEN_P2P_REQUIRE_HANDSHAKE=true`, P2P token set, TLS required for P2P (`BULEN_P2P_REQUIRE_TLS=true` with cert/key). Production profiles refuse to start without these.
+- **Config wizard (CLI/UI) with checklist:** walks through profile (gateway/validator/mobile), ports, tokens, CORS allowlist, status/metrics tokens, TLS files, mempool and rate limits. Writes `config.env` and prints a “secure node” checklist (faucet off, key backup, snapshots, monitoring).
+- **Auto-update with signature verification:** binaries fetched over HTTPS with signed manifest (minisig/ed25519). Node verifies signatures before swapping; on failure it keeps the current version and logs/alerts.
+- **UX warnings:** UI/CLI highlights missing TLS/tokens, disabled signature checks, missing backups and reminds to turn off faucet on public hosts.
+
+# 8. Token economics and payouts (policy draft)
+
+- **Inflation (parametric decay):** 8% in year 1 → 6% in year 2 → 4% in year 3 → 2.5% in year 4 → 1.5% from year 5 onward; changes only within narrow governance bands.
+- **Block rewards split:** 60% validators/committee by stake, 20% uptime/loyalty pool, 20% ecosystem pool (multi‑sig + time‑lock, transparently reported).
+- **Transaction fees:** 30% burned, 60% to the active validator set, 10% to the ecosystem pool.
+- **Payout cadence and comms:** testnet settles daily (low stakes) to exercise tooling; mainnet pays per epoch (~weekly) after finality. Publish a calendar (epoch IDs, slot start, payout dates), fee‑burn totals and ecosystem pool balances on dashboards.
+
+# 9. Legal and compliance notes (high‑level)
 
 The repository itself:
 

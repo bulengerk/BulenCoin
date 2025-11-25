@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 function paymentsFile(config) {
   return path.join(config.dataDir, 'payments.json');
@@ -42,6 +43,16 @@ function createPayment(context, payload) {
   if (!payload.to || typeof payload.to !== 'string') {
     throw new Error('Missing destination address');
   }
+  if (payload.webhookUrl) {
+    const allowInsecure =
+      context.config.allowInsecureWebhooks || process.env.NODE_ENV !== 'production';
+    if (!allowInsecure && !String(payload.webhookUrl).startsWith('https://')) {
+      throw new Error('Webhook URL must be https:// in production');
+    }
+    if (context.config.requireWebhookSecret && !context.config.webhookSecret) {
+      throw new Error('Webhook secret required when using webhookUrl');
+    }
+  }
   const memo = normalizeMemo(payload.memo);
   if (payload.memo && memo !== payload.memo) {
     // Memo was truncated; reject instead of silently trimming for invoices
@@ -56,6 +67,7 @@ function createPayment(context, payload) {
     expiresAt,
     status: 'pending',
     transactionId: null,
+    webhookUrl: payload.webhookUrl || null,
   };
   context.payments.push(payment);
   savePayments(context.config, context.payments);
@@ -111,6 +123,7 @@ function updatePaymentStatus(context, payment) {
       payment.blockIndex = blockIndex;
     }
     savePayments(context.config, context.payments);
+    notifyWebhook(context, payment);
   }
   return payment;
 }
@@ -148,7 +161,38 @@ function paymentSummary(payment) {
     status: payment.status,
     transactionId: payment.transactionId || null,
     blockIndex: payment.blockIndex || null,
+    webhookUrl: payment.webhookUrl || null,
   };
+}
+
+async function notifyWebhook(context, payment) {
+  if (!payment.webhookUrl) {
+    return;
+  }
+  try {
+    const body = {
+      event: 'payment.updated',
+      payment: paymentSummary(payment),
+    };
+    const bodyString = JSON.stringify(body);
+    let signature = null;
+    if (context.config.webhookSecret) {
+      signature = crypto
+        .createHmac('sha256', context.config.webhookSecret)
+        .update(bodyString)
+        .digest('hex');
+    }
+    await fetch(payment.webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(signature ? { 'x-bulen-signature': signature } : {}),
+      },
+      body: bodyString,
+    });
+  } catch (error) {
+    console.warn('Failed to notify webhook', payment.webhookUrl, error.message);
+  }
 }
 
 module.exports = {
@@ -159,4 +203,5 @@ module.exports = {
   onBlockAccepted,
   getPayment,
   paymentSummary,
+  notifyWebhook,
 };

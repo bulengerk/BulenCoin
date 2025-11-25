@@ -1,0 +1,18 @@
+{
+  "name": "bulencoin-sdk",
+  "version": "0.1.0",
+  "description": "Minimal JS/TS client for BulenCoin prototype APIs (payments, payment links/QR, status).",
+  "main": "bulencoin-sdk.js",
+  "types": "bulencoin-sdk.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/bulencoin.git"
+  },
+  "keywords": [
+    "bulencoin",
+    "payments",
+    "blockchain",
+    "sdk"
+  ]
+}

@@ -144,6 +144,15 @@ const profileDefaults = {
     blockIntervalMs: 11000,
     enableFaucet: true,
   },
+  'phone-superlight': {
+    deviceClass: 'phone',
+    rewardWeight: 0.35,
+    nodeRole: 'observer',
+    httpPort: 4114,
+    p2pPort: 4115,
+    blockIntervalMs: 15000,
+    enableFaucet: false,
+  },
   raspberry: {
     deviceClass: 'raspberry',
     rewardWeight: 0.75,
@@ -176,6 +185,9 @@ function getProtocolMajor(version) {
   return Number.isNaN(value) ? 0 : value;
 }
 
+const securityPreset = getEnv('BULEN_SECURITY_PRESET', 'dev').toLowerCase();
+const securityStrict = ['strict', 'prod', 'production', 'mainnet'].includes(securityPreset);
+
 const config = {
   chainId: getEnv('BULEN_CHAIN_ID', 'bulencoin-devnet-1'),
   nodeId: getEnv('BULEN_NODE_ID', `node-${Math.random().toString(16).slice(2)}`),
@@ -191,10 +203,10 @@ const config = {
   maxBodySize: getEnv('BULEN_MAX_BODY_SIZE', '128kb'),
   requireSignatures: getBoolEnv(
     'BULEN_REQUIRE_SIGNATURES',
-    process.env.NODE_ENV === 'production' ? true : false,
+    securityStrict || (process.env.NODE_ENV === 'production' ? true : false),
   ),
   enableFaucet: getBoolEnv('BULEN_ENABLE_FAUCET', (() => {
-    if (process.env.NODE_ENV === 'production') {
+    if (securityStrict || process.env.NODE_ENV === 'production') {
       return false;
     }
     if (typeof selectedProfile.enableFaucet === 'boolean') {
@@ -203,6 +215,19 @@ const config = {
     return process.env.NODE_ENV !== 'production';
   })()),
   p2pToken: getEnv('BULEN_P2P_TOKEN', ''),
+  p2pRequireHandshake: getBoolEnv(
+    'BULEN_P2P_REQUIRE_HANDSHAKE',
+    getEnv('BULEN_P2P_TOKEN', '') !== '',
+  ),
+  p2pTlsEnabled: getBoolEnv('BULEN_P2P_TLS_ENABLED', false),
+  p2pTlsKeyFile: getEnv('BULEN_P2P_TLS_KEY_FILE', ''),
+  p2pTlsCertFile: getEnv('BULEN_P2P_TLS_CERT_FILE', ''),
+  p2pTlsAllowSelfSigned: getBoolEnv('BULEN_P2P_TLS_ALLOW_SELF_SIGNED', false),
+  p2pQuicEnabled: getBoolEnv('BULEN_P2P_QUIC_ENABLED', false),
+  p2pQuicPort: getNumberEnv(
+    'BULEN_P2P_QUIC_PORT',
+    getNumberEnv('BULEN_P2P_PORT', selectedProfile.p2pPort) + 100,
+  ),
   telemetryEnabled: getBoolEnv('BULEN_TELEMETRY_ENABLED', false),
   corsOrigins: parseOrigins(getEnv('BULEN_CORS_ORIGINS', '')),
   logFormat: getEnv('BULEN_LOG_FORMAT', 'dev'),
@@ -213,6 +238,41 @@ const config = {
   protocolVersion: getEnv('BULEN_PROTOCOL_VERSION', defaultProtocolVersion),
   loyaltyBoostSteps: parseLoyaltySteps(getEnv('BULEN_LOYALTY_STEPS', '')),
   deviceProtectionBoosts: parseDeviceBoosts(getEnv('BULEN_DEVICE_PROTECTION', '')),
+  minimumValidatorWeight: getNumberEnv('BULEN_MIN_VALIDATOR_WEIGHT', 1),
+  finalityStakeThreshold: getNumberEnv('BULEN_FINALITY_THRESHOLD', 0.67),
+  finalityMinDepth: getNumberEnv('BULEN_FINALITY_MIN_DEPTH', 2),
+  slashPenalty: getNumberEnv('BULEN_SLASH_PENALTY', 0.25),
+  mempoolMaxSize: getNumberEnv('BULEN_MEMPOOL_MAX_SIZE', 1000),
+  p2pRequireTls: getBoolEnv('BULEN_P2P_REQUIRE_TLS', false),
+  metricsToken: getEnv('BULEN_METRICS_TOKEN', ''),
+  statusToken: getEnv('BULEN_STATUS_TOKEN', ''),
+  p2pMaxPeers: getNumberEnv('BULEN_P2P_MAX_PEERS', 50),
+  p2pFanout: getNumberEnv('BULEN_P2P_FANOUT', 8),
+  webhookSecret: getEnv('BULEN_WEBHOOK_SECRET', ''),
+  rewardsHubHmacSecret: getEnv('BULEN_REWARDS_HMAC_SECRET', ''),
+  superLightMode: getBoolEnv(
+    'BULEN_SUPERLIGHT_MODE',
+    nodeProfile === 'phone-superlight' || nodeProfile === 'super-light',
+  ),
+  superLightKeepBlocks: getNumberEnv('BULEN_SUPERLIGHT_KEEP_BLOCKS', 256),
+  superLightFinalityBuffer: getNumberEnv('BULEN_SUPERLIGHT_FINALITY_BUFFER', 2),
+  superLightBatteryThreshold: getNumberEnv('BULEN_SUPERLIGHT_BATTERY_THRESHOLD', 0.15),
+  deviceControlToken: getEnv('BULEN_DEVICE_TOKEN', ''),
+  requireWebhookSecret: getBoolEnv(
+    'BULEN_REQUIRE_WEBHOOK_SECRET',
+    securityStrict || process.env.NODE_ENV === 'production',
+  ),
+  allowInsecureWebhooks: getBoolEnv(
+    'BULEN_ALLOW_INSECURE_WEBHOOKS',
+    process.env.NODE_ENV !== 'production' && !securityStrict,
+  ),
+  securityPreset,
+  securityStrict,
+  enableProtocolRewards: getBoolEnv('BULEN_ENABLE_PROTOCOL_REWARDS', true),
+  blockReward: getNumberEnv('BULEN_BLOCK_REWARD', securityStrict ? 10 : 0),
+  feeBurnFraction: getNumberEnv('BULEN_FEE_BURN_FRACTION', 0.3),
+  feeEcosystemFraction: getNumberEnv('BULEN_FEE_ECOSYSTEM_FRACTION', 0.1),
+  blockProducerRewardFraction: getNumberEnv('BULEN_BLOCK_PRODUCER_FRACTION', 0.4),
   get protocolMajor() {
     return getProtocolMajor(this.protocolVersion);
   },

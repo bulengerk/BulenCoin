@@ -34,6 +34,9 @@ function startUptimeSampler(context) {
   const intervalSeconds = Math.max(5, Math.min(config.uptimeWindowSeconds, 60));
   const intervalMs = intervalSeconds * 1000;
   const intervalHandle = setInterval(() => {
+    if (context.superLightSleeping) {
+      return;
+    }
     metrics.uptimeSeconds += intervalSeconds;
   }, intervalMs);
   if (Array.isArray(context.timers)) {
@@ -62,6 +65,36 @@ function computeRewardEstimate(config, metrics) {
   };
 }
 
+function computeRewardProjection(config, metrics, options = {}) {
+  const metricsOverride = { ...metrics };
+  if (options.deviceClass) {
+    metricsOverride.deviceClass = options.deviceClass;
+  }
+  const base = computeRewardEstimate(config, metricsOverride);
+  const stake = Math.max(0, Number(options.stake || 0));
+  const stakeWeight = Math.min(3, 1 + stake / 10000);
+  const uptimeHoursPerDay = Math.max(
+    0,
+    Math.min(24, Number(options.uptimeHoursPerDay || 24)),
+  );
+  const days = Math.max(1, Math.min(30, Number(options.days || 7)));
+  const hourly = base.hourly * stakeWeight;
+  const daily = hourly * uptimeHoursPerDay;
+  const weekly = daily * Math.min(7, days);
+  const periodTotal = daily * days;
+  return {
+    hourly,
+    daily,
+    weekly,
+    periodTotal,
+    stakeWeight,
+    uptimeHoursPerDay,
+    days,
+    loyaltyBoost: base.loyaltyBoost,
+    deviceBoost: base.deviceBoost,
+  };
+}
+
 module.exports = {
   createMetrics,
   startUptimeSampler,
@@ -69,4 +102,5 @@ module.exports = {
   computeRewardEstimate,
   computeLoyaltyBoost,
   computeDeviceProtectionBoost,
+  computeRewardProjection,
 };

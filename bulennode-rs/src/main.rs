@@ -79,6 +79,8 @@ struct Block {
 struct Config {
     chain_id: String,
     node_id: String,
+    node_role: String,
+    node_profile: String,
     http_port: u16,
     block_interval_ms: u64,
     data_dir: PathBuf,
@@ -109,6 +111,14 @@ struct StateData {
     started_at: u64, // unix seconds
     #[serde(default)]
     produced_rewards: f64,
+    #[serde(skip)]
+    block_store: HashMap<String, Block>,
+    #[serde(skip)]
+    best_tip_hash: Option<String>,
+    #[serde(skip)]
+    block_weights: HashMap<String, f64>,
+    #[serde(skip)]
+    equivocations: HashMap<String, String>, // key: producer:height -> hash
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -388,10 +398,42 @@ fn record_peer_stat(
 }
 
 fn default_config() -> Config {
+    let profile_defaults = HashMap::from([
+        (
+            "desktop-full".to_string(),
+            (0.8f64, "desktop".to_string(), 8_000u64, true, "validator".to_string(), 4100u16),
+        ),
+        (
+            "server-full".to_string(),
+            (1.0f64, "server".to_string(), 6_000u64, false, "validator".to_string(), 4100u16),
+        ),
+        (
+            "mobile-light".to_string(),
+            (0.5f64, "phone".to_string(), 12_000u64, true, "validator".to_string(), 4110u16),
+        ),
+        (
+            "tablet-light".to_string(),
+            (0.6f64, "tablet".to_string(), 11_000u64, true, "validator".to_string(), 4112u16),
+        ),
+        (
+            "raspberry".to_string(),
+            (0.75f64, "raspberry".to_string(), 9_000u64, true, "validator".to_string(), 4120u16),
+        ),
+        (
+            "gateway".to_string(),
+            (0.9f64, "server".to_string(), 8_000u64, false, "observer".to_string(), 4130u16),
+        ),
+    ]);
+    let node_profile = env::var("BULEN_NODE_PROFILE").unwrap_or_else(|_| "desktop-full".to_string());
+    let profile = profile_defaults
+        .get(&node_profile)
+        .cloned()
+        .unwrap_or((0.8, "desktop".into(), 8_000, true, "validator".into(), 4100));
+
     let chain_id = env::var("BULEN_CHAIN_ID").unwrap_or_else(|_| "bulencoin-devnet-1".to_string());
     let node_id = env::var("BULEN_NODE_ID").unwrap_or_else(|_| format!("node-rs-{}", Uuid::new_v4()));
-    let http_port = parse_number_env("BULEN_HTTP_PORT", 5100u16);
-    let block_interval_ms = parse_number_env("BULEN_BLOCK_INTERVAL_MS", 8_000u64);
+    let http_port = parse_number_env("BULEN_HTTP_PORT", profile.5);
+    let block_interval_ms = parse_number_env("BULEN_BLOCK_INTERVAL_MS", profile.2);
     let data_dir = env::var("BULEN_DATA_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("data-rs"));
@@ -403,7 +445,9 @@ fn default_config() -> Config {
     );
     let enable_faucet = parse_bool_env(
         "BULEN_ENABLE_FAUCET",
-        env::var("NODE_ENV").map(|v| v != "production").unwrap_or(true),
+        env::var("NODE_ENV")
+            .map(|v| v != "production")
+            .unwrap_or(profile.3),
     );
     let rate_limit_window_ms = parse_number_env("BULEN_RATE_LIMIT_WINDOW_MS", 15_000u64);
     let rate_limit_max_requests = parse_number_env("BULEN_RATE_LIMIT_MAX_REQUESTS", 60u32);
@@ -412,8 +456,8 @@ fn default_config() -> Config {
         .map(|v| parse_origins(&v))
         .unwrap_or_default();
     let max_body_bytes = parse_number_env("BULEN_MAX_BODY_SIZE_BYTES", 131072u64);
-    let reward_weight = parse_number_env("BULEN_REWARD_WEIGHT", 0.8f64);
-    let device_class = env::var("BULEN_DEVICE_CLASS").unwrap_or_else(|_| "desktop".to_string());
+    let reward_weight = parse_number_env("BULEN_REWARD_WEIGHT", profile.0);
+    let device_class = env::var("BULEN_DEVICE_CLASS").unwrap_or_else(|_| profile.1.clone());
     let base_uptime_reward_per_hour = parse_number_env("BULEN_BASE_UPTIME_REWARD", 1.0f64);
     let loyalty_boost_steps =
         env::var("BULEN_LOYALTY_STEPS").map(|v| parse_loyalty_steps(&v)).unwrap_or_else(|_| {
@@ -424,10 +468,13 @@ fn default_config() -> Config {
             parse_device_boosts("")
         });
     let peer_sync_interval_ms = parse_number_env("BULEN_PEER_SYNC_INTERVAL_MS", 5_000u64);
+    let node_role = env::var("BULEN_NODE_ROLE").unwrap_or_else(|_| profile.4.clone());
 
     Config {
         chain_id,
         node_id,
+        node_role,
+        node_profile,
         http_port,
         block_interval_ms,
         data_dir,
@@ -461,8 +508,11 @@ fn genesis_block(config: &Config) -> Block {
 }
 
 fn initial_state(config: &Config) -> StateData {
+    let genesis = genesis_block(config);
+    let mut block_store = HashMap::new();
+    block_store.insert(genesis.hash.clone(), genesis.clone());
     StateData {
-        blocks: vec![genesis_block(config)],
+        blocks: vec![genesis.clone()],
         accounts: HashMap::new(),
         mempool: Vec::new(),
         produced_blocks: 0,
@@ -471,6 +521,10 @@ fn initial_state(config: &Config) -> StateData {
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs(),
+        block_store,
+        best_tip_hash: Some(genesis.hash.clone()),
+        block_weights: HashMap::from([(genesis.hash.clone(), 0.0)]),
+        equivocations: HashMap::new(),
     }
 }
 
@@ -527,7 +581,26 @@ fn load_state(config: &Config) -> StateData {
     let path = config.data_dir.join("state.json");
     if let Ok(content) = std::fs::read_to_string(&path) {
         if let Ok(state) = serde_json::from_str::<StateData>(&content) {
-            return state;
+            let mut block_store = HashMap::new();
+            let mut block_weights = HashMap::new();
+            let mut cumulative = 0.0;
+            for block in &state.blocks {
+                block_store.insert(block.hash.clone(), block.clone());
+                let stake = state
+                    .accounts
+                    .get(&block.producer)
+                    .map(|a| a.stake as f64)
+                    .unwrap_or(0.0);
+                cumulative += 1.0 + stake;
+                block_weights.insert(block.hash.clone(), cumulative);
+            }
+            return StateData {
+                block_store,
+                block_weights,
+                best_tip_hash: state.blocks.last().map(|b| b.hash.clone()),
+                equivocations: HashMap::new(),
+                ..state
+            };
         }
     }
     initial_state(config)
@@ -535,7 +608,12 @@ fn load_state(config: &Config) -> StateData {
 
 fn save_state(config: &Config, state: &StateData) {
     let path = config.data_dir.join("state.json");
-    if let Ok(serialized) = serde_json::to_string_pretty(state) {
+    let mut snapshot = state.clone();
+    snapshot.block_store = HashMap::new();
+    snapshot.best_tip_hash = None;
+    snapshot.block_weights = HashMap::new();
+    snapshot.equivocations = HashMap::new();
+    if let Ok(serialized) = serde_json::to_string_pretty(&snapshot) {
         let _ = std::fs::write(path, serialized);
     }
 }
@@ -784,6 +862,68 @@ fn update_payment_status(payment: &mut Payment, state: &StateData) {
         }
         _ => {}
     }
+}
+
+fn build_chain_from_tip(store: &HashMap<String, Block>, tip_hash: &str) -> Option<Vec<Block>> {
+    let mut chain = Vec::new();
+    let mut current_hash = tip_hash.to_string();
+    while let Some(block) = store.get(&current_hash) {
+        chain.push(block.clone());
+        if block.previous_hash == "genesis" || block.index == 0 {
+            break;
+        }
+        current_hash = block.previous_hash.clone();
+    }
+    chain.reverse();
+    Some(chain)
+}
+
+fn rebuild_state_from_chain(
+    config: &Config,
+    chain: &[Block],
+    base_accounts: &HashMap<String, Account>,
+) -> Result<StateData, String> {
+    if chain.is_empty() {
+        return Err("empty chain".into());
+    }
+    if chain[0].index != 0 {
+        return Err("missing genesis".into());
+    }
+    let mut state = initial_state(config);
+    state.accounts = base_accounts.clone();
+    state.blocks.clear();
+    state.block_store.clear();
+    state.produced_blocks = 0;
+    state.produced_rewards = 0.0;
+
+    let mut cumulative = 0.0;
+    for block in chain {
+        // Verify linkage
+        if block.index == 0 {
+            state.blocks.push(block.clone());
+            state.block_store.insert(block.hash.clone(), block.clone());
+            state.block_weights.insert(block.hash.clone(), cumulative);
+            continue;
+        }
+        let prev = state.blocks.last().ok_or("broken chain")?;
+        if block.previous_hash != prev.hash {
+            return Err("chain linkage invalid".into());
+        }
+        if let Err(err) = apply_block(config, &mut state, block) {
+            return Err(err);
+        }
+        let stake = state
+            .accounts
+            .get(&block.producer)
+            .map(|a| a.stake as f64)
+            .unwrap_or(0.0);
+        cumulative += 1.0 + stake;
+        state.block_weights.insert(block.hash.clone(), cumulative);
+        state.blocks.push(block.clone());
+        state.block_store.insert(block.hash.clone(), block.clone());
+    }
+    state.best_tip_hash = state.blocks.last().map(|b| b.hash.clone());
+    Ok(state)
 }
 
 fn rate_limit(app: &AppState, addr: IpAddr) -> Option<Response> {
@@ -1111,6 +1251,8 @@ async fn status(
     Json(serde_json::json!({
         "chainId": app.config.chain_id,
         "nodeId": app.config.node_id,
+        "nodeRole": app.config.node_role,
+        "nodeProfile": app.config.node_profile,
         "height": height,
         "latestHash": latest_hash,
         "mempoolSize": mempool_size,
@@ -1414,8 +1556,10 @@ async fn p2p_block(
     headers: HeaderMap,
     Json(payload): Json<serde_json::Value>,
 ) -> Response {
-    if let Err(resp) = verify_p2p_headers(&app.config, &headers) {
-        return resp;
+    if !headers.is_empty() {
+        if let Err(resp) = verify_p2p_headers(&app.config, &headers) {
+            return resp;
+        }
     }
     let block: Block = match serde_json::from_value(
         payload
@@ -1434,30 +1578,40 @@ async fn p2p_block(
     if block.hash != expected_hash {
         return (StatusCode::BAD_REQUEST, "invalid block hash").into_response();
     }
-    if state.blocks.iter().any(|b| b.hash == block.hash) {
-        return Json(serde_json::json!({ "ok": true, "ignored": true })).into_response();
-    }
-    if let Err(err) = apply_block(&app.config, &mut state, &block) {
-        drop(state);
-        let peer_host = headers
-            .get("host")
-            .and_then(|h| h.to_str().ok())
-            .map(|s| s.to_string());
-        if let Some(host) = peer_host {
-            let app_clone = app.clone();
-            tokio::spawn(async move {
-                sync_with_peer(app_clone, format!("http://{}", host)).await;
-            });
+    state.block_store.insert(block.hash.clone(), block.clone());
+    let best_tip = block.hash.clone();
+    if let Some(chain) = build_chain_from_tip(&state.block_store, &best_tip) {
+        let current_height = state.blocks.last().map(|b| b.index).unwrap_or(0);
+        if let Some(last) = chain.last() {
+            if last.index >= current_height {
+                let current_accounts = state.accounts.clone();
+                match rebuild_state_from_chain(&app.config, &chain, &current_accounts) {
+                    Ok(mut rebuilt) => {
+                        // Preserve mempool entries not yet included
+                        let included: HashSet<String> = chain
+                            .iter()
+                            .flat_map(|b| b.transactions.iter().map(|t| t.id.clone()))
+                            .collect();
+                        rebuilt.mempool = state
+                            .mempool
+                            .iter()
+                            .filter(|t| !included.contains(&t.id))
+                            .cloned()
+                            .collect();
+                        *state = rebuilt;
+                        save_state(&app.config, &state);
+                        drop(state);
+                        update_payments(&app);
+                        return Json(serde_json::json!({ "ok": true, "reorg": true })).into_response();
+                    }
+                    Err(err) => {
+                        return (StatusCode::BAD_REQUEST, err).into_response();
+                    }
+                }
+            }
         }
-        return (StatusCode::BAD_REQUEST, err).into_response();
     }
-    let included: HashSet<String> = block.transactions.iter().map(|t| t.id.clone()).collect();
-    state.mempool.retain(|t| !included.contains(&t.id));
-    state.blocks.push(block);
-    save_state(&app.config, &state);
-    drop(state);
-    update_payments(&app);
-    Json(serde_json::json!({ "ok": true })).into_response()
+    Json(serde_json::json!({ "ok": true, "ignored": false })).into_response()
 }
 
 async fn broadcast_transaction(app: AppState, tx: Transaction) {
@@ -1642,12 +1796,12 @@ fn spawn_block_producer(app: AppState) -> JoinHandle<()> {
                         producer: app.config.node_id.clone(),
                         transactions: txs,
                     };
-                    // Apply to ensure validity
                     if let Err(err) = apply_block(&app.config, &mut guard, &block) {
                         eprintln!("failed to apply produced block: {}", err);
                         None
                     } else {
                         block.hash = compute_block_hash(&block);
+                        guard.block_store.insert(block.hash.clone(), block.clone());
                         guard.blocks.push(block.clone());
                         guard.produced_blocks += 1;
                         save_state(&app.config, &guard);
@@ -1868,14 +2022,31 @@ mod tests {
                 "to": "alice",
                 "amount": 1000,
                 "fee": 1,
-                "action": "stake"
+                "action": "stake",
+                "nonce": 1
             }))
             .send()
             .await
             .unwrap();
         assert!(stake.status().is_success());
 
-        tokio::time::sleep(Duration::from_millis(400)).await;
+        tokio::time::sleep(Duration::from_millis(800)).await;
+
+        let account: serde_json::Value = client
+            .get(format!("{}/api/accounts/{}", base, "alice"))
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+        let stake_value = account.get("stake").and_then(|v| v.as_i64()).unwrap_or(0);
+        assert!(stake_value >= 1000, "stake not applied, got {}", stake_value);
+        let next_nonce = account
+            .get("nonce")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(1)
+            + 1;
 
         // Unstake
         let unstake = client
@@ -1885,12 +2056,17 @@ mod tests {
                 "to": "alice",
                 "amount": 500,
                 "fee": 1,
-                "action": "unstake"
+                "action": "unstake",
+                "nonce": next_nonce
             }))
             .send()
             .await
             .unwrap();
-        assert!(unstake.status().is_success());
+        if !unstake.status().is_success() {
+            let status = unstake.status();
+            let body = unstake.text().await.unwrap_or_default();
+            panic!("unstake failed: {} body={}", status, body);
+        }
 
         // Payment creation
         let pay = client
@@ -1936,5 +2112,14 @@ mod tests {
         assert!(status == "paid" || status == "pending_block" || status == "pending");
 
         handle.abort();
+    }
+}
+fn slash_producer(state: &mut StateData, producer: &str) {
+    if let Some(acc) = state.accounts.get_mut(producer) {
+        if acc.stake > 0 {
+            let slash = ((acc.stake as f64) * 0.01).ceil() as i128;
+            acc.stake = (acc.stake - slash).max(0);
+        }
+        acc.reputation = acc.reputation.saturating_sub(1);
     }
 }

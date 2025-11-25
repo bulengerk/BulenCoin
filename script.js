@@ -1,6 +1,8 @@
 const translations = {
   en: {
+    nav_rewards: 'Rewards',
     nav_overview: 'Overview',
+    nav_how: 'How it works',
     nav_nodes: 'Nodes',
     nav_consensus: 'Consensus',
     nav_economics: 'Economics',
@@ -29,6 +31,27 @@ const translations = {
     hero_card3_title: 'Uptime‑based rewards',
     hero_card3_body:
       'Nodes that stay online and respond to health checks regularly earn additional rewards, with parameters calibrated for everyday hardware.',
+    how_title: 'How BulenCoin works on any device',
+    how_subtitle:
+      'Two layers of explanation: plain language for anyone, and a concise technical view for operators.',
+    how_simple_title: 'For everyone',
+    how_simple_point1:
+      'Install BulenNode on a phone, laptop or server and pick a profile (mobile light, desktop/server full, or API gateway).',
+    how_simple_point2:
+      'Keep the app online; it earns automatic rewards for honest uptime and helps secure the network. No mining rigs required.',
+    how_simple_point3:
+      'Send/receive payments and stake coins; gateways expose simple HTTP APIs for wallets, shops and explorers.',
+    how_simple_point4:
+      'Safety basics: back up your seed, set a P2P token on public nodes, use rate limits and (optionally) TLS.',
+    how_expert_title: 'For builders & operators',
+    how_expert_point1:
+      'Lightweight Proof of Stake with small validator committees; selection uses stake, device class weighting (phone/tablet/laptop/server) and reputation.',
+    how_expert_point2:
+      'Profiles: mobile light keeps headers+recent state; desktop/server full keeps full history; gateway role exposes RPC/REST; superlight phone profile prunes aggressively.',
+    how_expert_point3:
+      'Rewards are autonomous: block reward + fees are split on-chain each block (burn, ecosystem pool, producer cut, stake-proportional remainder).',
+    how_expert_point4:
+      'Security knobs: required signatures, P2P tokens + handshake, optional TLS/QUIC, rate limits, faucet off in strict mode; metrics and status endpoints gated by tokens.',
     overview_title: '1. What is BulenCoin?',
     overview_intro:
       'BulenCoin is a meme‑themed cryptocurrency with a serious engineering goal: to prove that a modern blockchain network can be maintained by the widest possible spectrum of devices – from phones and tablets, through laptops and desktops, up to cloud servers.',
@@ -97,6 +120,10 @@ const translations = {
       'Node income combines block rewards, transaction‑fee share and uptime rewards. In early mainnet, higher base rewards can attract pioneers; later on, fees from real usage should become the dominant component.',
     economics_costs:
       'User‑side costs include electricity, data transfer, hardware wear and stake risk. Applications should show estimated energy/data usage and clearly warn about the possibility of losing part of the stake in case of misconfiguration or malicious behaviour.',
+    economics_policy:
+      'Emission/fees: 8%→6%→4%→2.5%→1.5% annual taper, rewards split 60% validators/committee, 20% uptime/loyalty, 20% ecosystem pool; fees: 30% burned, 60% validators, 10% ecosystem; parameters are published and only adjustable within narrow governance bands.',
+    economics_payouts:
+      'Payout cadence: testnet settles daily to exercise tooling; mainnet pays per epoch (~weekly) after finality, with public calendars/dashboards showing burns, pool balances and epoch IDs.',
     roadmap_title: '7. Launch phases and deployment',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -149,11 +176,64 @@ const translations = {
     faq_q3: 'What are the main risks?',
     faq_a3:
       'As with any cryptocurrency, there is no guaranteed profit. You can lose access to your funds by losing your seed phrase, and a misconfigured or malicious node may be slashed. Hardware, electricity and data usage also have a cost. BulenCoin is an experimental project and should be treated as such.',
+    calc_title: 'Reward projection',
+    calc_subtitle:
+      'Estimate hourly/daily/weekly rewards based on your stake, device type and uptime. Values pulled from a running BulenNode.',
+    calc_stake_label: 'Stake amount (BULEN)',
+    calc_device_label: 'Device class',
+    calc_uptime_label: 'Hours online per day',
+    calc_days_label: 'Projection window (days)',
+    calc_button: 'Calculate',
+    calc_result_title: 'Weekly projection',
+    calc_result_subtitle: 'Indicative only; real rewards depend on network usage and parameters.',
+    calc_metric_hourly: 'Hourly',
+    calc_metric_daily: 'Daily',
+    calc_metric_weekly: 'Weekly',
+    calc_metric_period: 'Period total',
+    leaderboard_title: 'Leaderboard & badges',
+    leaderboard_subtitle:
+      'Live rewards hub scores (uptime/stake) so everyone can see the network is active.',
+    leaderboard_refresh: 'Refresh',
+    leaderboard_error: 'Unable to load leaderboard (is rewards hub reachable / CORS allowed?).',
+    leaderboard_table_node: 'Node',
+    leaderboard_table_score: 'Score',
+    leaderboard_table_stake: 'Stake',
+    leaderboard_table_uptime: 'Uptime',
+    leaderboard_table_badges: 'Badges',
+    leaderboard_badges_title: 'Badge legend',
+    leaderboard_badges_body: 'Telemetry-only prototype; badges help newcomers spot active nodes.',
+    leaderboard_badge_uptime: '99% uptime window',
+    leaderboard_badge_mobile: 'Mobile / gateway hero',
+    leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
+    leaderboard_source_prefix: 'Rewards hub:',
+    onboarding_title: 'Start in 5 minutes (testnet)',
+    onboarding_body:
+      'Grab test tokens, install a one-click package, create a wallet with a seed backup and join the network with safe defaults. Works on desktop, gateway or mobile light mode.',
+    onboarding_step1_title: '1) Get test BULEN',
+    onboarding_step1_body:
+      'Call the faucet: curl -X POST http://localhost:4100/api/faucet -d \'{"address":"alice"}\' or use the web form in your BulenNode UI.',
+    onboarding_step2_title: '2) Install & run',
+    onboarding_step2_body:
+      'Use the desktop/gateway installers (see Downloads) or run npm start in bulennode/. Mobile light mode uses the same profile but prunes state.',
+    onboarding_step3_title: '3) Wallet & backup',
+    onboarding_step3_body:
+      'Generate a wallet, write down the seed, and store an encrypted backup. Nodes store a local checkpoint so you can resume after reboot without full resync.',
+    onboarding_step4_title: '4) Watch earnings',
+    onboarding_step4_body:
+      'Open /api/status or the explorer to see height, stake, uptime boosts and projected weekly rewards.',
+    onboarding_cta_title: 'One-click packages',
+    onboarding_desktop: 'Desktop / laptop validator (desktop-full)',
+    onboarding_gateway: 'Gateway/API profile (gateway)',
+    onboarding_mobile: 'Mobile light profile (battery-aware)',
+    onboarding_note:
+      'Coming soon: video walkthrough and prebuilt binaries per OS. For now, use the guides above or Docker Compose in this repo.',
     footer_note:
       'BulenCoin is an experimental project. This website describes a proposed network design and does not constitute financial, legal or tax advice. Operating nodes or services based on this design may be regulated in your jurisdiction; you are responsible for complying with local law.',
   },
   es: {
+    nav_rewards: 'Recompensas',
     nav_overview: 'Visión general',
+    nav_how: 'Cómo funciona',
     nav_nodes: 'Nodos',
     nav_consensus: 'Consenso',
     nav_economics: 'Economía',
@@ -183,6 +263,26 @@ const translations = {
     hero_card3_title: 'Recompensas por disponibilidad',
     hero_card3_body:
       'Los nodos que permanecen en línea y responden a comprobaciones de estado de forma regular obtienen recompensas adicionales, con parámetros ajustados para hardware cotidiano.',
+    how_title: 'Cómo funciona BulenCoin en cualquier dispositivo',
+    how_subtitle: 'Explicación sencilla y vista técnica para operadores.',
+    how_simple_title: 'Para todos',
+    how_simple_point1:
+      'Instala BulenNode en teléfono, portátil o servidor y elige un perfil (mobile light, desktop/server full o gateway API).',
+    how_simple_point2:
+      'Déjalo en línea; gana recompensas automáticas por uptime honesto y ayuda a asegurar la red. Sin granjas de minería.',
+    how_simple_point3:
+      'Envía/recibe pagos y haz stake; los gateways exponen APIs HTTP simples para wallets, tiendas y exploradores.',
+    how_simple_point4:
+      'Básicos de seguridad: copia de tu seed, token P2P en nodos públicos, rate limiting y TLS opcional.',
+    how_expert_title: 'Para builders y operadores',
+    how_expert_point1:
+      'Proof of Stake ligero con comités pequeños; la selección usa stake, clase de dispositivo (móvil/tablet/portátil/servidor) y reputación.',
+    how_expert_point2:
+      'Perfiles: mobile light guarda cabeceras + estado reciente; desktop/server full guarda todo; el rol gateway expone RPC/REST; el perfil superlight de teléfono poda agresivamente.',
+    how_expert_point3:
+      'Recompensas autónomas: la block reward y las comisiones se reparten en cada bloque (burn, fondo de ecosistema, parte del productor, resto proporcional al stake).',
+    how_expert_point4:
+      'Controles de seguridad: firmas obligatorias, tokens P2P + handshake, TLS/QUIC opcional, rate limit, faucet desactivado en modo estricto; métricas y status protegidos por tokens.',
     overview_title: '1. ¿Qué es BulenCoin?',
     overview_intro:
       'BulenCoin es una criptomoneda con estética de meme, pero con un objetivo de ingeniería serio: demostrar que una red blockchain moderna puede mantenerse con el espectro más amplio posible de dispositivos, desde teléfonos y tabletas hasta portátiles, ordenadores de escritorio y servidores.',
@@ -251,6 +351,10 @@ const translations = {
       'Los ingresos de un nodo combinan recompensas de bloque, parte de las comisiones de transacción y recompensas por disponibilidad. En el inicio de mainnet se pueden usar recompensas base más altas para atraer pioneros; más adelante, las comisiones del uso real deberían ser el componente dominante.',
     economics_costs:
       'Los costes para el usuario incluyen electricidad, transferencia de datos, desgaste del hardware y riesgo sobre el stake. Las aplicaciones deben mostrar consumo estimado de energía/datos y advertir claramente sobre la posibilidad de perder parte del stake en caso de mala configuración o comportamiento malicioso.',
+    economics_policy:
+      'Emisión/tarifas: inflación 8%→6%→4%→2.5%→1.5% anual, reparto de recompensas 60% validadores/comité, 20% uptime/lealtad, 20% fondo de ecosistema; comisiones: 30% quemadas, 60% validadores, 10% ecosistema; parámetros públicos y ajustables solo en bandas acotadas por gobernanza.',
+    economics_payouts:
+      'Pagos: en testnet liquidación diaria para ejercitar herramientas; en mainnet pagos por época (~semanal) tras finalización, con calendarios/paneles públicos que muestran quemas, saldos del fondo e IDs de época.',
     roadmap_title: '7. Fases de lanzamiento y despliegue',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -306,11 +410,75 @@ const translations = {
     faq_q3: '¿Cuáles son los principales riesgos?',
     faq_a3:
       'Como en cualquier criptomoneda, no hay beneficios garantizados. Puedes perder acceso a tus fondos si pierdes la seed, y un nodo mal configurado o malicioso puede ser penalizado (slashing). El hardware, la electricidad y los datos también tienen coste. BulenCoin es un proyecto experimental y debe tratarse como tal.',
+    calc_title: 'Proyección de recompensas',
+    calc_subtitle:
+      'Calcula recompensas hora/día/semana según tu stake, tipo de dispositivo y horas online. Valores desde un BulenNode en ejecución.',
+    calc_stake_label: 'Cantidad en stake (BULEN)',
+    calc_device_label: 'Clase de dispositivo',
+    calc_uptime_label: 'Horas en línea por día',
+    calc_days_label: 'Ventana de proyección (días)',
+    calc_button: 'Calcular',
+    calc_result_title: 'Proyección semanal',
+    calc_result_subtitle: 'Indicativo; las recompensas reales dependen del uso y parámetros.',
+    calc_metric_hourly: 'Por hora',
+    calc_metric_daily: 'Diaria',
+    calc_metric_weekly: 'Semanal',
+    calc_metric_period: 'Total del periodo',
+    leaderboard_title: 'Clasificación y medallas',
+    leaderboard_subtitle:
+      'Puntuaciones en vivo del rewards hub (uptime/stake) para demostrar que la red está viva.',
+    leaderboard_refresh: 'Actualizar',
+    leaderboard_error: 'No se pudo poblar la clasificación (¿hub accesible/CORS habilitado?).',
+    leaderboard_table_node: 'Nodo',
+    leaderboard_table_score: 'Puntuación',
+    leaderboard_table_stake: 'Stake',
+    leaderboard_table_uptime: 'Disponibilidad',
+    leaderboard_table_badges: 'Medallas',
+    leaderboard_badges_title: 'Leyenda de medallas',
+    leaderboard_badges_body: 'Prototipo con telemetría; las medallas destacan nodos activos.',
+    leaderboard_badge_uptime: 'Ventana de 99% uptime',
+    leaderboard_badge_mobile: 'Héroe móvil / gateway',
+    leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
+    leaderboard_source_prefix: 'Rewards hub:',
+    onboarding_title: 'Empieza en 5 minutos (testnet)',
+    onboarding_body:
+      'Obtén tokens de prueba, instala un paquete de un clic, crea un wallet con copia de seed y únete con ajustes seguros. Funciona en escritorio, gateway o modo light móvil.',
+    onboarding_step1_title: '1) Consigue BULEN de prueba',
+    onboarding_step1_body:
+      'Usa el faucet: curl -X POST http://localhost:4100/api/faucet -d \'{"address":"alice"}\' o el formulario web en tu BulenNode.',
+    onboarding_step2_title: '2) Instala y ejecuta',
+    onboarding_step2_body:
+      'Instaladores escritorio/gateway (ver Descargas) o npm start en bulennode/. El modo light móvil recorta el estado.',
+    onboarding_step3_title: '3) Wallet y backup',
+    onboarding_step3_body:
+      'Genera un wallet, apunta la seed y guarda un backup cifrado. El nodo guarda un checkpoint local para reanudar sin resincronizar todo.',
+    onboarding_step4_title: '4) Observa las ganancias',
+    onboarding_step4_body:
+      'Abre /api/status o el explorador para ver altura, stake, boosts de disponibilidad y proyección semanal.',
+    onboarding_cta_title: 'Paquetes de un clic',
+    onboarding_desktop: 'Validador escritorio/portátil (desktop-full)',
+    onboarding_gateway: 'Perfil Gateway/API (gateway)',
+    onboarding_mobile: 'Perfil móvil light (ahorro batería)',
+    onboarding_note:
+      'Pronto: video tutorial y binarios precompilados. De momento usa las guías o Docker Compose de este repo.',
     footer_note:
       'BulenCoin es un proyecto experimental. Este sitio describe un diseño de red propuesto y no constituye asesoramiento financiero, legal ni fiscal. La operación de nodos o servicios basados en este diseño puede estar regulada en tu jurisdicción; eres responsable de cumplir la legislación local.',
+    wallet_title: 'Wallet y enlaces de pago',
+    wallet_body:
+      'Genera enlaces de pago estilo BIP21 y códigos QR para facturas. Ideal para wallets web/móvil y botones de pago rápidos.',
+    wallet_address_label: 'Dirección de destino',
+    wallet_amount_label: 'Importe (BULEN)',
+    wallet_memo_label: 'Memo (opcional)',
+    wallet_button: 'Generar enlace y QR',
+    wallet_result_title: 'Tu enlace de pago',
+    wallet_link_label: 'Enlace',
+    wallet_qr_label: 'Código QR',
+    wallet_copy: 'Copiar',
   },
   pl: {
+    nav_rewards: 'Nagrody',
     nav_overview: 'Przegląd',
+    nav_how: 'Jak to działa',
     nav_nodes: 'Węzły',
     nav_consensus: 'Konsensus',
     nav_economics: 'Ekonomia',
@@ -340,6 +508,26 @@ const translations = {
     hero_card3_title: 'Nagrody za uptime',
     hero_card3_body:
       'Węzły, które pozostają online i odpowiadają na health checki, regularnie otrzymują dodatkowe nagrody, z parametrami skalibrowanymi pod typowy sprzęt domowy.',
+    how_title: 'Jak działa BulenCoin na każdym urządzeniu',
+    how_subtitle: 'Warstwa prosta dla każdego i krótka techniczna dla operatorów.',
+    how_simple_title: 'Dla każdego',
+    how_simple_point1:
+      'Zainstaluj BulenNode na telefonie, laptopie lub serwerze i wybierz profil (mobile light, desktop/server full lub gateway API).',
+    how_simple_point2:
+      'Po prostu trzymaj aplikację online – sama zbiera nagrody za uczciwy uptime i pomaga zabezpieczać sieć. Żadnych koparek.',
+    how_simple_point3:
+      'Wysyłaj/odbieraj płatności i stake’uj; węzły gateway udostępniają proste API HTTP dla portfeli, sklepów i eksploratorów.',
+    how_simple_point4:
+      'Podstawy bezpieczeństwa: kopia seeda, token P2P na publicznych węzłach, rate limiting i opcjonalnie TLS.',
+    how_expert_title: 'Dla budujących i operatorów',
+    how_expert_point1:
+      'Lekki Proof of Stake z małymi komitetami; selekcja używa stake, klasy urządzenia (telefon/tablet/laptop/serwer) i reputacji.',
+    how_expert_point2:
+      'Profile: mobile light trzyma nagłówki + świeży stan; desktop/server full trzyma pełną historię; rola gateway wystawia RPC/REST; profil superlight na telefonie agresywnie tnie dane.',
+    how_expert_point3:
+      'Nagrody są autonomiczne: block reward + fee dzielone w każdym bloku (burn, pula ekosystemu, część producenta, reszta proporcjonalna do stake).',
+    how_expert_point4:
+      'Przełączniki bezpieczeństwa: wymagane podpisy, tokeny P2P + handshake, opcjonalnie TLS/QUIC, rate limiting, faucet off w trybie strict; metryki i status chronione tokenami.',
     overview_title: '1. Czym jest BulenCoin?',
     overview_intro:
       'BulenCoin to kryptowaluta o memowym charakterze, ale z poważnym celem technicznym: pokazaniem, że nowoczesna sieć blockchain może być utrzymywana przez możliwie najszersze spektrum urządzeń – od telefonów i tabletów, przez laptopy i komputery stacjonarne, aż po serwery.',
@@ -408,6 +596,10 @@ const translations = {
       'Przychód węzła składa się z nagród blokowych, udziału w opłatach transakcyjnych oraz nagród za uptime. We wczesnej fazie mainnet nagroda bazowa może być wyższa, aby mocniej wynagradzać pionierów; później większą część stanowią opłaty wynikające z realnego użycia sieci.',
     economics_costs:
       'Po stronie użytkownika kosztem jest prąd, transfer danych, zużycie sprzętu oraz ryzyko utraty części stake w przypadku złego zachowania lub błędnej konfiguracji węzła. Aplikacja BulenNode powinna prezentować szacowane zużycie energii i danych oraz wyraźnie ostrzegać o ryzyku.',
+    economics_policy:
+      'Emisja/opłaty: inflacja 8%→6%→4%→2.5%→1.5% (roczna, malejąca), podział nagród 60% walidator/komitet, 20% uptime/lojalność, 20% fundusz ekosystemu; opłaty: 30% spalane, 60% walidatorzy, 10% ekosystem; parametry publikowane i zmieniane tylko w wąskich widełkach governance.',
+    economics_payouts:
+      'Wypłaty: w testnecie symulacja dzienna (narzędzia), w mainnecie rozliczenia per epoka (~tydzień) po finalności, z publicznym kalendarzem/panelami (spalanie opłat, saldo funduszu, ID epok).',
     roadmap_title: '7. Fazy uruchomienia i wdrożenia',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -462,9 +654,86 @@ const translations = {
     faq_q3: 'Jakie są główne ryzyka?',
     faq_a3:
       'Jak w każdej kryptowalucie, nie ma gwarancji zysku. Możesz utracić środki poprzez zgubienie seed phrase, a źle skonfigurowany lub złośliwy węzeł może zostać ukarany slashowaniem. Dodatkowo występują koszty energii, transferu danych i zużycia sprzętu. BulenCoin jest projektem eksperymentalnym i należy go tak traktować.',
+    calc_title: 'Projekcja nagród',
+    calc_subtitle:
+      'Szacuj nagrody godzinowe/dzienne/tygodniowe na podstawie stake’u, typu urządzenia i godzin online. Dane z działającego BulenNode.',
+    calc_stake_label: 'Kwota stake (BULEN)',
+    calc_device_label: 'Klasa urządzenia',
+    calc_uptime_label: 'Godzin online dziennie',
+    calc_days_label: 'Okno projekcji (dni)',
+    calc_button: 'Oblicz',
+    calc_result_title: 'Projekcja tygodniowa',
+    calc_result_subtitle: 'Wartości poglądowe; nagrody zależą od obciążenia i parametrów sieci.',
+    calc_metric_hourly: 'Godzinowo',
+    calc_metric_daily: 'Dziennie',
+    calc_metric_weekly: 'Tygodniowo',
+    calc_metric_period: 'Łącznie w okresie',
+    leaderboard_title: 'Leaderboard i odznaki',
+    leaderboard_subtitle:
+      'Na żywo z rewards-hub: punkty za uptime/stake – dowód, że sieć żyje.',
+    leaderboard_refresh: 'Odśwież',
+    leaderboard_error: 'Nie udało się pobrać leaderboarda (czy rewards-hub działa/CORS?).',
+    leaderboard_table_node: 'Węzeł',
+    leaderboard_table_score: 'Wynik',
+    leaderboard_table_stake: 'Stake',
+    leaderboard_table_uptime: 'Uptime',
+    leaderboard_table_badges: 'Odznaki',
+    leaderboard_badges_title: 'Legenda odznak',
+    leaderboard_badges_body: 'Prototyp na telemetrii; odznaki pokazują aktywne i zróżnicowane węzły.',
+    leaderboard_badge_uptime: '99% uptime w oknie',
+    leaderboard_badge_mobile: 'Bohater mobile/gateway',
+    leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
+    leaderboard_source_prefix: 'Rewards hub:',
+    onboarding_title: 'Start w 5 minut (testnet)',
+    onboarding_body:
+      'Weź tokeny testowe, zainstaluj pakiet „jednym kliknięciem”, utwórz portfel z kopią seed i dołącz do sieci na bezpiecznych ustawieniach. Działa na desktopie, gateway i w trybie mobile light.',
+    onboarding_step1_title: '1) Testowe BULEN',
+    onboarding_step1_body:
+      'Faucet: curl -X POST http://localhost:4100/api/faucet -d \'{"address":"alice"}\' albo formularz w UI BulenNode.',
+    onboarding_step2_title: '2) Instalacja',
+    onboarding_step2_body:
+      'Instalatory desktop/gateway (patrz Downloads) lub npm start w bulennode/. Profil mobile light przycina stan.',
+    onboarding_step3_title: '3) Portfel i backup',
+    onboarding_step3_body:
+      'Wygeneruj portfel, zapisz seed, zrób zaszyfrowany backup. Węzeł trzyma checkpoint, więc po restarcie nie trzeba pełnej resynchronizacji.',
+    onboarding_step4_title: '4) Podgląd nagród',
+    onboarding_step4_body:
+      'Otwórz /api/status lub eksplorator aby zobaczyć wysokość, stake, boosty uptime i prognozę tygodniową.',
+    onboarding_cta_title: 'Pakiety „one-click”',
+    onboarding_desktop: 'Walidator desktop/laptop (desktop-full)',
+    onboarding_gateway: 'Profil gateway/API (gateway)',
+    onboarding_mobile: 'Profil mobile light (oszczędzanie baterii)',
+    onboarding_note:
+      'Wkrótce: wideo krok-po-kroku i gotowe binarki. Na razie korzystaj z poradników lub Docker Compose z repo.',
     footer_note:
       'BulenCoin jest projektem eksperymentalnym. Ta strona opisuje proponowany projekt sieci i nie stanowi porady inwestycyjnej, prawnej ani podatkowej. Utrzymywanie węzłów lub usług w oparciu o ten projekt może podlegać regulacjom w Twojej jurysdykcji – za zgodność z prawem odpowiadasz samodzielnie.',
+    wallet_title: 'Portfel i linki płatności',
+    wallet_body:
+      'Generuj linki płatności w stylu BIP21 i kody QR do faktur. Idealne dla web/mobile wallet i szybkich przycisków płatności.',
+    wallet_address_label: 'Adres docelowy',
+    wallet_amount_label: 'Kwota (BULEN)',
+    wallet_memo_label: 'Memo (opcjonalnie)',
+    wallet_button: 'Generuj link i QR',
+    wallet_result_title: 'Twój link płatności',
+    wallet_link_label: 'Link',
+    wallet_qr_label: 'Kod QR',
+    wallet_copy: 'Kopiuj',
   },
+};
+
+const apiBase = window.BULEN_API_BASE || 'http://localhost:4100/api';
+const rewardsHubBase = window.REWARDS_HUB_BASE || 'http://localhost:4400';
+const createElement = (tag, attrs = {}, children = []) => {
+  const el = document.createElement(tag);
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (key === 'text') {
+      el.textContent = value;
+    } else {
+      el.setAttribute(key, value);
+    }
+  });
+  children.forEach((child) => el.appendChild(child));
+  return el;
 };
 
 function applyTranslations(lang) {
@@ -492,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const select = document.getElementById('language');
   const preferred =
     (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
+  const dict = () => translations[select.value] || translations.en;
 
   if (translations[preferred]) {
     select.value = preferred;
@@ -502,4 +772,196 @@ document.addEventListener('DOMContentLoaded', () => {
   select.addEventListener('change', () => {
     applyTranslations(select.value);
   });
+
+  const form = document.getElementById('reward-form');
+  if (form) {
+    const errorEl = document.getElementById('calc-error');
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = value;
+      }
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const stake = Number(document.getElementById('calc-stake').value || 0);
+      const deviceClass = document.getElementById('calc-device').value;
+      const uptimeHoursPerDay = Number(document.getElementById('calc-uptime').value || 0);
+      const days = Number(document.getElementById('calc-days').value || 0);
+      if (errorEl) {
+        errorEl.hidden = true;
+      }
+      try {
+        const res = await fetch(`${apiBase}/rewards/estimate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stake, uptimeHoursPerDay, days, deviceClass }),
+        });
+        if (!res.ok) {
+          throw new Error(`API responded ${res.status}`);
+        }
+        const data = await res.json();
+        const proj = data.projection || {};
+        const fmt = (val) =>
+          typeof val === 'number' ? val.toFixed(2).replace(/\.00$/, '') : '–';
+        setText('calc-hourly', fmt(proj.hourly));
+        setText('calc-daily', fmt(proj.daily));
+        setText('calc-weekly', fmt(proj.weekly));
+        setText('calc-period', fmt(proj.periodTotal));
+        setText('calc-badge-loyalty', `Loyalty x${fmt(proj.loyaltyBoost || 1)}`);
+        setText('calc-badge-device', `Device x${fmt(proj.deviceBoost || 1)}`);
+        setText('calc-badge-stake', `Stake weight x${fmt(proj.stakeWeight || 1)}`);
+      } catch (error) {
+        console.error('Reward estimate failed', error);
+        if (errorEl) {
+          errorEl.textContent =
+            'Unable to fetch projection from node. Is BulenNode running at ' + apiBase + '?';
+          errorEl.hidden = false;
+        }
+      }
+    });
+
+    form.dispatchEvent(new Event('submit'));
+  }
+
+  const leaderboardTable = document.getElementById('leaderboard-table');
+  if (leaderboardTable) {
+    const errorEl = document.getElementById('leaderboard-error');
+    const sourceEl = document.getElementById('leaderboard-source');
+    const refreshBtn = document.getElementById('leaderboard-refresh');
+    if (sourceEl) {
+      sourceEl.textContent = rewardsHubBase;
+    }
+
+    const renderRows = (entries) => {
+      leaderboardTable.innerHTML = '';
+      if (!entries.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 5;
+        cell.textContent = 'No telemetry yet';
+        row.appendChild(cell);
+        leaderboardTable.appendChild(row);
+        return;
+      }
+      entries.slice(0, 5).forEach((entry) => {
+        const row = document.createElement('tr');
+        const nodeCell = document.createElement('td');
+        nodeCell.textContent = entry.nodeId || 'unknown';
+        if (entry.deviceClass) {
+          const pill = document.createElement('span');
+          pill.className = 'bc-pill';
+          pill.style.marginLeft = '0.5rem';
+          pill.textContent = entry.deviceClass;
+          nodeCell.appendChild(pill);
+        }
+        const scoreCell = document.createElement('td');
+        scoreCell.textContent = Number(entry.score || 0).toFixed(2);
+        const stakeCell = document.createElement('td');
+        stakeCell.textContent = String(entry.stake || 0);
+        const uptimeCell = document.createElement('td');
+        uptimeCell.textContent = `${Math.round((entry.uptimePercent || 0) * 100)}%`;
+        const badgeCell = document.createElement('td');
+        const badges = entry.badges || [];
+        if (badges.length) {
+          badges.forEach((badge) => {
+            const span = document.createElement('span');
+            span.className = 'bc-badge';
+            span.style.marginRight = '0.3rem';
+            span.textContent = badge;
+            badgeCell.appendChild(span);
+          });
+        } else {
+          badgeCell.textContent = '–';
+        }
+        [nodeCell, scoreCell, stakeCell, uptimeCell, badgeCell].forEach((cell) =>
+          row.appendChild(cell),
+        );
+        leaderboardTable.appendChild(row);
+      });
+    };
+
+    const loadLeaderboard = async () => {
+      if (errorEl) {
+        errorEl.hidden = true;
+      }
+      try {
+        const res = await fetch(`${rewardsHubBase}/leaderboard`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        renderRows(data.entries || []);
+      } catch (error) {
+        console.error('leaderboard error', error);
+        if (errorEl) {
+          errorEl.textContent = dict().leaderboard_error || 'Unable to load leaderboard.';
+          errorEl.hidden = false;
+        }
+      }
+    };
+
+    refreshBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      loadLeaderboard();
+    });
+
+    loadLeaderboard();
+  }
+
+  const walletForm = document.getElementById('wallet-form');
+  if (walletForm) {
+    const errEl = document.getElementById('wallet-error');
+    const linkEl = document.getElementById('wallet-link');
+    const qrEl = document.getElementById('wallet-qr');
+    const copyBtn = document.getElementById('wallet-copy');
+
+    const setError = (msg) => {
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.hidden = !msg;
+      }
+    };
+
+    copyBtn?.addEventListener('click', () => {
+      if (linkEl && linkEl.textContent && linkEl.textContent !== '–') {
+        navigator.clipboard.writeText(linkEl.textContent).catch(() => {});
+      }
+    });
+
+    walletForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setError('');
+      const address = document.getElementById('wallet-address').value.trim();
+      const amount = Number(document.getElementById('wallet-amount').value || 0);
+      const memo = document.getElementById('wallet-memo').value.trim();
+      if (!address || Number.isNaN(amount) || amount <= 0) {
+        setError('Please provide a valid address and amount.');
+        return;
+      }
+      try {
+        const res = await fetch(`${apiBase}/payment-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address, amount, memo }),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        linkEl.textContent = data.link;
+        if (data.qrDataUrl) {
+          const img = createElement('img', { src: data.qrDataUrl, alt: 'QR code', style: 'max-width:140px;' });
+          qrEl.innerHTML = '';
+          qrEl.appendChild(img);
+        } else {
+          qrEl.textContent = 'QR unavailable';
+        }
+      } catch (error) {
+        console.error('payment link error', error);
+        setError('Could not generate link/QR. Is BulenNode running?');
+      }
+    });
+  }
 });

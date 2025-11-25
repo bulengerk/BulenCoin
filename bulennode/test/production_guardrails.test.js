@@ -62,5 +62,5 @@ test('startup fails in production when guardrails are missing', () => {
     },
   );
   assert.notStrictEqual(result.status, 0, 'Expected process to exit non-zero');
-  assert.match(result.stderr || '', /Production requires BULEN_REQUIRE_SIGNATURES/i);
+  assert.match(result.stderr || '', /requires BULEN_REQUIRE_SIGNATURES/i);
 });

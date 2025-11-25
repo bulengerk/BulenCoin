@@ -173,6 +173,16 @@ select {
   border-bottom: 1px solid var(--border);
 }
 
+.bc-section-contrast {
+  background: linear-gradient(120deg, rgba(103, 242, 214, 0.08), rgba(12, 16, 32, 0.92));
+  border-block: 1px solid var(--border);
+}
+
+.bc-section-header {
+  max-width: 840px;
+  margin: 0 auto 1.4rem;
+}
+
 .bc-hero {
   padding-top: 4.5rem;
 }
@@ -375,6 +385,210 @@ section p {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.2rem;
   margin-top: 1rem;
+}
+
+.bc-how-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.bc-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.bc-checklist li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: var(--text);
+}
+
+.bc-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.bc-checklist-muted li {
+  color: var(--muted);
+}
+
+.bc-form {
+  display: grid;
+  gap: 0.65rem;
+  background: rgba(12, 16, 32, 0.75);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+}
+
+.bc-form label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.bc-form input,
+.bc-form select {
+  width: 100%;
+}
+
+.bc-calculator-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.bc-metric-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.bc-metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.bc-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bc-pill {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.bc-leaderboard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bc-leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.bc-leaderboard-table th,
+.bc-leaderboard-table td {
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.bc-leaderboard-table th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.bc-badge {
+  display: inline-block;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+}
+
+.bc-badge-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.bc-error {
+  margin-top: 0.5rem;
+  color: #ffb4b4;
+  font-size: 0.9rem;
+}
+
+.bc-quickstart {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.8rem;
+}
+
+.bc-step {
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(12, 16, 32, 0.7);
+}
+
+.bc-step strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.bc-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 0.75rem;
+}
+
+.bc-list li {
+  margin: 0.3rem 0;
+}
+
+.bc-note {
+  font-size: 0.95rem;
+  color: var(--muted);
+  padding-top: 0.2rem;
+}
+
+.bc-wallet-output {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bc-wallet-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bc-wallet-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.bc-wallet-value {
+  word-break: break-all;
+  color: var(--text);
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bc-wallet-qr {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .bc-faq {

@@ -5,6 +5,40 @@ function hashObject(object) {
   return crypto.createHash('sha256').update(canonical).digest('hex');
 }
 
+function creditBalance(state, address, amount) {
+  if (!amount || Number.isNaN(amount)) {
+    return;
+  }
+  const account = ensureAccount(state, address);
+  account.balance += amount;
+  if (state.finalizedSnapshot) {
+    const snapshotAccount = ensureAccount(state.finalizedSnapshot, address);
+    snapshotAccount.balance += amount;
+  }
+}
+
+function getTotalStake(state) {
+  return Object.values(state.accounts || {}).reduce((sum, acc) => sum + (acc.stake || 0), 0);
+}
+
+function normalizeFraction(value, fallback) {
+  const numeric = Number(value);
+  if (Number.isNaN(numeric) || numeric < 0) {
+    return fallback;
+  }
+  return Math.min(1, numeric);
+}
+
+function computeFeeSplits(config, totalFees) {
+  const burnFraction = normalizeFraction(config.feeBurnFraction, 0);
+  const ecosystemFraction = normalizeFraction(config.feeEcosystemFraction, 0);
+  const validatorFraction = Math.max(0, 1 - burnFraction - ecosystemFraction);
+  const burned = totalFees * burnFraction;
+  const ecosystem = totalFees * ecosystemFraction;
+  const validator = totalFees * validatorFraction;
+  return { burned, ecosystem, validator };
+}
+
 function getLastBlock(state) {
   if (!state.blocks.length) {
     return null;
@@ -111,10 +145,54 @@ function applyTransaction(state, transaction) {
   }
 }
 
-function applyBlock(state, block) {
+function distributeProtocolRewards(config, state, block, collectedFees) {
+  if (!config || !config.enableProtocolRewards) {
+    return;
+  }
+  const feeSplits = computeFeeSplits(config, collectedFees);
+  const blockReward = Number(config.blockReward || 0);
+  const validatorPool = feeSplits.validator + blockReward;
+  const producerFraction = normalizeFraction(config.blockProducerRewardFraction, 0.4);
+  const totalStake = getTotalStake(state);
+
+  const producerPortion = validatorPool * producerFraction;
+  creditBalance(state, block.validator, producerPortion);
+
+  const stakePool = validatorPool - producerPortion;
+  if (stakePool > 0 && totalStake > 0) {
+    for (const [address, account] of Object.entries(state.accounts || {})) {
+      const stake = account.stake || 0;
+      if (stake <= 0) {
+        continue;
+      }
+      const share = (stake / totalStake) * stakePool;
+      creditBalance(state, address, share);
+    }
+  } else if (stakePool > 0) {
+    creditBalance(state, block.validator, stakePool);
+  }
+
+  state.feeBurnedTotal = (state.feeBurnedTotal || 0) + feeSplits.burned;
+  state.ecosystemPool = (state.ecosystemPool || 0) + feeSplits.ecosystem;
+  state.mintedRewardsTotal = (state.mintedRewardsTotal || 0) + blockReward;
+
+  if (state.finalizedSnapshot) {
+    state.finalizedSnapshot.feeBurnedTotal =
+      (state.finalizedSnapshot.feeBurnedTotal || 0) + feeSplits.burned;
+    state.finalizedSnapshot.ecosystemPool =
+      (state.finalizedSnapshot.ecosystemPool || 0) + feeSplits.ecosystem;
+    state.finalizedSnapshot.mintedRewardsTotal =
+      (state.finalizedSnapshot.mintedRewardsTotal || 0) + blockReward;
+  }
+}
+
+function applyBlock(config, state, block) {
   const lastBlock = getLastBlock(state);
   if (lastBlock && block.previousHash !== lastBlock.hash) {
     throw new Error('Previous hash mismatch');
+  }
+  if (lastBlock && block.index !== lastBlock.index + 1) {
+    throw new Error('Unexpected block height');
   }
 
   const blockWithoutHash = {
@@ -122,6 +200,7 @@ function applyBlock(state, block) {
     previousHash: block.previousHash,
     timestamp: block.timestamp,
     validator: block.validator,
+    validatorStake: block.validatorStake,
     transactions: block.transactions,
   };
   const expectedHash = hashObject(blockWithoutHash);
@@ -130,13 +209,17 @@ function applyBlock(state, block) {
   }
 
   // Apply transactions
+  let collectedFees = 0;
   for (const transaction of block.transactions) {
     // Simple model: skip invalid transactions instead of failing the whole block
     const validation = validateTransaction(state, transaction);
     if (validation.ok) {
       applyTransaction(state, transaction);
+      collectedFees += Number(transaction.fee || 0);
     }
   }
+
+  distributeProtocolRewards(config, state, block, collectedFees);
 
   state.blocks.push(block);
 }
@@ -145,12 +228,13 @@ function createGenesisBlock(config, state) {
   if (state.blocks.length > 0) {
     return;
   }
-  const timestamp = new Date().toISOString();
+  const timestamp = config.genesisTimestamp || '2023-01-01T00:00:00.000Z';
   const genesisContent = {
     index: 0,
     previousHash: null,
     timestamp,
     validator: 'genesis',
+    validatorStake: 0,
     transactions: [],
   };
   const hash = hashObject(genesisContent);
@@ -163,11 +247,14 @@ function createBlock(config, state, validatorId, transactions) {
   const index = lastBlock ? lastBlock.index + 1 : 1;
   const previousHash = lastBlock ? lastBlock.hash : null;
   const timestamp = new Date().toISOString();
+  const validatorAccount = ensureAccount(state, validatorId);
+  const validatorStake = validatorAccount.stake || 0;
   const blockWithoutHash = {
     index,
     previousHash,
     timestamp,
     validator: validatorId,
+    validatorStake,
     transactions,
   };
   const hash = hashObject(blockWithoutHash);
@@ -181,4 +268,9 @@ module.exports = {
   validateTransaction,
   ensureAccount,
   getLastBlock,
+  hashObject,
+  getTotalStake,
+  distributeProtocolRewards,
+  creditBalance,
+  computeFeeSplits,
 };

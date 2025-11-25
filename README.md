@@ -17,6 +17,9 @@ Additionally, it includes prototype infrastructure services implemented in Node.
 - `explorer/` – a lightweight web explorer that reads chain data from a BulenNode instance.
 - `bulennode-rs/` – wip Rust rewrite of the BulenNode (HTTP API + block production + metrics).
 - deployment notes and manifests in `docs/prod_manifests.md` (reverse proxy TLS, sentry nodes, backups, monitoring).
+- `rewards-hub/` – prototype rewards leaderboard and badges fed by BulenNode telemetry.
+- `sdk/` – JS/TS helpers for merchants (payments, payment links/QR, status polling).
+- `sdk-rs/` – Rust client crate (blocking) for payments/status/payment links.
 
 For a map of all documentation, see `docs/README.md`.
 
@@ -61,6 +64,7 @@ Nodes use `BULEN_NODE_PROFILE` to select a default configuration and reward weig
 - `server-full` – server‑grade validator with higher relative uptime weight (`deviceClass=server`, `rewardWeight=1.0`),
 - `mobile-light` – light node on a phone (`deviceClass=phone`, `rewardWeight=0.5`),
 - `tablet-light` – light node on a tablet (`deviceClass=tablet`, `rewardWeight=0.6`),
+- `phone-superlight` – observer mode for phones (headers + snapshot, aggressive pruning, `superLightMode=true`, `rewardWeight=0.35`),
 - `raspberry` – full/partial node on Raspberry Pi or similar ARM single‑board computers (`deviceClass=raspberry`, `rewardWeight=0.75`),
 - `gateway` – API gateway node (`deviceClass=server`, `rewardWeight=0.9`, `nodeRole=observer`).
 
@@ -115,8 +119,12 @@ Security‑related configuration (environment variables):
 - `BULEN_P2P_TOKEN` – shared secret token; when set, P2P HTTP endpoints (`/p2p/tx`, `/p2p/block`) only accept requests that include the matching `x-bulen-p2p-token` header.
 - `BULEN_ENABLE_FAUCET` – controls test faucet endpoint (`/api/faucet`); defaults to `true` in development and **must** be `false` in any semi‑public deployment.
 - `BULEN_MAX_BODY_SIZE` – maximum JSON body size for API requests (default `128kb`).
- - `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window (ms) and max burst per IP (default `15000` / `60`).
- - `BULEN_TELEMETRY_ENABLED` – reserved flag for enabling telemetry in future full clients (defaults to `false` in this prototype; no telemetry is sent by the current code).
+- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window (ms) and max burst per IP (default `15000` / `60`).
+- `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` – optional shared secrets required in headers for `/api/status` and `/metrics` on public-facing hosts.
+- `BULEN_REWARDS_HUB` / `BULEN_REWARDS_TOKEN` – optional telemetry target for uptime/stake reports (prototype rewards hub); set both to enable reporting.
+- `BULEN_WEBHOOK_SECRET` – optional HMAC secret; when set, outgoing payment webhooks include header `x-bulen-signature` (sha256 HMAC of the JSON body).
+- `BULEN_REWARDS_HMAC_SECRET` – optional HMAC secret for telemetry reports to rewards-hub (header `x-bulen-signature`).
+- `BULEN_DEVICE_TOKEN` – optional token to protect `/api/device/battery`; in production a token is required if super-light mode is used.
 
 Example usage (in another terminal):
 
@@ -137,6 +145,18 @@ curl -X POST http://localhost:4100/api/transactions \
 After one or two block intervals, the transaction will be included in a block and balances will update.
 
 You can inspect node status at `http://localhost:4100/api/status`.
+
+Key HTTP APIs (prototype):
+
+- `GET /api/status` – node info, profile, reward weight, reward projection, peers, payments counters,
+- `GET /api/blocks` / `GET /api/blocks/:height` – recent blocks and single block by height,
+- `GET /api/accounts/:address` – balance/stake/nonce/reputation,
+- `GET /api/mempool` – pending transactions,
+- `POST /api/payments` + `GET /api/payments/:id` – invoice lifecycle (supports `webhookUrl`),
+- `POST /api/payment-link` – BIP21-like link and QR code,
+- `POST /api/rewards/estimate` – reward/loyalty projection (mirrors calculator on `/api/status`),
+- `POST /api/wallets/challenge` / `POST /api/wallets/verify` – signed-message wallet login,
+- `GET /metrics` – Prometheus metrics (optionally protected by `BULEN_METRICS_TOKEN`).
 
 Metrics endpoint (Prometheus format):
 
@@ -191,7 +211,16 @@ The explorer can be customised via environment variables:
 - `BULENNODE_API_BASE` – base URL of the BulenNode API (default `http://localhost:4100/api`),
 - `EXPLORER_PORT` – HTTP port (default `4200`),
 - `EXPLORER_TITLE` – title/brand shown in the header,
-- `EXPLORER_LOG_FORMAT` – morgan log format (default `dev`).
+- `EXPLORER_LOG_FORMAT` – morgan log format (default `dev`),
+- `REWARDS_HUB_BASE` – base URL for the rewards leaderboard/badges (default `http://localhost:4400`).
+
+Developer docs and SDKs:
+
+- Cookbook: `docs/dev_cookbook.md` (payments, paywall, reward calc; Node/Go/Python).
+- JS/TS: `sdk/` (`npm install bulencoin-sdk`).
+- Rust: `sdk-rs/` crate `bulencoin-sdk` (blocking client, reqwest).
+- Super-light mobile: profile `phone-superlight` + API `POST /api/device/battery` to sleep on low battery; status exposes `superLight`/`superLightSleeping`.
+- Integration tests: run `node --test scripts/tests` (added webhook signature and super-light tests to increase coverage).
 
 ## Status aggregation service
 

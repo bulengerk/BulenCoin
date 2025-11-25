@@ -11,6 +11,7 @@ project.
   - applications (BulenNode) and platform requirements,
   - setup phases (testnet → mainnet),
   - security considerations.
+- `tokenomics_and_roadmap.md` – tokenomics, fee burn podział, slashing oraz plan (devnet → testnet → audyt → mainnet) wraz z parametrami konfiguracyjnymi.
 - `whitesheet_investor_pl.md` (+ PDF: `whitesheet_investor_pl.pdf`) – investors’ view of
   the project: problem/solution fit, economics, roadmap, security and funding needs.
   Generate/update the PDF via `scripts/generate_whitesheet_pdf.py` (uses reportlab and
@@ -28,6 +29,7 @@ project.
   - local and Docker-based setups,
   - security-related configuration,
   - high-level legal notes.
+- `operator_runbook.md` – praktyczny runbook dla walidatorów/gateway: parametry bezpieczeństwa, start w trybie strict, obserwacja i alerty, kopie/przywracanie, twardnienie serwera.
 - `testing_strategy.md` – test levels (service, full-stack smoke, Docker) and how to run
   them locally.
 - `payment_integration.md` – payment and wallet integration API (invoice lifecycle, memo
@@ -47,6 +49,7 @@ project.
   - goals and design philosophy,
   - consensus and reward model summary,
   - node types and prototype implementation scope.
+- `dev_cookbook.md` – quick integration recipes (payments, paywall, reward calc) with Node/Go/Python snippets and SDK pointers.
 
 If you add new documentation files, please link them here to keep the documentation
 navigable for future contributors and operators.

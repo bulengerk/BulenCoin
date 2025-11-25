@@ -90,6 +90,11 @@ Najważniejsze elementy:
 - konta z polami: saldo, stake, nonce, reputacja,
 - mempool transakcji i okresowa produkcja bloków (co `BULEN_BLOCK_INTERVAL_MS`),
 - HTTP API (status węzła, bloki, konta, wysyłanie transakcji, faucet testowy),
+- ekonomia/ux:
+  - `/api/rewards/estimate` – kalkulator nagród/lojalności (też w `/api/status` jako `rewardProjection`),
+  - `/api/payments` + `/api/payments/:id` – faktury z opcjonalnym `webhookUrl`,
+  - `/api/payment-link` – generowanie linku BIP21 + QR,
+  - `/api/mempool` – podgląd kolejki transakcji,
 - bardzo proste P2P oparte o HTTP do rozgłaszania bloków i transakcji,
 - opcjonalna weryfikacja podpisów transakcji i nonce.
 
@@ -146,6 +151,30 @@ Prototyp BulenNode obsługuje kilka ważnych zmiennych środowiskowych:
 - `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – okno limitera (w
   milisekundach) i liczba zapytań na IP w tym oknie (domyślnie `15000` ms i `60`).
   W publicznych gateway’ach ustawiaj ciaśniejsze wartości albo dołóż zewnętrzny WAF.
+- `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` – gdy ustawione, `/api/status` i
+  `/metrics` wymagają odpowiednich nagłówków (`x-bulen-status-token`,
+  `x-bulen-metrics-token`), co jest zalecane na publicznych hostach; w buildach prod
+  traktować jako wymagane (BulenNode nie wystartuje w prod bez tokenów).
+- `BULEN_REWARDS_HUB` / `BULEN_REWARDS_TOKEN` – opcjonalny endpoint/token do wysyłania
+  telemetrycznych raportów uptime/stake do prototypowego `rewards-hub`.
+- `BULEN_WEBHOOK_SECRET` – jeżeli ustawione, webhooki płatności są podpisywane HMAC
+  (nagłówek `x-bulen-signature`, sha256 nad JSON); w prod wymagane gdy używasz webhooków.
+- `BULEN_REWARDS_HMAC_SECRET` – jeżeli ustawione, raporty telemetryczne do rewards-hub
+  są podpisywane HMAC (nagłówek `x-bulen-signature`).
+- `BULEN_SUPERLIGHT_MODE` (domyślnie w profilu `phone-superlight`) – utrzymuje tylko świeże
+  bloki (snapshot + małe okno) i pozwala na „uśpienie” gdy telefon ma niski poziom baterii.
+  Próg baterii kontroluje `BULEN_SUPERLIGHT_BATTERY_THRESHOLD` (domyślnie 0.15); REST:
+  `POST /api/device/battery {"level":0.12}` ustawia `sleeping=true`.
+- `BULEN_DEVICE_TOKEN` – opcjonalny token do sterowania `/api/device/battery`; w prod
+  endpoint wymaga nagłówka `x-bulen-device-token` (inaczej 403).
+
+### Testy integracyjne (zwiększone pokrycie)
+
+- `node --test scripts/tests/full_stack_smoke.test.js` – węzeł + explorer + status (blok z tx).
+- `node --test scripts/tests/full_stack_integration_all.test.js` – pełen stack + payments + wallet session.
+- `node --test scripts/tests/node_load_30s.test.js` – 30s obciążenie (status + tx co ~1s).
+- **Nowe:** `scripts/tests/payment_webhook_signature.test.js` – end‑to‑end podpisy HMAC webhooków płatności.
+- **Nowe:** `scripts/tests/superlight_mobile.test.js` – profil super‑light: sleep/resume po poziomie baterii.
 
 Ponadto:
 
@@ -178,6 +207,11 @@ Prototyp BulenNode ma domyślne profile konfiguracyjne, wybierane zmienną
   - `deviceClass=tablet`,
   - `rewardWeight=0.6`,
   - parametry pośrednie między telefonem a laptopem.
+- `phone-superlight` – super‑lekki tryb na telefon (nagłówki + snapshot, observer):
+  - `deviceClass=phone`,
+  - `rewardWeight=0.35`,
+  - `nodeRole=observer` (bez produkcji bloków),
+  - `superLightMode=true` – agresywne utrzymywanie tylko świeżych bloków i snapshotu.
 - `raspberry` – węzeł na Raspberry Pi / SBC:
   - `deviceClass=raspberry`,
   - `rewardWeight=0.75`,
@@ -479,7 +513,83 @@ Podstawowe scenariusze:
 - **kompromitacja klucza walidatora** – natychmiastowe wycofanie walidatora (jeśli
   protokół to wspiera), przeniesienie stake na nowy klucz, analiza zdarzenia.
 
-# 7. Podsumowanie
+## 6.5. Szacunkowe koszty uruchomienia produkcji (PL)
+
+Symulacja bazuje na typowych cenach VPS u polskich dostawców (lokalne DC, rynek 2024),
+bez zniżek rocznych; widełki obejmują VAT. Referencyjne cenniki: OVHcloud Warszawa,
+Atman Cloud, ArubaCloud PL / homecloud (w zaokrągleniu, bez promocji).
+
+Założone role i minimalne parametry:
+
+- **Walidator** (prywatny, za sentry): 4 vCPU, 8 GB RAM, dysk SSD 160–200 GB – ~70–120 PLN / mies.
+- **Sentry** (publiczny, reverse proxy + P2P/TLS): 2 vCPU, 4–8 GB RAM, 80–160 GB SSD – ~40–80 PLN / mies.
+- **Gateway** (API/Explorer + WAF/limiter): 2 vCPU, 4 GB RAM, 80–120 GB SSD – ~30–60 PLN / mies.
+- **Monitoring/backup node** (Prometheus + bucket sync): 2 vCPU, 4 GB RAM, 80 GB SSD – ~30–50 PLN / mies.
+- **Storage S3-kompatybilne** (snapshots, logi): 100–200 GB – ~10–25 PLN / mies.
+
+Przykładowe miesięczne koszty dla minimalnej topologii z `docs/prod_manifests.md`:
+
+- 3× walidator: ~210–360 PLN,
+- 2× sentry: ~80–160 PLN,
+- 2× gateway: ~60–120 PLN,
+- 1× monitoring/backup: ~30–50 PLN,
+- storage (S3/bucket + transfer): ~10–25 PLN.
+
+**Razem szacunkowo:** ~390–715 PLN / mies. (wariant VPS, pojedyncze DC).
+
+Uwagi operacyjne:
+
+- Dodanie zapasowego DC/regionu albo HA reverse proxy podwaja część kosztów sentry/gateway.
+- Rezerwacje roczne lub pre-paid zwykle obniżają ceny o 10–25%.
+- Wyceny trzeba okresowo aktualizować (cenniki VPS zmieniają się dynamicznie); powyższe
+  liczby służą jedynie do planowania budżetu pilotażu/testnetu prod.
+
+## 6.6. Checklista bezpieczeństwa (aktualizacja)
+
+Parametry środowiskowe (produkcyjnie wymagane/wskazane):
+
+- `BULEN_REQUIRE_SIGNATURES=true` – wymusza podpisy transakcji (z polami `action/memo/timestamp` w kanonicznym payloadzie).
+- `BULEN_P2P_TOKEN=<sekret>` oraz `BULEN_P2P_REQUIRE_HANDSHAKE=true` – autoryzacja P2P; sesje z TTL, odrzucenie anon traffic.
+- `BULEN_P2P_REQUIRE_TLS=true` oraz `BULEN_P2P_TLS_ENABLED=true` + certy – handshake wyłącznie po TLS; najlepiej za VPN/sentry.
+- `BULEN_P2P_QUIC_ENABLED=false` (domyślnie) lub tylko za VPN z tokenem; UDP bez autoryzacji jest blokowane.
+- `BULEN_MEMPOOL_MAX_SIZE=1000` (domyślnie) – limit kolejki transakcji; dostosuj do zasobów.
+- `BULEN_ENABLE_FAUCET=false` – faucet nigdy na publicznych hostach.
+- `BULEN_CORS_ORIGINS=<lista>` – wymusza whitelistę; brak listy = dowolne originy (tylko w dev).
+- `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` – wymagane nagłówki do `/api/status` i `/metrics` na publicznych instancjach.
+
+Warstwa sieciowa:
+
+- P2P tylko między zaufanymi peerami (token/handshake/TLS) i najlepiej przez sentry/VPN; blokuj UDP/TCP z Internetu tam, gdzie to możliwe.
+- Reverse proxy z TLS/mTLS i rate-limitami na `/api/*` oraz `Content-Length` > 128KB dropowane na brzegu.
+- `/metrics` i `/api/status` za auth/allowlistą IP; nie wystawiać publicznie.
+
+Ochrona przed DoS:
+
+- Rate-limiter przed parserem body (domyślnie w aplikacji) + zewnętrzny limiter/WAF.
+- Mempool z limitem rozmiaru; odrzucanie duplikatów i niskich fee (do rozbudowy).
+- Monitorowanie odrzuconych bloków/tx i tempa handshake’ów; alerty na skoki 429/403.
+
+Operacyjnie:
+
+- Testy guardrails w CI (`npm test`) – regresje signature/p2p/faucet.
+- Aktualizacja certów TLS automatem; mTLS dla połączeń wewnętrznych gdy to możliwe.
+- Snapshoty `data/` zabezpieczone dostępem (bucket ACL/KMS), logi rotowane i ograniczone.
+
+# 7. Bezpieczeństwo „dla ludzi” (domyślne i kreator)
+
+- **Twarde domyślne dla buildów prod:** `BULEN_REQUIRE_SIGNATURES=true`, handshake P2P (`BULEN_P2P_REQUIRE_HANDSHAKE=true`), token P2P, TLS (`BULEN_P2P_REQUIRE_TLS=true` + cert/key) – build/profil prod nie startuje bez tych flag.
+- **Kreator konfiguracji (CLI/UI) z checklistą:** krokowo pyta o profil (gateway/validator/mobile), porty, tokeny, listę CORS, status/metrics token, TLS, limity mempool/ratelimit; na końcu zapisuje `config.env` i drukuje „bezpieczny węzeł” checklistę do odhaczenia (faucet off, backup kluczy, snapshoty, monitoring).
+- **Auto‑update z weryfikacją podpisów:** binarki/artefakty aktualizowane przez kanał HTTPS + podpisy (np. minisig/ed25519). Węzeł pobiera listę wersji + sygnatury, weryfikuje i dopiero wtedy restartuje; w przypadku błędu zostaje na starej wersji i loguje alert.
+- **Komunikaty UX:** UI/CLI pokazuje na czerwono brak TLS/tokenów, brak wymuszonych podpisów, oraz przypomina o backupie seed i o wyłączeniu fauceta w środowiskach publicznych.
+
+# 8. Polityka emisji/fee i harmonogram wypłat
+
+- **Inflacja (parametryzowana, malejąca):** 8% w roku 1 → 6% w roku 2 → 4% w roku 3 → 2.5% w roku 4 → 1.5% od roku 5 wzwyż; zmiany tylko w wąskim paśmie decyzją governance/koordynacji wydawniczej.
+- **Podział nagród blokowych:** 60% walidator/komitet wg stake, 20% pula uptime/lojalności (boosty urządzeń/uptime), 20% fundusz ekosystemu (multi‑sig + time‑lock, publikowane stany).
+- **Opłaty transakcyjne:** 30% spalane (antyinflacja), 60% dla aktywnego setu walidatorów, 10% do funduszu ekosystemu.
+- **Komunikacja i wypłaty:** w testnecie symulacja dzienna (małe stawki) do ćwiczenia narzędzi; w mainnecie rozliczenie per epoka (~tydzień) po osiągnięciu finalności. Publikowany kalendarz (ID epok, slot start, daty wypłat), dashboard spalania fee i sald funduszu, cykliczne raporty do społeczności.
+
+# 9. Podsumowanie
 
 W tym repozytorium:
 

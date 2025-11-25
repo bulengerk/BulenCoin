@@ -41,7 +41,7 @@ test('createBlock and applyBlock append a valid block', () => {
   assert.ok(validation.ok, validation.reason);
 
   const block = createBlock(config, state, config.nodeId, [tx]);
-  applyBlock(state, block);
+  applyBlock(config, state, block);
 
   const last = getLastBlock(state);
   assert.strictEqual(last.index, 1);
@@ -60,13 +60,13 @@ test('stake and unstake move funds between balance and stake', () => {
 
   const stakeTx = { from: 'alice', to: 'alice', amount: 200, fee: 0, nonce: 1, action: 'stake' };
   const blockStake = createBlock(config, state, config.nodeId, [stakeTx]);
-  applyBlock(state, blockStake);
+  applyBlock(config, state, blockStake);
   assert.strictEqual(state.accounts.alice.balance, 800);
   assert.strictEqual(state.accounts.alice.stake, 200);
 
   const unstakeTx = { from: 'alice', to: 'alice', amount: 50, fee: 0, nonce: 2, action: 'unstake' };
   const blockUnstake = createBlock(config, state, config.nodeId, [unstakeTx]);
-  applyBlock(state, blockUnstake);
+  applyBlock(config, state, blockUnstake);
   assert.strictEqual(state.accounts.alice.balance, 850);
   assert.strictEqual(state.accounts.alice.stake, 150);
 });

@@ -35,6 +35,9 @@ function createEmptyState(config) {
     chainId: config.chainId,
     blocks: [],
     accounts: {},
+    feeBurnedTotal: 0,
+    ecosystemPool: 0,
+    mintedRewardsTotal: 0,
   };
 }
 
@@ -51,6 +54,15 @@ function loadState(config) {
   if (!state.accounts || typeof state.accounts !== 'object') {
     state.accounts = {};
   }
+  if (typeof state.feeBurnedTotal !== 'number') {
+    state.feeBurnedTotal = 0;
+  }
+  if (typeof state.ecosystemPool !== 'number') {
+    state.ecosystemPool = 0;
+  }
+  if (typeof state.mintedRewardsTotal !== 'number') {
+    state.mintedRewardsTotal = 0;
+  }
   return state;
 }
 
@@ -63,4 +75,3 @@ module.exports = {
   loadState,
   saveState,
 };
-

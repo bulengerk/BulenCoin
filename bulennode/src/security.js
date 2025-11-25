@@ -1,4 +1,9 @@
 const crypto = require('crypto');
+const { deriveServerNonce } = require('./consensus');
+
+function hmac(secret, data) {
+  return crypto.createHmac('sha256', secret).update(data).digest('hex');
+}
 
 function canonicalTransactionPayload(transaction) {
   return JSON.stringify({
@@ -7,6 +12,9 @@ function canonicalTransactionPayload(transaction) {
     amount: transaction.amount,
     fee: transaction.fee,
     nonce: transaction.nonce,
+    action: transaction.action || 'transfer',
+    memo: transaction.memo || null,
+    timestamp: transaction.timestamp || null,
   });
 }
 
@@ -30,14 +38,31 @@ function verifyTransactionSignature(config, account, transaction) {
   }
 
   const verifier = crypto.createVerify('sha256');
-  verifier.update(canonicalTransactionPayload(transaction));
-  verifier.end();
+  const payloads = [
+    canonicalTransactionPayload(transaction),
+    // Legacy payload for backwards compatibility (action/memo/timestamp omitted)
+    JSON.stringify({
+      from: transaction.from,
+      to: transaction.to,
+      amount: transaction.amount,
+      fee: transaction.fee,
+      nonce: transaction.nonce,
+    }),
+  ];
 
   let validSignature = false;
-  try {
-    validSignature = verifier.verify(transaction.publicKey, transaction.signature, 'base64');
-  } catch (error) {
-    return { ok: false, reason: 'Signature verification failed' };
+  for (const payload of payloads) {
+    const v = crypto.createVerify('sha256');
+    v.update(payload);
+    v.end();
+    try {
+      if (v.verify(transaction.publicKey, transaction.signature, 'base64')) {
+        validSignature = true;
+        break;
+      }
+    } catch (error) {
+      // continue to next payload variant
+    }
   }
 
   if (!validSignature) {
@@ -97,6 +122,74 @@ function verifyP2PToken(config, request, response) {
   return true;
 }
 
+function shouldRequireHandshake(config) {
+  return Boolean(config.p2pToken) && config.p2pRequireHandshake !== false;
+}
+
+function createPeerProof(config, nodeId, chainId, nonce) {
+  if (!config.p2pToken) {
+    return null;
+  }
+  const payload = `${nodeId}|${chainId}|${nonce}`;
+  return hmac(config.p2pToken, payload);
+}
+
+function createPeerSessionToken(config, nodeId, chainId, clientNonce) {
+  if (!config.p2pToken) {
+    return null;
+  }
+  const serverNonce = deriveServerNonce(config, nodeId);
+  return hmac(config.p2pToken, `${nodeId}|${chainId}|${clientNonce}|${serverNonce}`);
+}
+
+function verifyHandshake(config, request, response) {
+  if (!shouldRequireHandshake(config)) {
+    return { ok: true, sessionToken: null, serverNonce: null };
+  }
+  const { nodeId, chainId, nonce } = request.body || {};
+  if (!nodeId || !chainId || !nonce) {
+    response.status(400).json({ error: 'Missing handshake parameters' });
+    return { ok: false };
+  }
+  const peerProof = request.headers['x-bulen-peer-proof'];
+  const expected = createPeerProof(config, nodeId, chainId, nonce);
+  if (!peerProof || peerProof !== expected) {
+    response.status(403).json({ error: 'Invalid handshake proof' });
+    return { ok: false };
+  }
+  const serverNonce = deriveServerNonce(config, nodeId);
+  const sessionToken = createPeerSessionToken(config, nodeId, chainId, nonce);
+  return { ok: true, sessionToken, serverNonce };
+}
+
+function verifyPeerSession(config, request, response, sessionStore) {
+  if (!shouldRequireHandshake(config)) {
+    return true;
+  }
+  const peerId = request.headers['x-bulen-peer-id'];
+  const nonce = request.headers['x-bulen-peer-nonce'];
+  const sessionToken = request.headers['x-bulen-peer-session'];
+
+  if (!peerId || !nonce || !sessionToken) {
+    response.status(403).json({ error: 'Missing peer session headers' });
+    return false;
+  }
+  if (sessionStore && sessionStore.has(sessionToken)) {
+    const entry = sessionStore.get(sessionToken);
+    if (entry.peerId === peerId && (!entry.expiresAt || entry.expiresAt > Date.now())) {
+      return true;
+    }
+  }
+
+  const serverNonce = deriveServerNonce(config, peerId);
+  const expected = hmac(config.p2pToken, `${peerId}|${config.chainId}|${nonce}|${serverNonce}`);
+  if (expected !== sessionToken) {
+    response.status(403).json({ error: 'Invalid peer session' });
+    return false;
+  }
+  return true;
+}
+
 function getProtocolMajor(version) {
   const match = String(version).match(/^(\d+)\./);
   if (!match) {
@@ -129,4 +222,9 @@ module.exports = {
   createRateLimiter,
   verifyP2PToken,
   verifyProtocolVersion,
+  createPeerProof,
+  createPeerSessionToken,
+  verifyHandshake,
+  verifyPeerSession,
+  shouldRequireHandshake,
 };

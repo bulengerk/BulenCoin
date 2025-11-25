@@ -86,9 +86,11 @@
         </div>
         <nav class="bc-nav">
           <a href="#overview" data-i18n-label="nav_overview">Overview</a>
+          <a href="#how" data-i18n-label="nav_how">How it works</a>
           <a href="#nodes" data-i18n-label="nav_nodes">Nodes</a>
           <a href="#consensus" data-i18n-label="nav_consensus">Consensus</a>
           <a href="#economics" data-i18n-label="nav_economics">Economics</a>
+          <a href="#rewards-calc" data-i18n-label="nav_rewards">Rewards</a>
           <a href="#apps" data-i18n-label="nav_apps">Apps</a>
           <a href="#security" data-i18n-label="nav_security">Security</a>
           <a href="#docs" data-i18n-label="nav_docs">Docs</a>
@@ -249,6 +251,53 @@
             and account state, and an incentive layer that defines how nodes are rewarded
             for honest behaviour and uptime.
           </p>
+        </div>
+      </section>
+
+      <section id="how" class="bc-section bc-section-contrast">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="how_title">How BulenCoin works on any device</h2>
+            <p data-i18n="how_subtitle">
+              Two layers of explanation: plain language for anyone, and a concise technical view for operators.
+            </p>
+          </div>
+          <div class="bc-how-grid">
+            <article class="bc-card bc-card-contrast">
+              <h3 data-i18n="how_simple_title">For everyone</h3>
+              <ul class="bc-checklist">
+                <li data-i18n="how_simple_point1">
+                  Install BulenNode on a phone, laptop or server and pick a profile (mobile light, desktop/server full, or API gateway).
+                </li>
+                <li data-i18n="how_simple_point2">
+                  Keep the app online; it earns automatic rewards for honest uptime and helps secure the network. No mining rigs required.
+                </li>
+                <li data-i18n="how_simple_point3">
+                  Send/receive payments and stake coins; gateways expose simple HTTP APIs for wallets, shops and explorers.
+                </li>
+                <li data-i18n="how_simple_point4">
+                  Safety basics: back up your seed, set a P2P token on public nodes, use rate limits and (optionally) TLS.
+                </li>
+              </ul>
+            </article>
+            <article class="bc-card">
+              <h3 data-i18n="how_expert_title">For builders & operators</h3>
+              <ul class="bc-checklist bc-checklist-muted">
+                <li data-i18n="how_expert_point1">
+                  Lightweight Proof of Stake with small validator committees; selection uses stake, device class weighting (phone/tablet/laptop/server) and reputation.
+                </li>
+                <li data-i18n="how_expert_point2">
+                  Profiles: mobile light keeps headers+recent state; desktop/server full keeps full history; gateway role exposes RPC/REST; superlight phone profile prunes aggressively.
+                </li>
+                <li data-i18n="how_expert_point3">
+                  Rewards are autonomous: block reward + fees are split on-chain each block (burn, ecosystem pool, producer cut, stake-proportional remainder).
+                </li>
+                <li data-i18n="how_expert_point4">
+                  Security knobs: required signatures, P2P tokens + handshake, optional TLS/QUIC, rate limits, faucet off in strict mode; metrics and status endpoints gated by tokens.
+                </li>
+              </ul>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -438,6 +487,223 @@
             about the possibility of losing part of the stake in case of misconfiguration
             or malicious behaviour.
           </p>
+          <p data-i18n="economics_policy">
+            Emission and fees: 8%→6%→4%→2.5%→1.5% annual inflation taper, block rewards split
+            60% validators/committee, 20% uptime/loyalty, 20% ecosystem pool; fees: 30% burned,
+            60% validators, 10% ecosystem. All params published and adjustable only within narrow
+            governance bands.
+          </p>
+          <p data-i18n="economics_payouts">
+            Payout cadence: testnet settles daily to exercise tools; mainnet pays per epoch
+            (~weekly) after finality, with public calendars and dashboards for burns, pool
+            balances and epoch IDs so operators know when to expect rewards.
+          </p>
+        </div>
+      </section>
+
+      <section id="rewards-calc" class="bc-section bc-section-contrast">
+        <div class="bc-container bc-grid-2">
+          <div>
+            <div class="bc-section-header">
+              <h2 data-i18n="calc_title">Reward projection</h2>
+              <p data-i18n="calc_subtitle">
+                Estimate weekly earnings based on stake, device type and uptime hours. Values come
+                from the running BulenNode (`/api/rewards/estimate`).
+              </p>
+            </div>
+            <form id="reward-form" class="bc-form">
+              <label for="calc-stake" data-i18n-label="calc_stake_label">Stake amount (BULEN)</label>
+              <input id="calc-stake" type="number" min="0" step="50" value="1000" />
+
+              <label for="calc-device" data-i18n-label="calc_device_label">Device class</label>
+              <select id="calc-device">
+                <option value="desktop" selected>Desktop / laptop</option>
+                <option value="server">Server</option>
+                <option value="phone">Phone</option>
+                <option value="tablet">Tablet</option>
+                <option value="raspberry">Raspberry / SBC</option>
+              </select>
+
+              <label for="calc-uptime" data-i18n-label="calc_uptime_label">Hours online per day</label>
+              <input id="calc-uptime" type="number" min="1" max="24" step="1" value="24" />
+
+              <label for="calc-days" data-i18n-label="calc_days_label">Projection window (days)</label>
+              <input id="calc-days" type="number" min="1" max="30" step="1" value="7" />
+
+              <button type="submit" class="bc-button" data-i18n-label="calc_button">Calculate</button>
+            </form>
+          </div>
+          <div class="bc-card bc-card-contrast" id="calc-result">
+            <h3 data-i18n="calc_result_title">Weekly projection</h3>
+            <p class="bc-muted" data-i18n="calc_result_subtitle">
+              Based on your inputs. Real rewards depend on network parameters and load.
+            </p>
+            <div class="bc-calculator-grid">
+              <div>
+                <div class="bc-metric-label" data-i18n="calc_metric_hourly">Hourly</div>
+                <div class="bc-metric-value" id="calc-hourly">–</div>
+              </div>
+              <div>
+                <div class="bc-metric-label" data-i18n="calc_metric_daily">Daily</div>
+                <div class="bc-metric-value" id="calc-daily">–</div>
+              </div>
+              <div>
+                <div class="bc-metric-label" data-i18n="calc_metric_weekly">Weekly</div>
+                <div class="bc-metric-value" id="calc-weekly">–</div>
+              </div>
+              <div>
+                <div class="bc-metric-label" data-i18n="calc_metric_period">Period total</div>
+                <div class="bc-metric-value" id="calc-period">–</div>
+              </div>
+            </div>
+            <div class="bc-pill-row" id="calc-badges">
+              <span class="bc-pill" id="calc-badge-loyalty"></span>
+              <span class="bc-pill" id="calc-badge-device"></span>
+              <span class="bc-pill" id="calc-badge-stake"></span>
+            </div>
+            <div class="bc-error" id="calc-error" hidden></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="leaderboard" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="leaderboard_title">Leaderboard & badges</h2>
+            <p data-i18n="leaderboard_subtitle">
+              Live rewards hub scores (uptime/stake) so everyone can see the network is active.
+            </p>
+          </div>
+          <div class="bc-leaderboard-header">
+            <span class="bc-muted" data-i18n="leaderboard_source_prefix">Rewards hub:</span>
+            <span class="bc-pill" id="leaderboard-source">http://localhost:4400</span>
+            <button id="leaderboard-refresh" class="bc-button bc-button-ghost" data-i18n-label="leaderboard_refresh">
+              Refresh
+            </button>
+          </div>
+          <div class="bc-grid-2">
+            <div class="bc-card bc-card-contrast">
+              <table class="bc-leaderboard-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="leaderboard_table_node">Node</th>
+                    <th data-i18n="leaderboard_table_score">Score</th>
+                    <th data-i18n="leaderboard_table_stake">Stake</th>
+                    <th data-i18n="leaderboard_table_uptime">Uptime</th>
+                    <th data-i18n="leaderboard_table_badges">Badges</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboard-table">
+                  <tr><td colspan="5">Loading…</td></tr>
+                </tbody>
+              </table>
+              <div class="bc-error" id="leaderboard-error" hidden></div>
+            </div>
+            <div class="bc-card">
+              <h3 data-i18n="leaderboard_badges_title">Badge legend</h3>
+              <p class="bc-muted" data-i18n="leaderboard_badges_body">
+                Prototype telemetry only; badges help newcomers see who is active and diverse.
+              </p>
+              <ul class="bc-badge-list">
+                <li><span class="bc-badge">uptime-99</span> <span data-i18n="leaderboard_badge_uptime">99% uptime window</span></li>
+                <li><span class="bc-badge">mobile-hero</span> <span data-i18n="leaderboard_badge_mobile">Mobile / gateway hero</span></li>
+                <li><span class="bc-badge">staker-1k</span> <span data-i18n="leaderboard_badge_staker">Stake ≥ 1000 BULEN</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="onboarding" class="bc-section">
+        <div class="bc-container bc-grid-2">
+          <div class="bc-section-header">
+            <h2 data-i18n="onboarding_title">Start in 5 minutes (testnet)</h2>
+            <p data-i18n="onboarding_body">
+              Grab test tokens, install a one-click package, create a wallet with a seed backup and
+              join the network with safe defaults. Works on desktop, gateway or mobile light mode.
+            </p>
+            <div class="bc-quickstart">
+              <div class="bc-step">
+                <strong data-i18n="onboarding_step1_title">1) Get test BULEN</strong>
+                <p data-i18n="onboarding_step1_body">
+                  Call the faucet: <code>curl -X POST http://localhost:4100/api/faucet -d '{"address":"alice"}'</code>
+                  or use the web form in your BulenNode UI.
+                </p>
+              </div>
+              <div class="bc-step">
+                <strong data-i18n="onboarding_step2_title">2) Install & run</strong>
+                <p data-i18n="onboarding_step2_body">
+                  Use the desktop/gateway installers (see Downloads) or run <code>npm start</code> in
+                  <code>bulennode/</code>. Mobile light mode uses the same profile but prunes state.
+                </p>
+              </div>
+              <div class="bc-step">
+                <strong data-i18n="onboarding_step3_title">3) Wallet & backup</strong>
+                <p data-i18n="onboarding_step3_body">
+                  Generate a wallet, write down the seed, and store an encrypted backup. Nodes store
+                  a local checkpoint so you can resume after reboot without full resync.
+                </p>
+              </div>
+              <div class="bc-step">
+                <strong data-i18n="onboarding_step4_title">4) Watch earnings</strong>
+                <p data-i18n="onboarding_step4_body">
+                  Open <code>/api/status</code> or the explorer to see height, stake, uptime boosts and
+                  projected weekly rewards.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="bc-card bc-card-contrast">
+            <h3 data-i18n="onboarding_cta_title">One-click packages</h3>
+            <ul class="bc-list">
+              <li><a href="docs/deployment_guide.md" data-i18n="onboarding_desktop">Desktop / laptop validator (desktop-full)</a></li>
+              <li><a href="docs/deployment_guide.md#gateway" data-i18n="onboarding_gateway">Gateway/API profile (gateway)</a></li>
+              <li><a href="docs/deployment_guide.md#mobile" data-i18n="onboarding_mobile">Mobile light profile (battery-aware)</a></li>
+            </ul>
+            <div class="bc-note" data-i18n="onboarding_note">
+              Coming soon: video walkthrough and prebuilt binaries per OS. For now, use the guides
+              above or Docker Compose in this repo.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="wallet" class="bc-section bc-section-alt">
+        <div class="bc-container bc-grid-2">
+          <div class="bc-section-header">
+            <h2 data-i18n="wallet_title">Wallet & payment links</h2>
+            <p data-i18n="wallet_body">
+              Generate BIP21-style payment links and QR codes for invoices. Ideal for web/mobile
+              wallets and quick pay buttons.
+            </p>
+            <form id="wallet-form" class="bc-form">
+              <label for="wallet-address" data-i18n-label="wallet_address_label">Destination address</label>
+              <input id="wallet-address" type="text" placeholder="addr_recipient" value="merchant-demo" />
+
+              <label for="wallet-amount" data-i18n-label="wallet_amount_label">Amount (BULEN)</label>
+              <input id="wallet-amount" type="number" min="0" step="0.01" value="10" />
+
+              <label for="wallet-memo" data-i18n-label="wallet_memo_label">Memo (optional)</label>
+              <input id="wallet-memo" type="text" maxlength="64" placeholder="Order #1234" />
+
+              <button type="submit" class="bc-button" data-i18n-label="wallet_button">Generate link & QR</button>
+            </form>
+          </div>
+          <div class="bc-card bc-card-contrast">
+            <h3 data-i18n="wallet_result_title">Your payment link</h3>
+            <div class="bc-wallet-output">
+              <div class="bc-wallet-row">
+                <div class="bc-wallet-label" data-i18n="wallet_link_label">Link</div>
+                <div id="wallet-link" class="bc-wallet-value">–</div>
+                <button id="wallet-copy" class="bc-button" type="button" data-i18n-label="wallet_copy">Copy</button>
+              </div>
+              <div class="bc-wallet-row">
+                <div class="bc-wallet-label" data-i18n="wallet_qr_label">QR code</div>
+                <div id="wallet-qr" class="bc-wallet-qr">–</div>
+              </div>
+              <div class="bc-error" id="wallet-error" hidden></div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -57,3 +57,29 @@ implements:
 
 For the full, precise protocol description, refer to `docs/bulencoin_spec_pl.md`.
 
+# 5. Token economics (policy draft)
+
+- **Inflation schedule (minted per epoch):** 8% year 1 → 6% year 2 → 4% year 3 → 2.5% year 4 → 1.5% year 5+, with parameterised decay so future governance can fine‑tune within a capped band.
+- **Block reward split:** 60% to validators/committee by stake weight, 20% to uptime/loyalty pool (device/uptime boosts), 20% to an ecosystem pool (time‑locked, multi‑sig, transparently reported).
+- **Transaction fees:** 30% burned to counter inflation, 60% shared with the active validator set, 10% sent to the ecosystem pool.
+- **Payout cadence and comms:** testnet payouts simulated daily (low stakes) to exercise tooling; mainnet payouts settle per epoch (~weekly) after finality. Public dashboards and a published calendar announce epoch numbers, payout dates, fee burn totals and ecosystem pool balances so operators know when to expect rewards.
+
+# 6. Fiat on/off‑ramp (where legally possible)
+
+- **Integration path:** partner on/off‑ramps or voucher-style redemptions; clearly segregate KYC/AML duties to partners and keep BulenCoin apps non-custodial.
+- **Fallback for non‑crypto users:** testnet app ships with a “demo points” faucet/purchase flow (no KYC, no real value) so new users can play without touching fiat/crypto.
+- **Compliance note:** any real on/off‑ramp requires jurisdiction‑specific legal review; keep the core client open, non‑custodial and able to disable the ramp in restricted regions.
+
+# 7. Super‑light mobile profile
+
+- `phone-superlight` profile keeps only headers + recent blocks (snapshot + small window), observer role, reward weight 0.35.
+- Super‑light mode can be put to sleep on low battery via `POST /api/device/battery { level: 0.12 }` (threshold configurable); quickly resumes without replaying the whole chain.
+- Disk/RAM is minimal thanks to aggressive pruning of finalized blocks; intended for “always-on” background presence on phones.
+
+# 8. Integration tests (coverage boost)
+
+- Full stack: `node --test scripts/tests/full_stack_smoke.test.js` (node + explorer + status).
+- Payments + wallet + explorer + status: `node --test scripts/tests/full_stack_integration_all.test.js`.
+- Load: `node --test scripts/tests/node_load_30s.test.js`.
+- **New:** `scripts/tests/payment_webhook_signature.test.js` (HMAC webhooks).
+- **New:** `scripts/tests/superlight_mobile.test.js` (super-light battery sleep/resume).

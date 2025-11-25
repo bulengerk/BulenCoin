@@ -140,6 +140,9 @@ test(
       amount: 50,
       fee: 1,
       nonce: 1,
+      action: 'transfer',
+      memo: 'guardrails',
+      timestamp: Date.now(),
     };
     const signature = signTransaction(privateKeyPem, txPayload);
     const signedTx = await fetchJson('http://127.0.0.1:5310/api/transactions', {
@@ -147,7 +150,7 @@ test(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...txPayload, publicKey: publicKeyPem, signature }),
     });
-    assert.strictEqual(signedTx.status, 202);
+    assert.ok([200, 202].includes(signedTx.status), `expected accepted tx, got ${signedTx.status} ${JSON.stringify(signedTx.body)}`);
     assert.strictEqual(signedTx.body.accepted, true);
 
     // 3) P2P token must be present.

@@ -7,6 +7,7 @@ const nodeApiBase =
 const port = Number(process.env.EXPLORER_PORT || '4200');
 const logFormat = process.env.EXPLORER_LOG_FORMAT || 'dev';
 const explorerTitle = process.env.EXPLORER_TITLE || 'BulenCoin Explorer';
+const rewardsHubBase = process.env.REWARDS_HUB_BASE || process.env.REWARDS_HUB || 'http://localhost:4400';
 
 function escapeHtml(value) {
   return String(value)
@@ -20,6 +21,24 @@ function escapeHtml(value) {
 async function fetchStatus() {
   const response = await axios.get(`${nodeApiBase}/status`);
   return response.data;
+}
+
+async function fetchPeers() {
+  try {
+    const response = await axios.get(`${nodeApiBase}/status`);
+    return response.data.peers || [];
+  } catch (error) {
+    return [];
+  }
+}
+
+async function fetchMempool() {
+  try {
+    const response = await axios.get(`${nodeApiBase}/mempool`);
+    return response.data || [];
+  } catch (error) {
+    return [];
+  }
 }
 
 async function fetchBlocks(limit, offset) {
@@ -37,6 +56,30 @@ async function fetchBlock(height) {
 async function fetchAccount(address) {
   const response = await axios.get(`${nodeApiBase}/accounts/${address}`);
   return response.data;
+}
+
+async function fetchLeaderboard() {
+  try {
+    const response = await axios.get(`${rewardsHubBase}/leaderboard`);
+    return response.data.entries || [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function summarizeValidators(blocks) {
+  const map = new Map();
+  blocks.forEach((block) => {
+    const entry = map.get(block.validator) || { count: 0, last: block.index };
+    entry.count += 1;
+    entry.last = Math.max(entry.last, block.index);
+    map.set(block.validator, entry);
+  });
+  return Array.from(map.entries()).map(([validator, info]) => ({
+    validator,
+    produced: info.count,
+    lastHeight: info.last,
+  }));
 }
 
 function renderLayout(title, bodyHtml) {
@@ -64,6 +107,8 @@ function renderLayout(title, bodyHtml) {
       button:hover { background: #1d4ed8; }
       .meta { font-size: 0.9rem; color: #9ca3af; margin-bottom: 1rem; }
       .error { color: #fecaca; margin: 1rem 0; }
+      .badge { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 999px; background: #111827; color: #bfdbfe; font-size: 0.75rem; margin-right: 0.2rem; border: 1px solid #1f2937; }
+      .pill { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 0.25rem; background: #0b1224; color: #cbd5e1; font-size: 0.8rem; border: 1px solid #1e293b; margin-left: 0.35rem; }
     </style>
   </head>
   <body>
@@ -92,7 +137,13 @@ function createServer() {
 
   app.get('/', async (request, response) => {
     try {
-      const [status, blocksPage] = await Promise.all([fetchStatus(), fetchBlocks(20, 0)]);
+      const [status, blocksPage, mempool, peers, leaderboard] = await Promise.all([
+        fetchStatus(),
+        fetchBlocks(20, 0),
+        fetchMempool(),
+        fetchPeers(),
+        fetchLeaderboard(),
+      ]);
       const rows = blocksPage.blocks
         .map(
           (block) => `
@@ -105,6 +156,32 @@ function createServer() {
         </tr>`,
         )
         .join('');
+      const validatorRows = summarizeValidators(blocksPage.blocks)
+        .map(
+          (item) => `
+          <tr>
+            <td>${escapeHtml(item.validator)}</td>
+            <td>${item.produced}</td>
+            <td>${item.lastHeight}</td>
+          </tr>`,
+        )
+        .join('');
+      const peerRows = peers
+        .map((peer) => `<li>${escapeHtml(String(peer))}</li>`)
+        .join('');
+      const mempoolRows = mempool
+        .slice(0, 20)
+        .map(
+          (tx) => `
+        <tr>
+          <td>${escapeHtml(tx.id || '')}</td>
+          <td>${escapeHtml(tx.from || '')}</td>
+          <td>${escapeHtml(tx.to || '')}</td>
+          <td>${tx.amount}</td>
+          <td>${tx.fee}</td>
+        </tr>`,
+        )
+        .join('');
       const bodyHtml = `
         <h1>BulenCoin Explorer</h1>
         <div class="meta">
@@ -112,7 +189,11 @@ function createServer() {
           height: <strong>${status.height}</strong>,
           node: <strong>${escapeHtml(status.nodeId)}</strong> (${escapeHtml(
             status.nodeProfile,
-          )}, ${escapeHtml(status.nodeRole)})
+          )}, ${escapeHtml(status.nodeRole)}), finality: <strong>${escapeHtml(
+        String(status.finalizedHeight || 0),
+      )}</strong>, total stake: <strong>${escapeHtml(String(status.totalStake || 0))}</strong>, mempool: ${
+        status.mempoolSize
+      }
         </div>
         <form method="get" action="/accounts" style="margin-bottom: 1rem;">
           <label for="address" style="font-size: 0.85rem;">Account address:</label>
@@ -133,6 +214,51 @@ function createServer() {
           <tbody>
             ${rows}
           </tbody>
+        </table>
+        <h2>Top validators (recent 20 blocks)</h2>
+        <table>
+          <thead>
+            <tr><th>Validator</th><th>Produced</th><th>Last height</th></tr>
+          </thead>
+          <tbody>${validatorRows || '<tr><td colspan="3">No data</td></tr>'}</tbody>
+        </table>
+        <h2>Rewards leaderboard (telemetry)</h2>
+        <div class="meta">Source: ${escapeHtml(rewardsHubBase)}</div>
+        <table>
+          <thead><tr><th>Node</th><th>Score</th><th>Stake</th><th>Uptime</th><th>Badges</th></tr></thead>
+          <tbody>
+            ${
+              leaderboard.length
+                ? leaderboard
+                    .slice(0, 10)
+                    .map(
+                      (entry) => `<tr>
+                        <td>${escapeHtml(entry.nodeId || '')} <span class="pill">${escapeHtml(
+                          entry.deviceClass || '',
+                        )}</span></td>
+                        <td>${Number(entry.score || 0).toFixed(2)}</td>
+                        <td>${escapeHtml(String(entry.stake || 0))}</td>
+                        <td>${Math.round((entry.uptimePercent || 0) * 100)}%</td>
+                        <td>${
+                          (entry.badges || []).length
+                            ? entry.badges
+                                .map((b) => `<span class="badge">${escapeHtml(b)}</span>`)
+                                .join(' ')
+                            : '<span class="badge">none</span>'
+                        }</td>
+                      </tr>`,
+                    )
+                    .join('')
+                : '<tr><td colspan="5">No telemetry yet</td></tr>'
+            }
+          </tbody>
+        </table>
+        <h2>Peers (reported)</h2>
+        <ul>${peerRows || '<li>No peers reported</li>'}</ul>
+        <h2>Live mempool (sample)</h2>
+        <table>
+          <thead><tr><th>ID</th><th>From</th><th>To</th><th>Amount</th><th>Fee</th></tr></thead>
+          <tbody>${mempoolRows || '<tr><td colspan="5">Empty</td></tr>'}</tbody>
         </table>
       `;
       response.send(renderLayout('BulenCoin Explorer', bodyHtml));
