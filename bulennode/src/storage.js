@@ -26,8 +26,27 @@ function saveJson(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
 }
 
+function computeSnapshotHash(snapshot) {
+  const crypto = require('crypto');
+  const payload = {
+    chainId: snapshot.chainId,
+    blocks: snapshot.blocks || [],
+    accounts: snapshot.accounts || {},
+    feeBurnedTotal: snapshot.feeBurnedTotal || 0,
+    ecosystemPool: snapshot.ecosystemPool || 0,
+    mintedRewardsTotal: snapshot.mintedRewardsTotal || 0,
+  };
+  return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+}
+
 function getStateFile(config) {
   return path.join(config.dataDir, 'state.json');
+}
+
+function computeChecksum(value) {
+  const crypto = require('crypto');
+  const raw = JSON.stringify(value);
+  return crypto.createHash('sha256').update(raw).digest('hex');
 }
 
 function createEmptyState(config) {
@@ -38,13 +57,22 @@ function createEmptyState(config) {
     feeBurnedTotal: 0,
     ecosystemPool: 0,
     mintedRewardsTotal: 0,
+    checkpoints: [],
   };
 }
 
 function loadState(config) {
   ensureDirectory(config.dataDir);
   const filePath = getStateFile(config);
-  const state = loadJson(filePath, createEmptyState(config));
+  const raw = loadJson(filePath, createEmptyState(config));
+  const { _checksum, ...state } = raw;
+  const expected = computeChecksum({ ...state, _checksum: undefined });
+  if (_checksum && _checksum !== expected) {
+    console.warn('State checksum mismatch – file may be corrupted');
+  }
+  if (state.finalizedSnapshot && !state.finalizedSnapshot.hash) {
+    state.finalizedSnapshot.hash = computeSnapshotHash(state.finalizedSnapshot);
+  }
   if (!state.chainId) {
     state.chainId = config.chainId;
   }
@@ -68,10 +96,12 @@ function loadState(config) {
 
 function saveState(config, state) {
   const filePath = getStateFile(config);
-  saveJson(filePath, state);
+  const withChecksum = { ...state, _checksum: computeChecksum({ ...state }) };
+  saveJson(filePath, withChecksum);
 }
 
 module.exports = {
   loadState,
   saveState,
+  computeSnapshotHash,
 };

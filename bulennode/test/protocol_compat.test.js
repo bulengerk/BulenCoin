@@ -11,12 +11,12 @@ const { createNodeContext, createServer } = require('../src/server');
 
 test('P2P accepts matching protocol major version and rejects mismatched major', async () => {
   config.protocolVersion = '1.2.0';
+  config.p2pRequireHandshake = false;
+  config.p2pToken = 'compat-token';
   const context = createNodeContext(config);
   const server = createServer(context);
   const addressInfo = server.address();
   const baseUrl = `http://127.0.0.1:${addressInfo.port}`;
-
-  config.p2pToken = 'compat-token';
 
   async function fetchJson(url, options) {
     const response = await fetch(url, {
@@ -60,4 +60,3 @@ test('P2P accepts matching protocol major version and rejects mismatched major',
 
   server.close();
 });
-

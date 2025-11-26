@@ -17,6 +17,7 @@ const { startUptimeSampler } = require('../src/rewards');
 const context = createNodeContext(config);
 // Speed up block production for tests
 config.blockIntervalMs = 200;
+config.p2pRequireHandshake = false;
 
 const server = createServer(context);
 startBlockProducer(context);

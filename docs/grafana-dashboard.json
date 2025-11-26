@@ -1,0 +1,51 @@
+{
+  "title": "BulenNode Overview",
+  "schemaVersion": 16,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Height",
+      "targets": [
+        { "expr": "bulen_blocks_height{role=\"validator\"}" }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Finalized Height",
+      "targets": [
+        { "expr": "bulen_blocks_finalized_height" }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Mempool size",
+      "targets": [
+        { "expr": "bulen_mempool_size" }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Total stake",
+      "targets": [
+        { "expr": "bulen_total_stake" }
+      ],
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 6 }
+    },
+    {
+      "type": "table",
+      "title": "Security counters",
+      "targets": [
+        { "expr": "bulen_security_invalid_signatures_total" },
+        { "expr": "bulen_security_p2p_rejected_total" }
+      ],
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 }
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  }
+}

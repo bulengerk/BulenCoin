@@ -59,9 +59,9 @@ async function fetchJson(url, options) {
   return { status: response.status, body };
 }
 
-function signTransaction(privateKeyPem, transaction) {
+function signTransaction(privateKeyPem, transaction, chainId = 'bulencoin-devnet-1') {
   const signer = crypto.createSign('sha256');
-  signer.update(canonicalTransactionPayload(transaction));
+  signer.update(canonicalTransactionPayload(transaction, chainId));
   signer.end();
   return signer.sign(privateKeyPem, 'base64');
 }

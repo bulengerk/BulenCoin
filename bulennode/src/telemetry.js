@@ -30,11 +30,12 @@ function startRewardsReporter(context) {
       const maxUptime = Number(config.uptimeWindowSeconds || 0) + uptimeSeconds;
       const uptimePercent = maxUptime > 0 ? Math.min(1, uptimeSeconds / maxUptime) : 0;
       const body = {
-        nodeId: config.nodeId,
+        nodeId: config.validatorAddress || config.nodeId,
         deviceClass: config.deviceClass,
         stake,
         uptimePercent,
-        reputation: state.accounts[config.nodeId]?.reputation || 0,
+        reputation:
+          state.accounts[config.validatorAddress || config.nodeId]?.reputation || 0,
         deviceBoost: estimate.deviceBoost || 1,
       };
       const normalized = hubUrl.endsWith('/') ? hubUrl.slice(0, -1) : hubUrl;

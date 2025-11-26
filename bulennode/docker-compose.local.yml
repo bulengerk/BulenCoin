@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  node-a:
+    build:
+      context: .
+    container_name: bulennode-a
+    environment:
+      - BULEN_NODE_ID=node-a
+      - BULEN_NODE_PROFILE=desktop-full
+      - BULEN_HTTP_PORT=4100
+      - BULEN_P2P_PORT=4101
+      - BULEN_P2P_TOKEN=local-p2p-token
+      - BULEN_P2P_REQUIRE_HANDSHAKE=true
+      - BULEN_P2P_TLS_ENABLED=false
+      - BULEN_REQUIRE_SIGNATURES=false
+      - BULEN_ENABLE_FAUCET=true
+      - BULEN_ALLOW_UNSIGNED_BLOCKS=true
+      - BULEN_PEERS=node-b:4201
+    ports:
+      - "4100:4100"
+      - "4101:4101"
+    volumes:
+      - ./data/node-a:/app/data
+
+  node-b:
+    build:
+      context: .
+    container_name: bulennode-b
+    depends_on:
+      - node-a
+    networks:
+      - bulen-localnet
+    environment:
+      - BULEN_NODE_ID=node-b
+      - BULEN_NODE_PROFILE=desktop-full
+      - BULEN_HTTP_PORT=4200
+      - BULEN_P2P_PORT=4201
+      - BULEN_P2P_TOKEN=local-p2p-token
+      - BULEN_P2P_REQUIRE_HANDSHAKE=true
+      - BULEN_P2P_TLS_ENABLED=false
+      - BULEN_REQUIRE_SIGNATURES=false
+      - BULEN_ENABLE_FAUCET=true
+      - BULEN_ALLOW_UNSIGNED_BLOCKS=true
+      - BULEN_PEERS=node-a:4101
+    ports:
+      - "4200:4200"
+      - "4201:4201"
+    volumes:
+      - ./data/node-b:/app/data
+
+networks:
+  bulen-localnet:
+    driver: bridge

@@ -21,3 +21,25 @@ Thumbs.db
 
 # Rust (if used in the future)
 target/
+
+# Secrets / wallets (avoid leaking addresses/keys)
+.env
+.env.*
+*.env
+*.local
+*.secret
+*.pem
+*.key
+*.p12
+*.crt
+*.csr
+*.der
+*.gpg
+*.asc
+*.keystore
+*.wallet
+*.wallet.json
+wallets/
+wallet_addresses*
+addresses*.txt
+addresses*.csv

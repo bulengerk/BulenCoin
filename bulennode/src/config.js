@@ -198,6 +198,7 @@ const config = {
   httpPort: getNumberEnv('BULEN_HTTP_PORT', selectedProfile.httpPort),
   p2pPort: getNumberEnv('BULEN_P2P_PORT', selectedProfile.p2pPort),
   dataDir: getEnv('BULEN_DATA_DIR', path.join(projectRoot, 'data', nodeProfile)),
+  nodeKeyPath: getEnv('BULEN_NODE_KEY_FILE', path.join(projectRoot, 'data', nodeProfile, 'node_key.pem')),
   peers: parsePeers(getEnv('BULEN_PEERS', '')),
   blockIntervalMs: getNumberEnv('BULEN_BLOCK_INTERVAL_MS', selectedProfile.blockIntervalMs),
   maxBodySize: getEnv('BULEN_MAX_BODY_SIZE', '128kb'),
@@ -215,9 +216,10 @@ const config = {
     return process.env.NODE_ENV !== 'production';
   })()),
   p2pToken: getEnv('BULEN_P2P_TOKEN', ''),
+  p2pTokens: parsePeers(getEnv('BULEN_P2P_TOKENS', '')).filter(Boolean),
   p2pRequireHandshake: getBoolEnv(
     'BULEN_P2P_REQUIRE_HANDSHAKE',
-    getEnv('BULEN_P2P_TOKEN', '') !== '',
+    true,
   ),
   p2pTlsEnabled: getBoolEnv('BULEN_P2P_TLS_ENABLED', false),
   p2pTlsKeyFile: getEnv('BULEN_P2P_TLS_KEY_FILE', ''),
@@ -273,6 +275,14 @@ const config = {
   feeBurnFraction: getNumberEnv('BULEN_FEE_BURN_FRACTION', 0.3),
   feeEcosystemFraction: getNumberEnv('BULEN_FEE_ECOSYSTEM_FRACTION', 0.1),
   blockProducerRewardFraction: getNumberEnv('BULEN_BLOCK_PRODUCER_FRACTION', 0.4),
+  committeeSize: getNumberEnv('BULEN_COMMITTEE_SIZE', 3),
+  p2pMaxCertificateEntries: getNumberEnv('BULEN_P2P_MAX_CERT_ENTRIES', 64),
+  nodeKeyRotateDays: getNumberEnv('BULEN_NODE_KEY_ROTATE_DAYS', 0),
+  allowUnsignedBlocks: getBoolEnv(
+    'BULEN_ALLOW_UNSIGNED_BLOCKS',
+    !securityStrict && process.env.NODE_ENV !== 'production',
+  ),
+  p2pMaxConcurrent: getNumberEnv('BULEN_P2P_MAX_CONCURRENT', 16),
   get protocolMajor() {
     return getProtocolMajor(this.protocolVersion);
   },

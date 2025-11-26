@@ -3,11 +3,16 @@ const morgan = require('morgan');
 const axios = require('axios');
 
 const nodeApiBase =
-  process.env.BULENNODE_API_BASE || process.env.BULENNODE_API || 'http://localhost:4100/api';
+  process.env.BULENNODE_API_BASE ||
+  process.env.BULENNODE_API ||
+  'http://localhost:4100/api';
 const port = Number(process.env.EXPLORER_PORT || '4200');
 const logFormat = process.env.EXPLORER_LOG_FORMAT || 'dev';
 const explorerTitle = process.env.EXPLORER_TITLE || 'BulenCoin Explorer';
-const rewardsHubBase = process.env.REWARDS_HUB_BASE || process.env.REWARDS_HUB || 'http://localhost:4400';
+const rewardsHubBase =
+  process.env.REWARDS_HUB_BASE ||
+  process.env.REWARDS_HUB ||
+  'http://localhost:4400';
 
 function escapeHtml(value) {
   return String(value)
@@ -137,13 +142,14 @@ function createServer() {
 
   app.get('/', async (request, response) => {
     try {
-      const [status, blocksPage, mempool, peers, leaderboard] = await Promise.all([
-        fetchStatus(),
-        fetchBlocks(20, 0),
-        fetchMempool(),
-        fetchPeers(),
-        fetchLeaderboard(),
-      ]);
+      const [status, blocksPage, mempool, peers, leaderboard] =
+        await Promise.all([
+          fetchStatus(),
+          fetchBlocks(20, 0),
+          fetchMempool(),
+          fetchPeers(),
+          fetchLeaderboard(),
+        ]);
       const rows = blocksPage.blocks
         .map(
           (block) => `
@@ -190,10 +196,10 @@ function createServer() {
           node: <strong>${escapeHtml(status.nodeId)}</strong> (${escapeHtml(
             status.nodeProfile,
           )}, ${escapeHtml(status.nodeRole)}), finality: <strong>${escapeHtml(
-        String(status.finalizedHeight || 0),
-      )}</strong>, total stake: <strong>${escapeHtml(String(status.totalStake || 0))}</strong>, mempool: ${
-        status.mempoolSize
-      }
+            String(status.finalizedHeight || 0),
+          )}</strong>, total stake: <strong>${escapeHtml(String(status.totalStake || 0))}</strong>, mempool: ${
+            status.mempoolSize
+          }
         </div>
         <form method="get" action="/accounts" style="margin-bottom: 1rem;">
           <label for="address" style="font-size: 0.85rem;">Account address:</label>
@@ -242,7 +248,10 @@ function createServer() {
                         <td>${
                           (entry.badges || []).length
                             ? entry.badges
-                                .map((b) => `<span class="badge">${escapeHtml(b)}</span>`)
+                                .map(
+                                  (b) =>
+                                    `<span class="badge">${escapeHtml(b)}</span>`,
+                                )
                                 .join(' ')
                             : '<span class="badge">none</span>'
                         }</td>
@@ -266,7 +275,12 @@ function createServer() {
       console.error(error);
       response
         .status(500)
-        .send(renderLayout('Error', `<div class="error">Failed to load data from node API.</div>`));
+        .send(
+          renderLayout(
+            'Error',
+            '<div class="error">Failed to load data from node API.</div>',
+          ),
+        );
     }
   });
 

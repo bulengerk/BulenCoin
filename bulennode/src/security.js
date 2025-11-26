@@ -1,12 +1,18 @@
 const crypto = require('crypto');
-const { deriveServerNonce } = require('./consensus');
+const {
+  deriveServerNonce,
+  deriveAddressFromPublicKey,
+  verifyPayload,
+  signPayload,
+} = require('./identity');
 
 function hmac(secret, data) {
   return crypto.createHmac('sha256', secret).update(data).digest('hex');
 }
 
-function canonicalTransactionPayload(transaction) {
+function canonicalTransactionPayload(transaction, chainId) {
   return JSON.stringify({
+    chainId: chainId || transaction.chainId || null,
     from: transaction.from,
     to: transaction.to,
     amount: transaction.amount,
@@ -16,11 +22,6 @@ function canonicalTransactionPayload(transaction) {
     memo: transaction.memo || null,
     timestamp: transaction.timestamp || null,
   });
-}
-
-function deriveAddressFromPublicKey(publicKey) {
-  const hash = crypto.createHash('sha256').update(publicKey).digest('hex');
-  return `addr_${hash.slice(0, 40)}`;
 }
 
 function verifyTransactionSignature(config, account, transaction) {
@@ -37,18 +38,12 @@ function verifyTransactionSignature(config, account, transaction) {
     return { ok: false, reason: 'From address does not match publicKey' };
   }
 
+  if (!transaction.chainId || transaction.chainId !== config.chainId) {
+    return { ok: false, reason: 'Invalid or missing chainId in transaction' };
+  }
+
   const verifier = crypto.createVerify('sha256');
-  const payloads = [
-    canonicalTransactionPayload(transaction),
-    // Legacy payload for backwards compatibility (action/memo/timestamp omitted)
-    JSON.stringify({
-      from: transaction.from,
-      to: transaction.to,
-      amount: transaction.amount,
-      fee: transaction.fee,
-      nonce: transaction.nonce,
-    }),
-  ];
+  const payloads = [canonicalTransactionPayload(transaction, config.chainId)];
 
   let validSignature = false;
   for (const payload of payloads) {
@@ -110,12 +105,15 @@ function createRateLimiter(options) {
 }
 
 function verifyP2PToken(config, request, response) {
-  if (!config.p2pToken) {
+  const tokens = Array.isArray(config.p2pTokens) && config.p2pTokens.length
+    ? config.p2pTokens
+    : (config.p2pToken ? [config.p2pToken] : []);
+  if (!tokens.length) {
     return true;
   }
   const headerName = 'x-bulen-p2p-token';
   const token = request.headers[headerName];
-  if (token !== config.p2pToken) {
+  if (!token || !tokens.includes(token)) {
     response.status(403).json({ error: 'Forbidden' });
     return false;
   }
@@ -123,34 +121,54 @@ function verifyP2PToken(config, request, response) {
 }
 
 function shouldRequireHandshake(config) {
-  return Boolean(config.p2pToken) && config.p2pRequireHandshake !== false;
+  return config.p2pRequireHandshake !== false;
 }
 
 function createPeerProof(config, nodeId, chainId, nonce) {
-  if (!config.p2pToken) {
+  const token = config.p2pToken;
+  if (!token) {
     return null;
   }
   const payload = `${nodeId}|${chainId}|${nonce}`;
-  return hmac(config.p2pToken, payload);
+  return hmac(token, payload);
 }
 
 function createPeerSessionToken(config, nodeId, chainId, clientNonce) {
-  if (!config.p2pToken) {
+  const token = config.p2pToken;
+  if (!token) {
     return null;
   }
   const serverNonce = deriveServerNonce(config, nodeId);
-  return hmac(config.p2pToken, `${nodeId}|${chainId}|${clientNonce}|${serverNonce}`);
+  return hmac(token, `${nodeId}|${chainId}|${clientNonce}|${serverNonce}`);
 }
 
 function verifyHandshake(config, request, response) {
-  if (!shouldRequireHandshake(config)) {
-    return { ok: true, sessionToken: null, serverNonce: null };
-  }
-  const { nodeId, chainId, nonce } = request.body || {};
+  const { nodeId, chainId, nonce, publicKey, signature } = request.body || {};
   if (!nodeId || !chainId || !nonce) {
     response.status(400).json({ error: 'Missing handshake parameters' });
     return { ok: false };
   }
+  if (chainId !== config.chainId) {
+    response.status(400).json({ error: 'ChainId mismatch' });
+    return { ok: false };
+  }
+
+  if (!config.p2pToken) {
+    if (!publicKey || !signature) {
+      response.status(400).json({ error: 'Missing publicKey or signature' });
+      return { ok: false };
+    }
+    const payload = `${nodeId}|${chainId}|${nonce}`;
+    const ok = verifyPayload(publicKey, payload, signature);
+    if (!ok) {
+      response.status(403).json({ error: 'Invalid handshake signature' });
+      return { ok: false };
+    }
+    const serverNonce = deriveServerNonce(config, nodeId);
+    const sessionToken = crypto.randomBytes(24).toString('hex');
+    return { ok: true, sessionToken, serverNonce, peerPublicKey: publicKey };
+  }
+
   const peerProof = request.headers['x-bulen-peer-proof'];
   const expected = createPeerProof(config, nodeId, chainId, nonce);
   if (!peerProof || peerProof !== expected) {
@@ -159,13 +177,10 @@ function verifyHandshake(config, request, response) {
   }
   const serverNonce = deriveServerNonce(config, nodeId);
   const sessionToken = createPeerSessionToken(config, nodeId, chainId, nonce);
-  return { ok: true, sessionToken, serverNonce };
+  return { ok: true, sessionToken, serverNonce, peerPublicKey: publicKey || null };
 }
 
 function verifyPeerSession(config, request, response, sessionStore) {
-  if (!shouldRequireHandshake(config)) {
-    return true;
-  }
   const peerId = request.headers['x-bulen-peer-id'];
   const nonce = request.headers['x-bulen-peer-nonce'];
   const sessionToken = request.headers['x-bulen-peer-session'];
@@ -174,6 +189,18 @@ function verifyPeerSession(config, request, response, sessionStore) {
     response.status(403).json({ error: 'Missing peer session headers' });
     return false;
   }
+
+  if (!config.p2pToken) {
+    if (sessionStore && sessionStore.has(sessionToken)) {
+      const entry = sessionStore.get(sessionToken);
+      if (entry.peerId === peerId && (!entry.expiresAt || entry.expiresAt > Date.now())) {
+        return true;
+      }
+    }
+    response.status(403).json({ error: 'Invalid peer session' });
+    return false;
+  }
+
   if (sessionStore && sessionStore.has(sessionToken)) {
     const entry = sessionStore.get(sessionToken);
     if (entry.peerId === peerId && (!entry.expiresAt || entry.expiresAt > Date.now())) {
@@ -215,6 +242,17 @@ function verifyProtocolVersion(config, request, response) {
   return true;
 }
 
+function signBlockHash(identity, hash) {
+  if (!identity || !identity.privateKeyPem) {
+    throw new Error('Missing node identity for signing');
+  }
+  return signPayload(identity.privateKeyPem, hash);
+}
+
+function verifyBlockSignature(publicKeyPem, hash, signature) {
+  return verifyPayload(publicKeyPem, hash, signature);
+}
+
 module.exports = {
   canonicalTransactionPayload,
   deriveAddressFromPublicKey,
@@ -227,4 +265,6 @@ module.exports = {
   verifyHandshake,
   verifyPeerSession,
   shouldRequireHandshake,
+  signBlockHash,
+  verifyBlockSignature,
 };

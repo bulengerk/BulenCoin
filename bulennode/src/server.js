@@ -11,12 +11,13 @@ const {
   createGenesisBlock,
   ensureAccount,
 } = require('./chain');
-const { loadState, saveState } = require('./storage');
+const { loadState, saveState, computeSnapshotHash } = require('./storage');
 const {
   broadcastTransaction,
   broadcastBlock,
   startQuicListener,
   fetchBlockFromPeer,
+  loadPeerBook,
 } = require('./p2p');
 const {
   verifyTransactionSignature,
@@ -25,12 +26,20 @@ const {
   verifyProtocolVersion,
   verifyPeerSession,
   verifyHandshake,
+  signBlockHash,
+  verifyBlockSignature,
 } = require('./security');
-const { ensureConsensusState, handleIncomingBlock } = require('./consensus');
+const {
+  ensureConsensusState,
+  handleIncomingBlock,
+  selectCommittee,
+  snapshotAtHeight,
+} = require('./consensus');
 const { createMetrics, computeRewardEstimate, computeRewardProjection } = require('./rewards');
 const payments = require('./payments');
 const wallets = require('./wallets');
 const QRCode = require('qrcode');
+const { ensureNodeKeys } = require('./identity');
 
 function requireOptionalToken(token, headerName, request, response) {
   if (!token) {
@@ -45,7 +54,14 @@ function requireOptionalToken(token, headerName, request, response) {
 }
 
 function createNodeContext(config) {
+  const identity = ensureNodeKeys(config);
+  if (!config.nodeId) {
+    config.nodeId = identity.address;
+  }
+  config.nodePublicKey = identity.publicKeyPem;
+  config.validatorAddress = identity.address;
   const state = loadState(config);
+  state.enableFaucet = config.enableFaucet;
   createGenesisBlock(config, state);
   ensureConsensusState(state);
   const mempool = [];
@@ -60,6 +76,10 @@ function createNodeContext(config) {
     peerSessions: new Map(),
     superLightSleeping: false,
     lastBatteryLevel: null,
+    identity,
+    peerBook: loadPeerBook(config),
+    p2pInFlight: 0,
+    securityStats: { invalidSignatures: 0, rejectedP2P: 0 },
   };
   return context;
 }
@@ -136,23 +156,89 @@ function startBlockProducer(context) {
     if (!mempool.length) {
       return;
     }
-    const transactionsToInclude = mempool.splice(0, mempool.length);
-    const block = createBlock(config, state, config.nodeId, transactionsToInclude);
+    const validatorAddress = config.validatorAddress || config.nodeId;
+    const validatorAccount = ensureAccount(state, validatorAddress);
+    if (!validatorAccount.stake || validatorAccount.stake <= 0) {
+      validatorAccount.stake = Math.max(1, config.minimumValidatorWeight || 1);
+    }
+    const pending = mempool.splice(0, mempool.length);
+    const transactionsToInclude = [];
+    for (const tx of pending) {
+      const validation = validateTransaction(state, tx);
+      if (!validation.ok) {
+        continue;
+      }
+      const senderAccount = ensureAccount(state, tx.from);
+      const signatureCheck = verifyTransactionSignature(config, senderAccount, tx);
+      if (!signatureCheck.ok) {
+        continue;
+      }
+      transactionsToInclude.push(tx);
+    }
+    let committee = selectCommittee(config, state, state.bestTipHash);
+    if (!committee || !committee.length) {
+      committee = [{ address: validatorAddress, stake: validatorAccount.stake }];
+    }
+    const checkpointHeight = state.finalizedHeight || 0;
+    const checkpointHash = state.finalizedHash || null;
+    const snapshotToSign = snapshotAtHeight(config, state, checkpointHeight);
+    const snapshotHash = snapshotToSign && snapshotToSign.hash
+      ? snapshotToSign.hash
+      : computeSnapshotHash(snapshotToSign || { chainId: state.chainId, blocks: [], accounts: {} });
+    if (snapshotToSign) {
+      snapshotToSign.hash = snapshotHash || snapshotToSign.hash;
+      state.finalizedSnapshot = snapshotToSign;
+    }
+    const checkpointPayload = JSON.stringify({ height: checkpointHeight, hash: checkpointHash, snapshotHash });
+    const finalityCertificate =
+      checkpointHash && context.identity
+        ? {
+            height: checkpointHeight,
+            hash: checkpointHash,
+            signer: context.identity.address,
+            publicKey: context.identity.publicKeyPem,
+            snapshotHash,
+            signature: signBlockHash(context.identity, checkpointPayload),
+          }
+        : null;
+    const block = createBlock(
+      config,
+      state,
+      validatorAddress,
+      transactionsToInclude,
+      {
+        committee,
+        certificate: [],
+        producerPublicKey: context.identity.publicKeyPem,
+        finalityCheckpoint: finalityCertificate,
+      },
+    );
+    const producerSignature = signBlockHash(context.identity, block.hash);
+    const certificate = Array.isArray(block.certificate) ? block.certificate.slice() : [];
+    const isInCommittee = committee.some((member) => member.address === block.validator);
+    if (isInCommittee) {
+      certificate.push({
+        validator: block.validator,
+        publicKey: context.identity.publicKeyPem,
+        signature: producerSignature,
+      });
+    }
+    const signedBlock = { ...block, producerSignature, certificate };
     try {
-      const result = handleIncomingBlock(context, block, { source: 'local' });
+      const result = handleIncomingBlock(context, signedBlock, { source: 'local' });
       if (!result.accepted) {
         throw new Error(result.reason || 'Block rejected by consensus');
       }
       saveState(config, state);
-      await broadcastBlock(context, block);
+      await broadcastBlock(context, signedBlock);
       const { onBlockProduced } = require('./rewards'); // lazy require to avoid cycles
       onBlockProduced(context);
-      for (const newBlock of result.newBlocks || [block]) {
+      for (const newBlock of result.newBlocks || [signedBlock]) {
         payments.onBlockAccepted(context, newBlock);
       }
       pruneForSuperLight(context);
       console.log(
-        `Produced block #${block.index} with ${block.transactions.length} txs (hash=${block.hash.slice(
+        `Produced block #${signedBlock.index} with ${signedBlock.transactions.length} txs (hash=${signedBlock.hash.slice(
           0,
           10,
         )}...)`,
@@ -208,6 +294,31 @@ function createServer(context) {
     response.json({ status: 'ok' });
   });
 
+  app.get('/api/checkpoint', (request, response) => {
+    if (!state.finalizedSnapshot) {
+      response.status(404).json({ error: 'No checkpoint yet' });
+      return;
+    }
+    response.json({
+      height: state.finalizedHeight || 0,
+      hash: state.finalizedHash || null,
+      snapshotHash: state.finalizedSnapshot.hash || null,
+    });
+  });
+
+  const guardP2P = (handler) => async (request, response) => {
+    if (context.p2pInFlight >= config.p2pMaxConcurrent) {
+      response.status(503).json({ error: 'P2P busy, backpressure engaged' });
+      return;
+    }
+    context.p2pInFlight += 1;
+    try {
+      await handler(request, response);
+    } finally {
+      context.p2pInFlight -= 1;
+    }
+  };
+
   app.get('/api/status', (request, response) => {
     if (!requireOptionalToken(config.statusToken, 'x-bulen-status-token', request, response)) {
       return;
@@ -222,6 +333,7 @@ function createServer(context) {
     response.json({
       chainId: state.chainId,
       nodeId: config.nodeId,
+      validatorAddress: config.validatorAddress || config.nodeId,
       nodeRole: config.nodeRole,
       nodeProfile: config.nodeProfile,
       deviceClass: config.deviceClass,
@@ -270,10 +382,18 @@ function createServer(context) {
         pending: context.payments.filter((p) => p.status === 'pending').length,
       },
       peers: config.peers,
-      reputation: state.accounts[config.nodeId]?.reputation || 0,
+      reputation:
+        state.accounts[config.validatorAddress || config.nodeId]?.reputation || 0,
       superLight: config.superLightMode,
       superLightSleeping: context.superLightSleeping || false,
       superLightKeepBlocks: config.superLightKeepBlocks,
+      checkpoint: state.finalizedSnapshot
+        ? {
+            height: state.finalizedHeight || 0,
+            hash: state.finalizedHash || null,
+            snapshotHash: state.finalizedSnapshot.hash || null,
+          }
+        : null,
     });
   });
 
@@ -381,6 +501,12 @@ function createServer(context) {
     lines.push(
       `bulen_fee_ecosystem_fraction${formatLabels()} ${config.feeEcosystemFraction || 0}`,
     );
+    lines.push(
+      `bulen_security_invalid_signatures_total${formatLabels()} ${context.securityStats.invalidSignatures || 0}`,
+    );
+    lines.push(
+      `bulen_security_p2p_rejected_total${formatLabels()} ${context.securityStats.rejectedP2P || 0}`,
+    );
 
     response.set('Content-Type', 'text/plain; version=0.0.4');
     response.send(`${lines.join('\n')}\n`);
@@ -459,6 +585,7 @@ function createServer(context) {
     const transaction = request.body || {};
     const preparedTransaction = {
       id: transaction.id || `tx-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      chainId: config.chainId,
       from: transaction.from,
       to: transaction.to,
       amount: Number(transaction.amount),
@@ -506,10 +633,6 @@ function createServer(context) {
     }
     const targetAccount = ensureAccount(state, address);
     targetAccount.balance += amount;
-    if (state.finalizedSnapshot) {
-      const snapAccount = ensureAccount(state.finalizedSnapshot, address);
-      snapAccount.balance += amount;
-    }
     saveState(config, state);
     response.json({ ok: true, address, newBalance: targetAccount.balance });
   });
@@ -677,8 +800,12 @@ function createServer(context) {
   });
 
   // P2P endpoints (authenticated, handshake-first gossip)
-  app.post('/p2p/handshake', (request, response) => {
+  app.post('/p2p/handshake', guardP2P((request, response) => {
     if (!verifyProtocolVersion(config, request, response)) {
+      return;
+    }
+    if (config.p2pRequireTls && !request.socket.encrypted) {
+      response.status(400).json({ error: 'TLS is required for P2P' });
       return;
     }
     const result = verifyHandshake(config, request, response);
@@ -688,6 +815,7 @@ function createServer(context) {
     if (result.sessionToken && context.peerSessions) {
       context.peerSessions.set(result.sessionToken, {
         peerId: request.body && request.body.nodeId,
+        publicKey: result.peerPublicKey || (request.body ? request.body.publicKey : null),
         expiresAt: Date.now() + 10 * 60 * 1000,
       });
     }
@@ -697,10 +825,11 @@ function createServer(context) {
       protocolVersion: config.protocolVersion,
       sessionToken: result.sessionToken,
       serverNonce: result.serverNonce,
+      publicKey: config.nodePublicKey,
     });
-  });
+  }));
 
-  app.post('/p2p/tx', (request, response) => {
+  app.post('/p2p/tx', guardP2P((request, response) => {
     if (!verifyProtocolVersion(config, request, response)) {
       return;
     }
@@ -716,6 +845,9 @@ function createServer(context) {
       response.status(400).json({ error: 'Invalid transaction payload' });
       return;
     }
+    if (!remoteTransaction.chainId) {
+      remoteTransaction.chainId = config.chainId;
+    }
     const alreadyPresent = mempool.some((item) => item.id === remoteTransaction.id);
     if (!alreadyPresent) {
       if (mempool.length >= config.mempoolMaxSize) {
@@ -725,9 +857,27 @@ function createServer(context) {
       mempool.push(remoteTransaction);
     }
     response.json({ ok: true });
-  });
+  }));
 
-  app.post('/p2p/block', async (request, response) => {
+  app.get('/p2p/peers', guardP2P((request, response) => {
+    if (!verifyProtocolVersion(config, request, response)) {
+      return;
+    }
+    if (config.p2pRequireHandshake) {
+      if (!verifyPeerSession(config, request, response, context.peerSessions)) {
+        return;
+      }
+    }
+    const peers = new Set(config.peers || []);
+    if (context.peerBook) {
+      for (const peer of context.peerBook.keys()) {
+        peers.add(peer);
+      }
+    }
+    response.json({ ok: true, peers: Array.from(peers) });
+  }));
+
+  app.post('/p2p/block', guardP2P(async (request, response) => {
     if (!verifyProtocolVersion(config, request, response)) {
       return;
     }
@@ -769,9 +919,9 @@ function createServer(context) {
       console.error('Failed to apply remote block', error.message);
       response.status(400).json({ error: 'Invalid block' });
     }
-  });
+  }));
 
-  app.get('/p2p/block/:hash', (request, response) => {
+  app.get('/p2p/block/:hash', guardP2P((request, response) => {
     if (!verifyProtocolVersion(config, request, response)) {
       return;
     }
@@ -788,8 +938,8 @@ function createServer(context) {
       response.status(404).json({ error: 'Not found' });
       return;
     }
-    response.json({ ok: true, block });
-  });
+    response.json({ ok: true, block, peers: Array.from(context.peerBook ? context.peerBook.keys() : []) });
+  }));
 
   if (config.p2pQuicEnabled) {
     startQuicListener(context, {

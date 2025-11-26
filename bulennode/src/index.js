@@ -14,9 +14,6 @@ function validateProductionConfig(conf) {
   if (conf.enableFaucet) {
     throw new Error('Production/strict mode must not expose faucet (set BULEN_ENABLE_FAUCET=false)');
   }
-  if (!conf.p2pToken || !conf.p2pToken.length) {
-    throw new Error('Production/strict mode requires BULEN_P2P_TOKEN to protect P2P endpoints');
-  }
   if (conf.p2pRequireHandshake === false) {
     throw new Error('Production/strict mode requires BULEN_P2P_REQUIRE_HANDSHAKE=true');
   }

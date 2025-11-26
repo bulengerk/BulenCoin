@@ -12,6 +12,7 @@ function cloneConfig(overrides) {
   return {
     ...baseConfig,
     peers: [],
+    allowUnsignedBlocks: false,
     ...overrides,
   };
 }
@@ -48,6 +49,8 @@ test('block produced on node A is propagated to node B via P2P', async () => {
     nodeRole: 'validator',
     blockIntervalMs: 300,
     p2pToken: 'p2p-secret',
+    requireSignatures: false,
+    allowUnsignedBlocks: true,
   });
 
   const contextA = createNodeContext(configA);
@@ -63,6 +66,8 @@ test('block produced on node A is propagated to node B via P2P', async () => {
     nodeRole: 'validator',
     blockIntervalMs: 300,
     p2pToken: 'p2p-secret',
+    requireSignatures: false,
+    allowUnsignedBlocks: true,
   });
   const contextB = createNodeContext(configB);
   const serverB = createServer(contextB);

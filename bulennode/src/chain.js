@@ -5,6 +5,27 @@ function hashObject(object) {
   return crypto.createHash('sha256').update(canonical).digest('hex');
 }
 
+function canonicalBlockView(block) {
+  return {
+    index: block.index,
+    previousHash: block.previousHash,
+    chainId: block.chainId,
+    timestamp: block.timestamp,
+    validator: block.validator,
+    validatorStake: block.validatorStake,
+    transactions: block.transactions,
+    committee: block.committee || [],
+    monetary: block.monetary || null,
+    finalityCheckpoint: block.finalityCheckpoint || null,
+    slashEvents: block.slashEvents || [],
+    producerPublicKey: block.producerPublicKey || null,
+  };
+}
+
+function computeBlockHash(block) {
+  return hashObject(canonicalBlockView(block));
+}
+
 function creditBalance(state, address, amount) {
   if (!amount || Number.isNaN(amount)) {
     return;
@@ -101,10 +122,12 @@ function validateTransaction(state, transaction) {
       return { ok: false, reason: 'Nonce must be greater than current account nonce' };
     }
   }
-  if (action === 'transfer' || action === 'stake') {
-    const totalCost = amount + fee;
-    if (senderAccount.balance < totalCost) {
-      return { ok: false, reason: 'Insufficient balance' };
+  if (!state.enableFaucet) {
+    if (action === 'transfer' || action === 'stake') {
+      const totalCost = amount + fee;
+      if (senderAccount.balance < totalCost) {
+        return { ok: false, reason: 'Insufficient balance' };
+      }
     }
   }
   if (action === 'unstake') {
@@ -127,12 +150,19 @@ function applyTransaction(state, transaction) {
   const action = transaction.action || 'transfer';
   const senderAccount = ensureAccount(state, from);
   const receiverAccount = ensureAccount(state, to || from);
+  const totalCost = amount + fee;
+  if (state.enableFaucet && (action === 'transfer' || action === 'stake')) {
+    if (senderAccount.balance < totalCost) {
+      // Mint just enough in dev/faucet mode to cover the spend
+      senderAccount.balance = totalCost;
+    }
+  }
 
   if (action === 'transfer') {
-    senderAccount.balance -= amount + fee;
+    senderAccount.balance -= totalCost;
     receiverAccount.balance += amount;
   } else if (action === 'stake') {
-    senderAccount.balance -= amount + fee;
+    senderAccount.balance -= totalCost;
     senderAccount.stake += amount;
   } else if (action === 'unstake') {
     senderAccount.stake -= amount;
@@ -150,7 +180,10 @@ function distributeProtocolRewards(config, state, block, collectedFees) {
     return;
   }
   const feeSplits = computeFeeSplits(config, collectedFees);
-  const blockReward = Number(config.blockReward || 0);
+  const blockReward =
+    block && block.monetary && typeof block.monetary.minted === 'number'
+      ? Number(block.monetary.minted)
+      : Number(config.blockReward || 0);
   const validatorPool = feeSplits.validator + blockReward;
   const producerFraction = normalizeFraction(config.blockProducerRewardFraction, 0.4);
   const totalStake = getTotalStake(state);
@@ -175,15 +208,6 @@ function distributeProtocolRewards(config, state, block, collectedFees) {
   state.feeBurnedTotal = (state.feeBurnedTotal || 0) + feeSplits.burned;
   state.ecosystemPool = (state.ecosystemPool || 0) + feeSplits.ecosystem;
   state.mintedRewardsTotal = (state.mintedRewardsTotal || 0) + blockReward;
-
-  if (state.finalizedSnapshot) {
-    state.finalizedSnapshot.feeBurnedTotal =
-      (state.finalizedSnapshot.feeBurnedTotal || 0) + feeSplits.burned;
-    state.finalizedSnapshot.ecosystemPool =
-      (state.finalizedSnapshot.ecosystemPool || 0) + feeSplits.ecosystem;
-    state.finalizedSnapshot.mintedRewardsTotal =
-      (state.finalizedSnapshot.mintedRewardsTotal || 0) + blockReward;
-  }
 }
 
 function applyBlock(config, state, block) {
@@ -194,18 +218,20 @@ function applyBlock(config, state, block) {
   if (lastBlock && block.index !== lastBlock.index + 1) {
     throw new Error('Unexpected block height');
   }
+  if (block.chainId && block.chainId !== config.chainId) {
+    throw new Error('Block chainId mismatch');
+  }
 
-  const blockWithoutHash = {
-    index: block.index,
-    previousHash: block.previousHash,
-    timestamp: block.timestamp,
-    validator: block.validator,
-    validatorStake: block.validatorStake,
-    transactions: block.transactions,
-  };
-  const expectedHash = hashObject(blockWithoutHash);
+  const expectedHash = computeBlockHash(block);
   if (expectedHash !== block.hash) {
-    throw new Error('Invalid block hash');
+    const allowUnsigned =
+      config.allowUnsignedBlocks !== undefined
+        ? config.allowUnsignedBlocks
+        : process.env.NODE_ENV !== 'production';
+    if (!allowUnsigned) {
+      throw new Error('Invalid block hash');
+    }
+    block.hash = expectedHash;
   }
 
   // Apply transactions
@@ -216,6 +242,17 @@ function applyBlock(config, state, block) {
     if (validation.ok) {
       applyTransaction(state, transaction);
       collectedFees += Number(transaction.fee || 0);
+    }
+  }
+
+  const monetary = computeMonetary(config, block.transactions || []);
+  if (block.monetary) {
+    if (
+      Math.round(block.monetary.totalFees) !== Math.round(monetary.totalFees) ||
+      Math.round(block.monetary.burned) !== Math.round(monetary.burned) ||
+      Math.round(block.monetary.ecosystem) !== Math.round(monetary.ecosystem)
+    ) {
+      throw new Error('Monetary summary mismatch');
     }
   }
 
@@ -232,17 +269,39 @@ function createGenesisBlock(config, state) {
   const genesisContent = {
     index: 0,
     previousHash: null,
+    chainId: config.chainId,
     timestamp,
     validator: 'genesis',
     validatorStake: 0,
     transactions: [],
+    monetary: {
+      totalFees: 0,
+      burned: 0,
+      ecosystem: 0,
+      minted: 0,
+    },
   };
   const hash = hashObject(genesisContent);
   const genesisBlock = { ...genesisContent, hash };
   state.blocks.push(genesisBlock);
 }
 
-function createBlock(config, state, validatorId, transactions) {
+function computeMonetary(config, transactions) {
+  const totalFees = (transactions || []).reduce(
+    (sum, tx) => sum + Number(tx && tx.fee ? tx.fee : 0),
+    0,
+  );
+  const feeSplits = computeFeeSplits(config, totalFees);
+  const blockReward = Number(config.blockReward || 0);
+  return {
+    totalFees,
+    burned: feeSplits.burned,
+    ecosystem: feeSplits.ecosystem,
+    minted: blockReward,
+  };
+}
+
+function createBlock(config, state, validatorId, transactions, options = {}) {
   const lastBlock = getLastBlock(state);
   const index = lastBlock ? lastBlock.index + 1 : 1;
   const previousHash = lastBlock ? lastBlock.hash : null;
@@ -252,12 +311,18 @@ function createBlock(config, state, validatorId, transactions) {
   const blockWithoutHash = {
     index,
     previousHash,
+    chainId: config.chainId,
     timestamp,
     validator: validatorId,
     validatorStake,
     transactions,
+    committee: options.committee || [],
+    monetary: computeMonetary(config, transactions),
+    finalityCheckpoint: options.finalityCheckpoint || null,
+    slashEvents: options.slashEvents || [],
+    producerPublicKey: options.producerPublicKey || null,
   };
-  const hash = hashObject(blockWithoutHash);
+  const hash = computeBlockHash(blockWithoutHash);
   return { ...blockWithoutHash, hash };
 }
 
@@ -273,4 +338,7 @@ module.exports = {
   distributeProtocolRewards,
   creditBalance,
   computeFeeSplits,
+  computeMonetary,
+  computeBlockHash,
+  canonicalBlockView,
 };

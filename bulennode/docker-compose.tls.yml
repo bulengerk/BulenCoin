@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  node-a:
+    build:
+      context: .
+    container_name: bulennode-a-tls
+    environment:
+      - BULEN_NODE_ID=node-a
+      - BULEN_NODE_PROFILE=desktop-full
+      - BULEN_HTTP_PORT=4100
+      - BULEN_P2P_PORT=4101
+      - BULEN_P2P_TOKEN=local-p2p-token
+      - BULEN_P2P_REQUIRE_HANDSHAKE=true
+      - BULEN_P2P_REQUIRE_TLS=true
+      - BULEN_P2P_TLS_ENABLED=true
+      - BULEN_P2P_TLS_KEY_FILE=/app/certs/node-a.key
+      - BULEN_P2P_TLS_CERT_FILE=/app/certs/node-a.crt
+      - BULEN_P2P_TLS_ALLOW_SELF_SIGNED=true
+      - BULEN_REQUIRE_SIGNATURES=false
+      - BULEN_ENABLE_FAUCET=true
+      - BULEN_ALLOW_UNSIGNED_BLOCKS=true
+      - BULEN_PEERS=node-b:4201
+    ports:
+      - "4100:4100"
+      - "4101:4101"
+    volumes:
+      - ./data/node-a-tls:/app/data
+      - ./certs:/app/certs:ro
+    networks:
+      - bulen-tls
+
+  node-b:
+    build:
+      context: .
+    container_name: bulennode-b-tls
+    depends_on:
+      - node-a
+    environment:
+      - BULEN_NODE_ID=node-b
+      - BULEN_NODE_PROFILE=desktop-full
+      - BULEN_HTTP_PORT=4200
+      - BULEN_P2P_PORT=4201
+      - BULEN_P2P_TOKEN=local-p2p-token
+      - BULEN_P2P_REQUIRE_HANDSHAKE=true
+      - BULEN_P2P_REQUIRE_TLS=true
+      - BULEN_P2P_TLS_ENABLED=true
+      - BULEN_P2P_TLS_KEY_FILE=/app/certs/node-b.key
+      - BULEN_P2P_TLS_CERT_FILE=/app/certs/node-b.crt
+      - BULEN_P2P_TLS_ALLOW_SELF_SIGNED=true
+      - BULEN_REQUIRE_SIGNATURES=false
+      - BULEN_ENABLE_FAUCET=true
+      - BULEN_ALLOW_UNSIGNED_BLOCKS=true
+      - BULEN_PEERS=node-a:4101
+    ports:
+      - "4200:4200"
+      - "4201:4201"
+    volumes:
+      - ./data/node-b-tls:/app/data
+      - ./certs:/app/certs:ro
+    networks:
+      - bulen-tls
+
+networks:
+  bulen-tls:
+    driver: bridge

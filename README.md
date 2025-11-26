@@ -30,6 +30,14 @@ The specification is based on the original `bulencoin_spec.pdf` and describes:
 - mobile, desktop and gateway node applications (BulenNode),
 - technical requirements, security and launch phases (testnet → mainnet).
 
+## Architecture at a glance
+
+- **Consensus**: stake-weighted committee, producer signature + committee quorum certificate, finality checkpoints signed by the producer over `{height, hash, snapshotHash}`.
+- **State**: on-chain balances/stake + monetary counters (burn/ecosystem/minted), finalized snapshots with checksum for super-light bootstrap.
+- **P2P**: HTTP-based gossip with handshake/token, peer book with scoring/discovery, backpressure on concurrent P2P requests.
+- **Security**: per-tx signatures (chainId-bound), per-block producer + committee signatures, optional TLS/handshake for P2P, rate limiting and max body size on HTTP.
+- **Economy**: fee splits (burn/ecosystem/producer/stakers), block rewards behind `enableProtocolRewards`, payments/invoice flow with optional webhook HMAC.
+
 ## Running the website locally
 
 From the repository root:
@@ -161,6 +169,7 @@ Key HTTP APIs (prototype):
 Metrics endpoint (Prometheus format):
 
 - `GET /metrics` – exposes node info, height, mempool size, stake total, uptime, reward estimate, payments counts, rate‑limit config and protocol version. Useful for Prometheus scraping and Grafana dashboards.
+- Sample Grafana: import `docs/grafana-dashboard.json` after adding a Prometheus datasource scraping `/metrics` (use header `x-bulen-metrics-token` if set).
 
 Health and metadata endpoints:
 
@@ -173,6 +182,58 @@ To connect multiple nodes together, start additional BulenNode instances with `B
 cd bulennode
 PORT=4102 BULEN_HTTP_PORT=4102 BULEN_NODE_ID=node2 BULEN_PEERS=localhost:4100 npm start
 ```
+
+### Quick local 2-node demo (P2P + payments)
+
+```bash
+# terminal 1
+cd bulennode
+BULEN_HTTP_PORT=4100 BULEN_P2P_PORT=4101 BULEN_NODE_ID=node-a npm start
+
+# terminal 2
+cd bulennode
+BULEN_HTTP_PORT=4200 BULEN_P2P_PORT=4201 BULEN_NODE_ID=node-b BULEN_PEERS=127.0.0.1:4100 npm start
+
+# fund & send (from terminal 3)
+curl -X POST http://127.0.0.1:4100/api/faucet -H 'Content-Type: application/json' -d '{"address":"alice","amount":1000}'
+curl -X POST http://127.0.0.1:4100/api/transactions -H 'Content-Type: application/json' -d '{"from":"alice","to":"bob","amount":123,"fee":1}'
+# wait ~1s; the block from node-a is gossiped to node-b
+curl http://127.0.0.1:4200/api/accounts/bob
+```
+
+Docker-compose wariant (2 węzły):
+
+```bash
+cd bulennode
+docker compose -f docker-compose.local.yml up --build
+
+# w drugim terminalu
+curl -X POST http://127.0.0.1:4100/api/faucet -H 'Content-Type: application/json' -d '{"address":"alice","amount":1000}'
+curl -X POST http://127.0.0.1:4100/api/transactions -H 'Content-Type: application/json' -d '{"from":"alice","to":"bob","amount":123,"fee":1}'
+curl http://127.0.0.1:4200/api/accounts/bob
+```
+
+TLS P2P demo (self-signed):
+
+```bash
+cd bulennode
+# generate self-signed certs (example)
+mkdir -p certs
+openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/node-a.key -out certs/node-a.crt -subj "/CN=node-a" -days 365
+openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/node-b.key -out certs/node-b.crt -subj "/CN=node-b" -days 365
+
+docker compose -f docker-compose.tls.yml up --build
+```
+
+Oba węzły wymagają handshake + TLS; certyfikaty z `certs/` są montowane read-only.
+
+### Threat model / production checklist
+
+- Require signatures: set `BULEN_REQUIRE_SIGNATURES=true` and ensure tx include `publicKey`, `signature`, `nonce`, correct `chainId`.
+- Lock down P2P: `BULEN_P2P_REQUIRE_HANDSHAKE=true` or `BULEN_P2P_TOKEN` set; enable TLS if exposed beyond LAN.
+- Disable faucet and test-only switches in any public environment: `BULEN_ENABLE_FAUCET=false`, `BULEN_ALLOW_UNSIGNED_BLOCKS=false`.
+- Protect observability: set `BULEN_STATUS_TOKEN` and `BULEN_METRICS_TOKEN` when exposing `/api/status` or `/metrics`.
+- Persist and protect keys: node keys live under `data/<profile>/node_key.pem`; keep `.gitignore` for keys/secrets intact.
 
 ### Rust prototype node
 
@@ -199,6 +260,26 @@ cd explorer
 npm install
 npm start
 ```
+
+## Tests and CI
+
+Prototype test suite (Node.js):
+
+```bash
+cd bulennode
+npm install
+npm test
+```
+
+The suite covers consensus (signatures, forks, checkpoints), P2P gossip fanout, payments, wallet login, protocol compatibility, security guardrails and state checksums. For CI, run `npm ci && npm test` in `bulennode/`; the website/explorer are static and can be linted with your preferred HTML/CSS/JS linters.
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs the BulenNode tests on push/PR using Node 18.
+
+## How to review the codebase quickly
+
+- Start from `bulennode/src/server.js` (HTTP/P2P endpoints), `bulennode/src/consensus.js` (fork-choice, finality, signatures) and `bulennode/src/p2p.js` (gossip, handshake).
+- Look at `bulennode/test/` for intended behaviours (consensus_fork, p2p_gossip_fanout, payments, protocol_compat, security_guardrails).
+- For economic rules, see `bulennode/src/chain.js` (fee splits, block reward, monetary fields) and `bulennode/src/rewards.js`.
 
 Then open `http://localhost:4200` in your browser to see:
 

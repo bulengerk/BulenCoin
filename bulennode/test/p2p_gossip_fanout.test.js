@@ -12,6 +12,7 @@ function cloneConfig(overrides) {
   return {
     ...baseConfig,
     peers: [],
+    allowUnsignedBlocks: true,
     ...overrides,
   };
 }
@@ -55,6 +56,7 @@ test('blocks propagate with limited fanout', async () => {
         p2pFanout: fanout,
         p2pMaxPeers: 8,
         requireSignatures: false,
+        allowUnsignedBlocks: false,
       });
       const context = createNodeContext(config);
       const server = createServer(context);

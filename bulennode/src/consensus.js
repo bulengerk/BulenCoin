@@ -2,7 +2,12 @@ const {
   applyBlock,
   ensureAccount,
   hashObject,
+  computeBlockHash,
+  computeMonetary,
 } = require('./chain');
+const { verifyBlockSignature, deriveAddressFromPublicKey } = require('./security');
+const { verifyPayload } = require('./identity');
+const { computeSnapshotHash } = require('./storage');
 
 function deepCloneState(state) {
   const clone = {
@@ -10,6 +15,9 @@ function deepCloneState(state) {
     blocks: Array.isArray(state.blocks) ? state.blocks.map((block) => ({ ...block })) : [],
     accounts: JSON.parse(JSON.stringify(state.accounts || {})),
   };
+  if (state.enableFaucet !== undefined) {
+    clone.enableFaucet = state.enableFaucet;
+  }
   if (state.feeBurnedTotal !== undefined) {
     clone.feeBurnedTotal = state.feeBurnedTotal;
   }
@@ -106,20 +114,109 @@ function ensureConsensusState(state) {
       chainId: state.chainId,
       blocks: snapshotBlocks.map((block) => ({ ...block })),
       accounts: JSON.parse(JSON.stringify(state.accounts || {})),
+      enableFaucet: state.enableFaucet,
     };
+  }
+  if (state.finalizedSnapshot && state.finalizedSnapshot.enableFaucet === undefined) {
+    state.finalizedSnapshot.enableFaucet = state.enableFaucet;
+  }
+  if (state.finalizedSnapshot && !state.finalizedSnapshot.hash) {
+    state.finalizedSnapshot.hash = computeSnapshotHash(state.finalizedSnapshot);
   }
   if (!state.bestTipHash && state.blocks && state.blocks.length) {
     state.bestTipHash = state.blocks[state.blocks.length - 1].hash;
   }
 }
 
-function deriveTotalStake(state) {
-  return Object.values(state.accounts || {}).reduce((sum, account) => sum + (account.stake || 0), 0);
+function selectCommittee(config, state, seedHash) {
+  const desiredSize = Math.max(1, Number(config.committeeSize || 3));
+  const validators = Object.entries(state.accounts || {})
+    .map(([address, account]) => ({ address, stake: account.stake || 0 }))
+    .filter((entry) => entry.stake > 0);
+  if (!validators.length) {
+    return [];
+  }
+  const seed = seedHash || (state.blocks && state.blocks.length ? state.blocks[state.blocks.length - 1].hash : 'seed');
+  const withScore = validators.map((entry) => ({
+    ...entry,
+    score: hashObject({ seed, address: entry.address }),
+  }));
+  withScore.sort((a, b) => a.score.localeCompare(b.score));
+  return withScore.slice(0, desiredSize);
 }
 
-function deriveServerNonce(config, peerId) {
-  const seed = `${config.p2pToken || 'bulen'}:${peerId}`;
-  return hashObject({ seed }).slice(0, 32);
+function quorumForCommittee(committee) {
+  if (!committee || !committee.length) {
+    return 0;
+  }
+  return Math.max(1, Math.floor((committee.length * 2) / 3) + 1);
+}
+
+function verifyCommitteeCertificate(config, state, block) {
+  const committee = Array.isArray(block.committee) && block.committee.length
+    ? block.committee
+    : selectCommittee(config, state, block.previousHash);
+  const certs = Array.isArray(block.certificate) ? block.certificate : [];
+  const threshold = quorumForCommittee(committee);
+  const maxCerts = Number.isFinite(config.p2pMaxCertificateEntries)
+    ? config.p2pMaxCertificateEntries
+    : 64;
+  if (certs.length > maxCerts) {
+    return false;
+  }
+  if (!committee.length) {
+    return false;
+  }
+  let validCount = 0;
+  const seen = new Set();
+  for (const cert of certs) {
+    if (!cert || !cert.validator || !cert.signature || !cert.publicKey) {
+      continue;
+    }
+    if (seen.has(cert.validator)) {
+      continue;
+    }
+    const derived = deriveAddressFromPublicKey(cert.publicKey);
+    if (derived !== cert.validator) {
+      continue;
+    }
+    const isMember = committee.some((member) => member.address === cert.validator);
+    if (!isMember) {
+      continue;
+    }
+    const ok = verifyBlockSignature(cert.publicKey, block.hash, cert.signature);
+    if (ok) {
+      seen.add(cert.validator);
+      validCount += 1;
+    }
+  }
+  if (validCount >= threshold) {
+    return true;
+  }
+  const allowUnsigned =
+    config.allowUnsignedBlocks !== undefined
+      ? config.allowUnsignedBlocks
+      : process.env.NODE_ENV !== 'production';
+  return allowUnsigned;
+}
+
+function verifyProducerSignature(config, block) {
+  const allowUnsigned =
+    config.allowUnsignedBlocks !== undefined
+      ? config.allowUnsignedBlocks
+      : process.env.NODE_ENV !== 'production';
+  if (!block.producerPublicKey || !block.producerSignature) {
+    return allowUnsigned;
+  }
+  const derived = deriveAddressFromPublicKey(block.producerPublicKey);
+  if (block.validator && block.validator !== derived) {
+    return false;
+  }
+  return verifyBlockSignature(block.producerPublicKey, block.hash, block.producerSignature);
+}
+
+function deriveTotalStake(state) {
+  return Object.values(state.accounts || {}).reduce((sum, account) => sum + (account.stake || 0), 0);
 }
 
 function slashValidator(state, validator, config, reason, height) {
@@ -153,8 +250,10 @@ function recordEquivocationAndSlash(state, block, config) {
   const key = `${validator}:${height}`;
   const existingForValidator = state.equivocations[validator] || {};
   const existingHash = existingForValidator[height];
+  let equivocated = false;
 
   if (existingHash && existingHash !== block.hash) {
+    equivocated = true;
     if (!state.slashRecords[key]) {
       slashValidator(state, validator, config, `Equivocation at height ${height}`, height);
       state.slashRecords[key] = true;
@@ -165,6 +264,8 @@ function recordEquivocationAndSlash(state, block, config) {
     existingForValidator[height] = block.hash;
     state.equivocations[validator] = existingForValidator;
   }
+
+  return { equivocated, existingHash };
 }
 
 function collectChain(state, tipHash, finalizedHash) {
@@ -213,6 +314,9 @@ function evaluateChain(config, state, tipHash) {
   }
 
   const workingState = deepCloneState(baseSnapshot);
+  if (state.finalizedSnapshot) {
+    workingState.finalizedSnapshot = deepCloneState(state.finalizedSnapshot);
+  }
   let weight = 0;
   let tipHeight = finalizedHeight;
   const validatorStakes = {};
@@ -222,6 +326,9 @@ function evaluateChain(config, state, tipHash) {
     if (block.index <= finalizedHeight) {
       tipHeight = block.index;
       continue;
+    }
+    if (block.chainId && block.chainId !== state.chainId) {
+      return { ok: false, reason: 'ChainId mismatch' };
     }
     const validatorAccount = ensureAccount(workingState, block.validator);
     const stake = validatorAccount.stake || 0;
@@ -285,9 +392,13 @@ function pruneMempool(context, includedTxIds) {
 }
 
 function snapshotAtHeight(config, state, targetHeight) {
+  const hasFinalizedSnapshot = Boolean(state.finalizedSnapshot);
   const baseSnapshot = deepCloneState(state.finalizedSnapshot || state);
-  if (!baseSnapshot.accounts || !Object.keys(baseSnapshot.accounts).length) {
+  if (!hasFinalizedSnapshot && (!baseSnapshot.accounts || !Object.keys(baseSnapshot.accounts).length)) {
     baseSnapshot.accounts = JSON.parse(JSON.stringify(state.accounts || {}));
+  }
+  if (baseSnapshot.enableFaucet === undefined && state.enableFaucet !== undefined) {
+    baseSnapshot.enableFaucet = state.enableFaucet;
   }
   const snapshot = deepCloneState(baseSnapshot);
   const sortedBlocks = (state.blocks || []).slice().sort((a, b) => a.index - b.index);
@@ -303,7 +414,41 @@ function snapshotAtHeight(config, state, targetHeight) {
   }
 
   snapshot.blocks = snapshot.blocks.filter((block) => block.index <= targetHeight);
+  snapshot.hash = computeSnapshotHash(snapshot);
   return snapshot;
+}
+
+function validateFinalityCheckpoint(checkpoint, chain, currentFinalizedHeight) {
+  if (!checkpoint) {
+    return { ok: true };
+  }
+  const { height, hash, signature, publicKey, signer, snapshotHash } = checkpoint;
+  if (typeof height !== 'number' || height < 0 || !hash) {
+    return { ok: false, reason: 'Invalid finality checkpoint payload' };
+  }
+  if (height < currentFinalizedHeight) {
+    return { ok: false, reason: 'Checkpoint below finalized height' };
+  }
+  const target = Array.isArray(chain) ? chain.find((blk) => blk.index === height) : null;
+  if (!target || target.hash !== hash) {
+    return { ok: false, reason: 'Checkpoint hash/height mismatch' };
+  }
+  if (signature && publicKey) {
+    const payloads = snapshotHash
+      ? [JSON.stringify({ height, hash, snapshotHash }), JSON.stringify({ height, hash })]
+      : [JSON.stringify({ height, hash })];
+    const ok = payloads.some((payload) => verifyPayload(publicKey, payload, signature));
+    if (!ok) {
+      return { ok: false, reason: 'Invalid checkpoint signature' };
+    }
+    if (signer) {
+      const derived = deriveAddressFromPublicKey(publicKey);
+      if (derived !== signer) {
+        return { ok: false, reason: 'Checkpoint signer mismatch' };
+      }
+    }
+  }
+  return { ok: true };
 }
 
 function updateFinalization(state, evaluation, config) {
@@ -356,6 +501,27 @@ function handleIncomingBlock(context, block, options = {}) {
   const { state, config } = context;
   ensureConsensusState(state);
 
+  if (!block.chainId) {
+    block.chainId = config.chainId;
+  }
+  const validatorAccount = ensureAccount(state, block.validator);
+  if (block.validatorStake && (!validatorAccount.stake || validatorAccount.stake < block.validatorStake)) {
+    validatorAccount.stake = block.validatorStake;
+  }
+
+  if (!verifyProducerSignature(config, block)) {
+    if (context.securityStats) {
+      context.securityStats.invalidSignatures += 1;
+    }
+    return { accepted: false, reason: 'Invalid producer signature' };
+  }
+  if (!verifyCommitteeCertificate(config, state, block)) {
+    if (context.securityStats) {
+      context.securityStats.rejectedP2P += 1;
+    }
+    return { accepted: false, reason: 'Insufficient committee certificate' };
+  }
+
   const parent = block.previousHash ? getBlockByHash(state, block.previousHash) : null;
   if (block.index > 0 && !parent) {
     return { accepted: false, reason: 'Missing parent' };
@@ -364,7 +530,8 @@ function handleIncomingBlock(context, block, options = {}) {
     return { accepted: false, reason: 'Unexpected height for parent' };
   }
 
-  const recalculatedHash = hashObject({
+  const canonicalHash = computeBlockHash(block);
+  const legacyHash = hashObject({
     index: block.index,
     previousHash: block.previousHash,
     timestamp: block.timestamp,
@@ -372,11 +539,34 @@ function handleIncomingBlock(context, block, options = {}) {
     validatorStake: block.validatorStake,
     transactions: block.transactions,
   });
-  if (recalculatedHash !== block.hash) {
-    return { accepted: false, reason: 'Block hash mismatch' };
+  const allowUnsigned =
+    config.allowUnsignedBlocks !== undefined
+      ? config.allowUnsignedBlocks
+      : process.env.NODE_ENV !== 'production';
+
+  if (block.hash !== canonicalHash) {
+    const matchesLegacy = block.hash === legacyHash;
+    if (allowUnsigned || matchesLegacy) {
+      block.hash = canonicalHash;
+    } else {
+      return { accepted: false, reason: 'Block hash mismatch' };
+    }
   }
 
-  recordEquivocationAndSlash(state, block, config);
+  const expectedMonetary = computeMonetary(config, block.transactions || []);
+  const monetary = block.monetary || {};
+  if (
+    Math.round(Number(monetary.totalFees || 0)) !== Math.round(expectedMonetary.totalFees) ||
+    Math.round(Number(monetary.burned || 0)) !== Math.round(expectedMonetary.burned) ||
+    Math.round(Number(monetary.ecosystem || 0)) !== Math.round(expectedMonetary.ecosystem)
+  ) {
+    return { accepted: false, reason: 'Monetary summary mismatch' };
+  }
+
+  const equivocation = recordEquivocationAndSlash(state, block, config);
+  if (equivocation.equivocated) {
+    return { accepted: false, reason: 'Equivocation detected' };
+  }
 
   if (typeof state.finalizedHeight === 'number' && block.index <= state.finalizedHeight) {
     return { accepted: false, reason: 'Block is not allowed below finalized height' };
@@ -392,6 +582,21 @@ function handleIncomingBlock(context, block, options = {}) {
 
   if (!candidateEval.ok) {
     return { accepted: false, reason: candidateEval.reason };
+  }
+  const checkpointValidation = validateFinalityCheckpoint(
+    block.finalityCheckpoint || null,
+    candidateEval.chain,
+    state.finalizedHeight || 0,
+  );
+  if (!checkpointValidation.ok) {
+    return { accepted: false, reason: checkpointValidation.reason };
+  }
+  if (block.finalityCheckpoint && block.finalityCheckpoint.snapshotHash) {
+    const snapshot = snapshotAtHeight(config, candidateEval.state, block.finalityCheckpoint.height);
+    const computed = computeSnapshotHash(snapshot);
+    if (computed !== block.finalityCheckpoint.snapshotHash) {
+      return { accepted: false, reason: 'Checkpoint snapshot hash mismatch' };
+    }
   }
 
   const better = isBetterChain(candidateEval, currentEval);
@@ -410,6 +615,15 @@ function handleIncomingBlock(context, block, options = {}) {
   state.mintedRewardsTotal = candidateEval.state.mintedRewardsTotal || 0;
 
   pruneMempool(context, candidateEval.includedTxIds);
+  if (
+    block.finalityCheckpoint &&
+    block.finalityCheckpoint.height > (state.finalizedHeight || 0) &&
+    block.finalityCheckpoint.hash
+  ) {
+    state.finalizedHeight = block.finalityCheckpoint.height;
+    state.finalizedHash = block.finalityCheckpoint.hash;
+    state.finalizedSnapshot = snapshotAtHeight(config, state, block.finalityCheckpoint.height);
+  }
   updateFinalization(state, candidateEval, config);
 
   const newBlocks = (state.blocks || []).filter((blk) => !previousHashes.has(blk.hash));
@@ -430,5 +644,6 @@ module.exports = {
   deriveTotalStake,
   recordEquivocationAndSlash,
   slashValidator,
-  deriveServerNonce,
+  selectCommittee,
+  snapshotAtHeight,
 };
