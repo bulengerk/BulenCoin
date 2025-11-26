@@ -1,151 +1,125 @@
 ---
-title: BulenCoin – aspekty prawne i zgodność z prawem
-language: pl
+title: BulenCoin – legal and compliance notes
+language: en
 ---
 
-> Uwaga: poniższy dokument ma charakter informacyjny i techniczny. Nie stanowi porady
-> prawnej ani podatkowej. Przed uruchomieniem produkcyjnej sieci lub prowadzeniem
-> działalności opartej o BulenCoin należy skonsultować się z prawnikiem znającym prawo
-> polskie i europejskie (w szczególności regulacje dotyczące kryptoaktywów, usług
-> finansowych i ochrony danych osobowych).
+> This document is informational and technical. It is **not** legal or tax advice. Before
+> running a production network or offering services based on BulenCoin, consult a lawyer
+> familiar with EU and local regulations on crypto-assets, financial services, and data
+> protection.
 
-# 1. Ogólne założenia prawne
+# 1. Scope and assumptions
 
-Projekt BulenCoin jest opisany w tym repozytorium jako:
+BulenCoin in this repository is:
 
-- eksperymentalna koncepcja sieci kryptowalutowej,
-- zestaw materiałów technicznych i demonstracyjnych (prototypowy węzeł w Node.js,
-  eksplorator bloków),
-- **bez**:
-  - emisji tokenów w ramach tego repozytorium,
-  - ofert inwestycyjnych,
-  - gwarancji zysku.
+- an experimental crypto-network concept,
+- technical/demo materials (prototype Node.js client, block explorer),
+- **without** token issuance, investment offers, or profit guarantees in this repo.
 
-Z tego powodu:
+Implications:
 
-- sam kod i dokumentacja nie stanowią oferty nabycia kryptoaktywów,
-- uruchomienie węzła przez użytkownika jest działaniem technicznym, za które odpowiada
-  sam użytkownik (operator węzła).
+- Source code and docs are not an offer to acquire crypto-assets.
+- Running a node is a technical action performed at the operator’s own responsibility.
 
-# 2. Kryptoaktywa i regulacje UE (w zarysie)
+# 2. Crypto-assets and EU regulation (high level)
 
-Na poziomie Unii Europejskiej obowiązują i wchodzą w życie regulacje dotyczące
-kryptoaktywów, w tym m.in.:
+Relevant frameworks in the EU:
 
-- rozporządzenie MiCA (Markets in Crypto‑Assets), regulujące m.in. emisję i ofertę
-  kryptoaktywów oraz świadczenie usług na rynku kryptoaktywów,
-- przepisy dotyczące przeciwdziałania praniu pieniędzy i finansowaniu terroryzmu (AML/CFT),
-- prawo krajowe poszczególnych państw członkowskich UE.
+- **MiCA** (Markets in Crypto-Assets) for issuance/offering and crypto-asset services,
+- **AML/CFT** obligations,
+- local laws of member states.
 
-Istotne konsekwencje:
+Likely interpretation:
 
-- sama implementacja protokołu i uruchomienie węzła na własny użytek co do zasady nie musi
-  oznaczać świadczenia regulowanych usług finansowych,
-- w momencie:
-  - publicznej emisji tokenów,
-  - prowadzenia giełdy lub kantoru,
-  - świadczenia usług powierniczych (custodial wallet),
-  - pośrednictwa w obrocie kryptoaktywami,
-  operator / organizator może wejść w zakres regulacji (MiCA, przepisy krajowe).
+- Implementing the protocol and running a node for personal use typically does **not**
+  constitute a regulated financial service.
+- Activities that may trigger licensing/registration (MiCA or local rules):
+  - public token issuance,
+  - operating an exchange/OTC desk,
+  - custodial wallets,
+  - brokering crypto-asset trades.
 
-Projekt BulenCoin w dokumentacji:
+This project:
 
-- nie definiuje ani nie opisuje procesu sprzedaży tokenów,
-- nie nakazuje operatorom przechowywania środków klientów (portfele są non‑custodial),
-- podkreśla eksperymentalny charakter sieci i brak gwarancji zysku.
+- does not define or describe a token sale process,
+- keeps wallets non-custodial; operators do not hold user funds,
+- stresses the experimental nature and absence of guaranteed returns.
 
-Mimo to, każdy podmiot planujący realne wdrożenie (szczególnie komercyjne) powinien:
+Anyone planning a real (especially commercial) deployment should:
 
-- uzyskać niezależną opinię prawną,
-- zweryfikować, czy jego działalność nie wymaga licencji, rejestracji lub zgłoszeń do
-  właściwych organów nadzoru.
+- obtain independent legal advice,
+- confirm whether licensing/registration or notifications to regulators are required.
 
-# 3. Ochrona danych osobowych (RODO/GDPR)
+# 3. Data protection (GDPR)
 
-BulenCoin jest projektowany z myślą o minimalizacji danych:
+Design intent: minimal data.
 
-- węzły komunikują się w sieci P2P na podstawie adresów IP i identyfikatorów węzłów,
-- stan łańcucha zawiera adresy i kwoty, a nie dane osobowe,
-- w dokumentacji telemetrycznej (specyfikacja) zakłada się anonimizację i agregację.
+- Nodes speak P2P using IPs and node IDs.
+- Chain state carries addresses and balances, not personal data.
+- Telemetry (if implemented) should be anonymised/aggregated.
 
-W praktycznym wdrożeniu należy jednak założyć, że:
+Practical considerations:
 
-- adres IP urządzenia może być uznany za dane osobowe,
-- logi serwera gateway (API) mogą zawierać identyfikatory użytkowników, nagłówki, adresy,
-- dane telemetryczne, jeśli pozwalają na profilowanie użytkownika, mogą podlegać RODO.
+- An IP address can be personal data.
+- Gateway/API logs may contain identifiers, headers, IPs.
+- Telemetry that profiles users may fall under GDPR.
 
-Zalecenia dla operatorów węzłów i infrastruktury:
+Operator recommendations:
 
-- ograniczać logi do niezbędnego minimum, stosować anonimizację lub pseudonimizację,
-- ustalić czas retencji logów i dbać o ich bezpieczne przechowywanie,
-- jeśli zbierane są dane identyfikujące użytkowników (np. przy rejestracji w usłudze
-  bramkowej), należy:
-  - poinformować użytkowników o zasadach przetwarzania danych (polityka prywatności),
-  - zapewnić podstawy prawne przetwarzania (zgoda, umowa, obowiązek prawny),
-  - umożliwić realizację praw osób, których dane dotyczą (dostęp, usunięcie, sprzeciw).
+- Limit logs to what is necessary; anonymise/pseudonymise where possible.
+- Define log retention and secure storage.
+- If collecting user-identifying data (e.g., for a gateway service):
+  - publish a privacy notice,
+  - ensure a lawful basis (consent/contract/legal obligation),
+  - support data-subject rights (access, deletion, objection).
 
-Prototypowa implementacja węzła BulenNode w tym repozytorium:
+Prototype BulenNode in this repo:
 
-- nie zawiera modułu telemetrycznego,
-- ma pole konfiguracyjne `BULEN_TELEMETRY_ENABLED`, które domyślnie jest wyłączone,
-- pozostawia implementację telemetryki po stronie przyszłego, docelowego klienta.
+- has no telemetry module; `BULEN_TELEMETRY_ENABLED` is off by default and left to future
+  clients.
 
-# 4. Odpowiedzialność podatkowa
+# 4. Tax responsibility
 
-W Polsce (i innych krajach UE) obrót kryptoaktywami może rodzić skutki podatkowe, m.in.:
+Crypto activity may have tax consequences (income/corporate tax on gains, record keeping,
+possible VAT on services). This project:
 
-- podatek dochodowy (PIT/CIT) od zysków kapitałowych,
-- możliwe obowiązki ewidencyjne (np. dokumentowanie transakcji),
-- potencjalne kwestie VAT w przypadku świadczenia usług.
+- does not provide accounting or tax reporting tools,
+- does not keep off-chain ledgers of user transactions,
+- does not track tax residency.
 
-Projekt BulenCoin:
+Users/operators:
 
-- nie zawiera mechanizmu księgowania ani raportowania podatkowego,
-- nie prowadzi ksiąg transakcji użytkowników poza łańcuchem (off‑chain),
-- nie zbiera informacji o rezydencji podatkowej uczestników.
+- are responsible for understanding their own tax obligations,
+- should consult a tax advisor in their jurisdiction.
 
-Użytkownicy i operatorzy:
+# 5. User safety and investment warnings
 
-- sami odpowiadają za rozpoznanie swoich obowiązków podatkowych,
-- powinni konsultować się z doradcą podatkowym w swojej jurysdykcji.
+Repository and website messaging must clearly state:
 
-# 5. Bezpieczeństwo użytkownika i ostrzeżenia inwestycyjne
+- experimental project, no profit guarantee,
+- seed loss = fund loss,
+- misconfiguration can lead to losses (e.g., slashing),
+- nothing here is investment advice.
 
-W repozytorium i na stronie WWW bulencoin:
+Recommendations:
 
-- wyraźnie wskazano, że:
-  - projekt ma charakter eksperymentalny,
-  - nie ma gwarancji zysku,
-  - utrata seed phrase oznacza utratę środków,
-  - błędna konfiguracja węzła może prowadzić do strat (np. slashing),
-- podkreślono, że treści nie stanowią porady inwestycyjnej.
+- Do not market BulenCoin as savings/investment without legal analysis.
+- Avoid promising returns to end users.
+- Communicate technical/economic risks in any marketing.
 
-Rekomendacje:
+# 6. Minimal compliance hygiene
 
-- nie traktować BulenCoin jako produktu oszczędnościowego lub inwestycyjnego bez
-  zrozumienia ryzyka,
-- nie składać obietnic zysku użytkownikom końcowym bez uprzedniego przeanalizowania
-  konsekwencji prawnych,
-- jasno komunikować ryzyko techniczne i ekonomiczne w materiałach marketingowych.
+For the team and node operators:
 
-# 6. Minimalne dobre praktyki zgodności
+- **Role separation:** open-source code/spec as a technical project; any exchange/custodial
+  service is a separately regulated activity.
+- **Policies:** IT security (backups, key management), privacy (for HTTP/API services),
+  incident response.
+- **Transparency:** disclose who operates a given gateway node (company/person) and publish
+  updates and known vulnerabilities.
 
-Dla zespołu rozwijającego BulenCoin i operatorów węzłów:
+Before production, perform:
 
-- **rozgraniczenie ról**:
-  - kod otwarto‑źródłowy i specyfikacja jako projekt techniczny,
-  - ewentualne usługi (np. giełda, portfel custodialny) jako osobno regulowana działalność,
-- **polityki wewnętrzne**:
-  - polityka bezpieczeństwa IT (backupy, zarządzanie kluczami),
-  - polityka prywatności (dla usług HTTP/API),
-  - procedury reagowania na incydenty,
-- **transparentność**:
-  - jawne informowanie, kto stoi za daną instancją węzła bramkowego (firma, osoba fizyczna),
-  - publikowanie informacji o aktualizacjach i znanych podatnościach.
-
-Wdrożenie produkcyjne powinno być poprzedzone:
-
-- analizą prawną (MiCA, AML, prawo krajowe),
-- audytem bezpieczeństwa implementacji,
-- przynajmniej podstawowym testowaniem obciążeniowym i scenariuszami awaryjnymi.
-
+- legal review (MiCA, AML, local law),
+- security audit of the implementation,
+- basic load testing and failure drills.

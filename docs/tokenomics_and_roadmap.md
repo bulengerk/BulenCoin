@@ -1,33 +1,33 @@
-# Tokenomics i roadmap BulenCoin
+# BulenCoin tokenomics and roadmap
 
-## Założenia
-- lekki łańcuch dostępny na urządzeniach końcowych, ale z realną motywacją ekonomiczną dla operatorów,
-- przejrzyste źródła inflacji i dystrybucji nagród,
-- proste parametry, które można stroić na testnecie bez zmiany protokołu.
+## Assumptions
+- Lightweight chain usable on end-user devices, with real economic motivation for operators.
+- Transparent inflation and reward distribution.
+- Simple, tunable parameters (adjustable on testnet without protocol changes).
 
-## Emisja i nagrody
-- Harmonogram inflacji (propozycja): 8% w roku 1 → 6% w roku 2 → 4% w roku 3 → 2.5% w roku 4 → 1.5% w roku 5+. Parametr decay można stroić w ramach zatwierdzonego przedziału.
-- Blokowa nagroda bazowa (`BULEN_BLOCK_REWARD`, domyślnie 10 w trybie `BULEN_SECURITY_PRESET=strict`, 0 w dev) trafia do producenta bloku.
-- Uptime/loyalty: obecnie symulowane lokalnie (kalkulator w `/api/status`), docelowo do przeniesienia on‑chain po stabilizacji parametrów.
-- Podział nagród jest **w pełni autonomiczny** – w każdym bloku `BULEN_ENABLE_PROTOCOL_REWARDS=true` dzieli opłaty i nagrodę blokową bez akcji administracyjnych.
+## Emission and rewards
+- Inflation proposal: 8% year 1 → 6% year 2 → 4% year 3 → 2.5% year 4 → 1.5% year 5+; decay can be tuned within an approved band.
+- Base block reward (`BULEN_BLOCK_REWARD`, default 10 in `BULEN_SECURITY_PRESET=strict`, 0 in dev) goes to the block producer.
+- Uptime/loyalty currently simulated locally (calculator in `/api/status`); planned on-chain once parameters stabilise.
+- Reward distribution is **fully autonomous** when `BULEN_ENABLE_PROTOCOL_REWARDS=true`—each block splits fees and base reward without admin actions.
 
-## Opłaty transakcyjne (fee burn)
-- Domyślny podział opłat w prototypie: 30% burn (`BULEN_FEE_BURN_FRACTION=0.3`), 10% do puli ekosystemowej (`BULEN_FEE_ECOSYSTEM_FRACTION=0.1`), 60% do puli walidatorów.
-- Pula walidatorów jest rozdzielana automatycznie: `BULEN_BLOCK_PRODUCER_FRACTION` (domyślnie 0.4) dla producenta bloku, reszta proporcjonalnie do stake wszystkich walidatorów (delegujących/utrzymujących stake).
-- Wszystkie wartości są parametryzowane zmiennymi środowiskowymi; suma frakcji nie może przekroczyć 1.0.
-- Suma spalonych opłat, pula ekosystemowa i łączna emisja blokowa są raportowane w `/api/status` (`monetary.*`) oraz w `/metrics` (`bulen_fee_burned_total`, `bulen_ecosystem_pool`, `bulen_rewards_minted_total`, `bulen_block_reward`).
+## Transaction fees (fee burn)
+- Prototype split: 30% burn (`BULEN_FEE_BURN_FRACTION=0.3`), 10% ecosystem pool (`BULEN_FEE_ECOSYSTEM_FRACTION=0.1`), 60% validator pool.
+- Validator pool split automatically: `BULEN_BLOCK_PRODUCER_FRACTION` (default 0.4) to producer, remainder proportional to stake across validators/delegators.
+- All values are env-configurable; fractions must sum to ≤ 1.0.
+- Burn totals, ecosystem pool, and block emission reported in `/api/status` (`monetary.*`) and `/metrics` (`bulen_fee_burned_total`, `bulen_ecosystem_pool`, `bulen_rewards_minted_total`, `bulen_block_reward`).
 
-## Slashing i kary
-- Za equivocation (podpis dwóch bloków na tym samym wysokości) stosowany jest domyślnie `BULEN_SLASH_PENALTY=0.25` (25% stake walidatora) + spadek reputacji.
-- Kary są naliczane w stanie węzła i eksportowane w `/metrics` (licznik `bulen_slash_events_total`).
+## Slashing and penalties
+- Equivocation (double-sign on same height): default `BULEN_SLASH_PENALTY=0.25` (25% stake) plus reputation drop.
+- Penalties tracked in state and exported via `/metrics` (`bulen_slash_events_total`).
 
-## Roadmap (propozycja)
-1. **Devnet** – częste zmiany, faucet domyślnie włączony, brak gwarancji finalności.
-2. **Publiczny testnet** – `BULEN_SECURITY_PRESET=strict`, blokowanie faucet, obowiązkowe podpisy, stałe P2P tokeny, monitorowanie i dashboardy; stabilizacja parametrów fee burn i nagród.
-3. **Audyt** – przegląd kodu (konsensus, P2P, podpisy, walidacja transakcji), fuzzing i testy obciążeniowe.
-4. **Mainnet** – zamrożenie parametrów na start (emisja, fee burn, nagroda blokowa), publikacja polityki zmian oraz kalendarza wypłat.
+## Roadmap (proposed)
+1. **Devnet** – rapid changes, faucet on by default, no finality guarantees.
+2. **Public testnet** – `BULEN_SECURITY_PRESET=strict`, faucet disabled, signatures required, fixed P2P tokens, monitoring and dashboards; stabilise fee-burn/reward params.
+3. **Audit** – review consensus/P2P/signing/tx validation, fuzzing, load tests.
+4. **Mainnet** – freeze launch parameters (emission, fee burn, block reward); publish change policy and payout cadence.
 
-## Parametry produkcyjne – szybki start
+## Production parameters quick start
 ```bash
 export BULEN_SECURITY_PRESET=strict \
   BULEN_P2P_TOKEN="strong-shared-secret" \

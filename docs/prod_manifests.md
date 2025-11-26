@@ -1,24 +1,29 @@
-# BulenCoin – production deployment starter (manifesty i topologie)
+# BulenCoin – production deployment starter (manifests and topology)
 
-Szkic do dalszego rozszerzania (do eksportu do PDF). Zakłada węzły Rust/Node za reverse
-proxy z TLS, sentry nodes oraz podstawowy backup/snapshot i monitoring.
+Draft outline for production deployments behind TLS reverse proxy with sentry nodes, basic
+backup/snapshot, and monitoring. Applies to Rust/Node clients.
 
-## Topologia minimalna (prod)
+## Minimal production topology
 
-- **Walidatory** (3–4): prywatne adresy, za sentry; role validator, `BULEN_REQUIRE_SIGNATURES=true`, `BULEN_P2P_TOKEN` ustawiony, faucet off.
-- **Sentry** (2): publiczne IP/porty, reverse proxy + TLS, terminują P2P+HTTP, forward do walidatorów po prywatnym/VPN.
-- **Gateway** (2): API/Explorer/Status za TLS/WAF, limiter ciaśniejszy, P2P token i wersja w nagłówku.
-- **Monitoring** (1): Prometheus + Alertmanager + Grafana, scrapes `/metrics`.
-- **Backup/Snapshot**: bucket S3-kompatybilny na `state.json`/`payments.json`/`wallet_sessions.json`.
+- **Validators (3–4):** private addresses behind sentries; `BULEN_REQUIRE_SIGNATURES=true`,
+  shared `BULEN_P2P_TOKEN`, faucet off.
+- **Sentries (2):** public IP/ports, terminate P2P+HTTP with TLS, forward to validators via
+  private network/VPN.
+- **Gateways (2):** API/Explorer/Status behind TLS/WAF; tighter rate limits; require P2P
+  token and protocol version header.
+- **Monitoring (1):** Prometheus + Alertmanager + Grafana scraping `/metrics`.
+- **Backup/Snapshot:** S3-compatible bucket for `state.json` / payments/wallet session
+  snapshots.
 
-### Wymagania sprzętowe / OS (minimum)
+### Minimum OS/hardware
 
-- OS: Debian 12 lub Ubuntu 22.04 LTS; Node.js 18 LTS (`npm` ≥ 9).
-- Walidator / gateway: min. 2 vCPU, 4 GB RAM, 40 GB SSD/NVMe; rekomendacja 4 vCPU, 8 GB RAM, 80 GB.
-- Sentry: podobnie jak gateway, ale z ostrzejszym limiterem; pamiętaj o TLS/WAF.
-- Desktop-full (niepubliczny): min. 2 vCPU, 4 GB RAM, 20 GB SSD.
-- Raspberry: Raspberry Pi 4/4GB (lub lepszy) + microSD UHS-I 32 GB / SSD po USB, stabilne łącze.
-## Reverse proxy (nginx, przykład)
+- OS: Debian 12 or Ubuntu 22.04 LTS; Node.js 18 LTS (npm ≥ 9).
+- Validator/gateway: min 2 vCPU, 4 GB RAM, 40 GB SSD/NVMe (4 vCPU/8 GB/80 GB recommended).
+- Sentry: similar to gateway with tighter limiter; TLS/WAF enforced.
+- Desktop-full (non-public): min 2 vCPU, 4 GB RAM, 20 GB SSD.
+- Raspberry: Pi 4/4GB (or better) + UHS-I 32 GB microSD / USB SSD, stable link.
+
+## Reverse proxy (nginx example)
 
 ```
 server {
@@ -45,55 +50,60 @@ server {
 }
 ```
 
-Traefik/ingress – analogicznie: TLS, HSTS, rate-limit middleware, forward auth gdy trzeba.
+Traefik/ingress: same principles—TLS, HSTS, rate-limit middleware, optional forward auth.
 
-## Konfiguracja węzłów (Rust/Node)
+## Node configuration (Rust/Node)
 
 - `BULEN_REQUIRE_SIGNATURES=true`
 - `BULEN_P2P_TOKEN=<shared>`
-- `BULEN_PROTOCOL_VERSION` zsynchronizowane w klastrze
-- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` (gateway: np. 10s / 20)
+- `BULEN_PROTOCOL_VERSION` aligned across the cluster
+- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` (gateway e.g., 10s / 20)
 - `BULEN_MAX_BODY_SIZE_BYTES` (~128kb)
 - `BULEN_CORS_ORIGINS=https://api.bulen.example,https://explorer.bulen.example`
-- `BULEN_ENABLE_FAUCET=false` na publicznych hostach
+- `BULEN_ENABLE_FAUCET=false` on public hosts
 - `BULEN_PEERS=https://sentry1.bulen.example,https://sentry2.bulen.example`
 - `BULEN_PEER_SYNC_INTERVAL_MS=5000` (Rust node)
 
 ## Backup / snapshot
 
-- Co 5–15 minut: snapshot `data/` (Node) lub `data-rs/` (Rust) do bucketu S3 (z wersjonowaniem).
-- Trzymaj co najmniej 7 dni wersji; szyfruj at-rest (SSE).
-- Testuj odtwarzanie: `aws s3 cp s3://bucket/state.json data-rs/state.json`, start węzła.
+- Every 5–15 minutes: snapshot `data/` (Node) or `data-rs/` (Rust) to S3 with versioning.
+- Retain at least 7 days; encrypt at rest (SSE).
+- Test restore regularly: `aws s3 cp s3://bucket/state.json data-rs/state.json` then start
+  the node.
 
-## Monitoring / alerty
+## Monitoring / alerts
 
-- Prometheus scrapuje:
-  - walidatory, gateway: `/metrics`
-  - reverse proxy: metryki 5xx/latencja
-- Alerty:
-  - brak metryk / host down
-  - niski peer count, brak wzrostu height
-  - skok 5xx / 429
-  - opóźnienie wysokości względem innych > N bloków
-- Grafana dashboard: wysokość łańcucha, mempool, stake total, reward est., payments, rate-limit config, peers.
+- Prometheus scrapes:
+  - validators, gateways: `/metrics`
+  - reverse proxy: 5xx/latency metrics
+- Alerts:
+  - missing metrics/host down
+  - low peer count, missing height growth
+  - spikes in 5xx / 429
+  - height lag > N blocks vs peers
+- Grafana dashboard: height, mempool, total stake, reward estimates, payments, rate-limit
+  config, peers.
 
 ## Sentry nodes
 
-- Publiczne tylko sentry; walidatory słuchają tylko na prywatnym/VPN.
-- Sentry ma `BULEN_P2P_TOKEN` i sprawdza wersję protokołu w nagłówku; limiter per-IP.
-- W firewallu otwarte tylko porty HTTP/P2P z zaufanych źródeł (WAF/ACL).
+- Only sentries are public; validators listen on private/VPN networks.
+- Sentries enforce `BULEN_P2P_TOKEN` and protocol version header; per-IP limiter.
+- Firewall exposes only required HTTP/P2P ports from trusted sources (WAF/ACL).
 
-## Checklista hardening
+## Hardening checklist
 
-- Non-root użytkownik dla procesu, `AmbientCapabilities=CAP_NET_BIND_SERVICE` tylko gdy trzeba.
-- Aktualne TLS certy, automatyczny renew (certbot/lego).
-- Log rotation (journald/logrotate) z retencją 30–90 dni.
-- Sekrety w KMS/SSM/Vault, nie w repo.
-- Systemd unit z `Restart=on-failure`, limit CPU/mem w cgroup.
+- Non-root service user; `AmbientCapabilities=CAP_NET_BIND_SERVICE` only when needed.
+- Current TLS certs with auto-renewal (certbot/lego).
+- Log rotation (journald/logrotate) with 30–90 day retention.
+- Secrets in KMS/SSM/Vault, not in the repo.
+- Systemd unit with `Restart=on-failure`; optionally cap CPU/mem via cgroups.
 
-## TODO (kolejna iteracja)
+## TODO (next iteration)
 
-- Testy soak/perf (dni/tygodnie) z metrykami i scenariuszami sieciowymi (packet loss/latencja).
-- Adversarial/byzantine P2P (blokada/double-sign), testy upgrade/backward-compat i podpisane snapshoty.
-- Pakiety podpisane (.deb/.rpm/.pkg/.exe) + auto-update desktop; release pipeline z hashami/Sigstore.
-- Dashboard SLO/alerty (Prometheus/Grafana): height drift, peer count, 5xx/latency, mempool.
+- Soak/perf tests (days/weeks) with metrics and network fault scenarios.
+- Adversarial/byzantine P2P (blocking/double-sign), upgrade/backward-compat tests, signed
+  snapshots.
+- Signed packages (.deb/.rpm/.pkg/.exe) + auto-update desktop; release pipeline with
+  hashes/Sigstore.
+- SLO/alert dashboard (Prometheus/Grafana): height drift, peer count, 5xx/latency,
+  mempool.

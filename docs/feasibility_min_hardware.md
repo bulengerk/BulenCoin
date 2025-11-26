@@ -1,130 +1,67 @@
-# BulenCoin – analiza wykonalności (minimalny sprzęt na start)
+# BulenCoin – feasibility and minimum hardware
 
-Dokument w formacie roboczym (do łatwego eksportu do PDF). Cel: oszacować minimalny,
-realistyczny zestaw sprzętowy potrzebny do uruchomienia sieci BulenCoin w fazie
-pilotażowej/testnetowej z podstawową obserwowalnością oraz wariant minimalny, ale
-pełnoprawny dla produkcji (z klientem w Rust).
+Working draft to estimate realistic minimum hardware for pilot/testnet and a lean
+production footprint (Rust/Node clients).
 
-## Założenia
+## Assumptions
 
-- Używamy aktualnego prototypu (Node.js) – niskie wymagania CPU/RAM, niski I/O.
-- Konsensus lekki (PoS z małymi komitetami), brak ciężkiego storage (brak pełnych
-  historii stanów).
-- Redundancja minimalna: 3 węzły walidujące (by mieć quorum i odporność na 1 awarię),
-  1 bramka/gateway (API), 1 eksplorator + 1 status-service (mogą współdzielić hosta).
+- Current prototype (Node.js) is lightweight on CPU/RAM/I/O.
+- PoS with small committees; no heavy historical storage.
+- Minimal redundancy: 3 validators for quorum, 1 gateway, 1 explorer + status (shared host
+  is fine).
 
-## Minimalny zestaw maszyn (testnet/pilot)
+## Pilot / testnet (Node.js client)
 
-1. **Validator 1–3 (x3)**  
-   - vCPU: 2  
-   - RAM: 2–4 GB  
-   - Dysk: 40 GB SSD (I/O umiarkowane)  
-   - Sieć: stałe łącze 50+ Mbps symetryczne, publiczny adres/porty (P2P+HTTP)  
-   - Profil: `server-full` lub `desktop-full` (w środowisku cloud/lab).
+- **Validators (3x):** 2 vCPU, 4 GB RAM, 40 GB SSD; public IP/ports for HTTP/P2P; profile
+  `server-full` or `desktop-full`.
+- **Gateway + Explorer + Status (1x shared):** 2 vCPU, 4 GB RAM, 30 GB SSD; public HTTP/HTTPS;
+  P2P token set, stricter rate limits.
+- **Optional edge/ARM nodes:** Raspberry Pi 4 / 4 GB + fast microSD/SSD, stable network.
 
-2. **Gateway + Explorer + Status (x1, współdzielony)**  
-   - vCPU: 2  
-   - RAM: 2–4 GB  
-   - Dysk: 30 GB SSD  
-   - Sieć: 50+ Mbps, publiczny HTTP/HTTPS (gateway/explorer), dostęp do validatorów po
-     sieci prywatnej lub publicznej (z ACL/WAF).  
-   - Profil gateway: `gateway` (faucet off, `BULEN_REQUIRE_SIGNATURES=true`,
-     `BULEN_P2P_TOKEN` ustawiony, limiter ustawiony ciaśniej).
+Network: 50+ Mbps symmetric recommended; secure ports via firewall/WAF; TLS termination at
+reverse proxy.
 
-3. **Opcjonalnie – węzły „edge”/ARM do testów urządzeń**  
-   - Raspberry Pi 4/5, 4 GB RAM, SSD na USB, profil `raspberry`.  
-   - Cel: walidacja działania na małych urządzeniach, nie krytyczne dla sieci.
+Total: 4 small VMs give a usable pilot quorum and public API.
 
-Łącznie: **4 małe VM/maszyny** (3x validator, 1x gateway+explorer+status). To pozwala
-zbudować podstawowe quorum PoS, mieć publiczne API i wgląd w status.
+## Minimal production (Rust client target)
 
-## Minimalny, ale pełnoprawny deployment produkcyjny (Rust client)
+- Focus on Rust BulenNode for efficiency (RAM/CPU, I/O, static binaries).
+- **Validators (3x):** 2–4 vCPU, 4–8 GB RAM, NVMe SSD 40+ GB, static IPs; strict profile,
+  signatures on, faucet off.
+- **Sentries (2x):** front P2P+HTTP with TLS/WAF, forward to validators over private/VPN;
+  rate limit tighter.
+- **Gateway (1x) + Explorer + Status:** 2 vCPU, 4 GB RAM, 30 GB SSD; HTTPS/WAF; connects
+  only to sentries or private validator addresses.
+- **Monitoring:** Prometheus scraping `/metrics` from validators/sentries/gateway; alert on
+  liveness, peers, 5xx/429, height lag.
+- **Backups:** validator state snapshot/restore scripts; config and keys in KMS/HSM if
+  available.
 
-Wymaga:
-- klienta BulenNode przepisania do **Rusta** (wydajność, mniejsze zużycie RAM/CPU,
-  lepszy profil I/O, łatwiejsze statyczne binarki),
-- izolacji warstw (sentry przed validatorami), TLS, monitoring/alerting,
-- minimalnej redundancji 3+ walidatorów i 2 gateway (active/active lub active/passive).
+Rough monthly cloud cost (budget instances): ~$50–70 for 3 validators + 1 shared
+gateway/explorer/status.
 
-Proponowany minimalny układ:
+## Garage / PoC variant
 
-1. **Walidatory (x3)**  
-   - vCPU: 4  
-   - RAM: 8 GB  
-   - Dysk: 80 GB NVMe (low‑latency)  
-   - Sieć: 200+ Mbps symetryczne, stałe publiczne IP lub stały endpoint (Anycast/Elastic IP)  
-   - Profil: produkcyjny, signatures on, faucet off, P2P token, rate limit włączony.
+- 1 laptop/mini-PC (4 vCPU, 8 GB RAM, 256 GB SSD) running 3 validator instances on
+  different ports + 1 gateway/explorer/status instance; not production-grade but fine for
+  demos.
 
-2. **Sentry nodes (x2)**  
-   - vCPU: 2–4  
-   - RAM: 4–8 GB  
-   - Dysk: 40 GB SSD/NVMe  
-   - Rola: terminują ruch P2P/HTTP, filtrują, forwardują do walidatorów; wystawione publicznie
-     zamiast bezpośredniej ekspozycji walidatorów.
+## Network and security checklist
 
-3. **Gateway / API (x2)**  
-   - vCPU: 2–4  
-   - RAM: 4 GB  
-   - Dysk: 30 GB SSD  
-   - Sieć: 200+ Mbps, HTTPS + WAF/ACL, limiter ciaśniejszy (np. 10s okno, 20–30 req/IP).  
-   - Łączą się tylko do sentry lub prywatnych adresów walidatorów.
+- Tokens: `BULEN_P2P_TOKEN` consistent across nodes; `BULEN_STATUS_TOKEN`/`BULEN_METRICS_TOKEN`.
+- TLS/WAF/ACL for public endpoints; open only required ports.
+- Non-root service users; `AmbientCapabilities=CAP_NET_BIND_SERVICE` only if binding <1024.
+- Log rotation with 30–90 day retention.
+- Alerting on node down, high 429/5xx, chain height divergence, low peers.
 
-4. **Explorer + Status (x1–2)**  
-   - vCPU: 2  
-   - RAM: 2–4 GB  
-   - Dysk: 30 GB SSD  
-   - Może współdzielić hosta z gateway (jeśli ruch mały) lub być odseparowany.
+## Upgrade and recovery
 
-5. **Monitoring / Prometheus + Alertmanager + Grafana (x1)**  
-   - vCPU: 2  
-   - RAM: 4 GB  
-   - Dysk: 30 GB SSD  
-   - Skrobie `/metrics` z walidatorów, sentry, gateway. Alerty na brak liveness, niską liczbę
-     peerów, 5xx, wysokie 429, odchylenia wysokości łańcucha.
+- Keep snapshots for fast rehydrate; test restore regularly.
+- Plan protocol upgrades with version headers in P2P; reject mismatched major versions.
+- Document failover for gateway/sentry and validator replacement.
 
-6. **Backup / Snapshot storage (bucket/S3 kompatybilny)**  
-   - Snapshoty danych walidatorów (pruning/snapshot), backup konfiguracji i kluczy w KMS/HSM.
+## Resource tuning
 
-Łącznie minimalnie produkcyjnie: **8–10 małych/średnich VM**. Zalety: odporność na awarię
-1 walidatora i 1 gateway, izolacja walidatorów za sentry, monitoring i backup.
-
-Kluczowe różnice vs. pilot:
-- Rustowy klient: niższy RAM/CPU, lepsza stabilność długotrwała, statyczny deploy.
-- 2x gateway (redundancja) i 2x sentry (warstwa ochronna).
-- TLS/WAF/ACL oraz szybsze dyski NVMe dla walidatorów.
-- KMS/HSM dla kluczy walidatorów (jeśli dostępne); inaczej air‑gapped key mgmt.
-
-## Konfiguracja i parametry (minimum higieny)
-
-- `BULEN_REQUIRE_SIGNATURES=true` na walidatorach i gateway.  
-- `BULEN_P2P_TOKEN` ustawiony spójnie między węzłami.  
-- Rate limit: `BULEN_RATE_LIMIT_WINDOW_MS=10000`, `BULEN_RATE_LIMIT_MAX_REQUESTS=30`
-  na gateway.  
-- Faucet: `BULEN_ENABLE_FAUCET=false` na hostach publicznych.  
-- Prometheus: scrapuj `/metrics` z validatorów i gateway; alerty na niedostępność, niską
-  liczbę peerów, wzrost 5xx, wysokie 429.  
-- TLS i WAF/reverse proxy przed gateway/explorer/status (nginx/Traefik z basic auth na
-  panelach wewnętrznych).
-
-## Szacunkowy koszt (chmura, klasy VM „small”)
-
-- 3x validator (2 vCPU, 4 GB RAM, 40 GB SSD): ~3×$12–18 / miesiąc (w zależności od
-  dostawcy/regionu).  
-- 1x gateway+explorer+status (2 vCPU, 4 GB RAM, 30 GB SSD): ~$12–18 / miesiąc.  
-- Razem rząd wielkości: **~$50–70 / miesiąc** przy cenach chmurowych klasy budżetowej
-  (bez ruchu/transferu).
-
-## Minimalny wariant „garażowy” (tylko PoC)
-
-- 1x laptop/mini‑PC (4 vCPU, 8 GB RAM, SSD 256 GB) z 3 instancjami validatorów
-  uruchomionymi lokalnie na różnych portach + 1 instancja gateway/explorer/status.  
-- Akceptowalne tylko do demonstracji; brak redundancji, pojedynczy punkt awarii,
-  słaba wiarygodność pomiarów.
-
-## Rekomendacje dalsze
-
-- Dodać 1 zapasowy gateway (active/passive) z tym samym backendem P2P.  
-- Oddzielić explorer/status od gateway, gdy ruch rośnie.  
-- Użyć storage z snapshotami (np. dysk sieciowy z backupem do bucketu).  
-- Włączyć monitoring transferu i limitów na firewallu/WAF.  
-- W produkcji docelowo 4–6 walidatorów (większe quorum) + sentry nodes przed nimi.
+- Block interval and pruning tuned per profile (desktop/server vs mobile/superlight).
+- Rate limits tighter on gateways; default limits acceptable for devnet/testnet.
+- Super-light/mobile profiles sleep on low battery and keep small history windows.

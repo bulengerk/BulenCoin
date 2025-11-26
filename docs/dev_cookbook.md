@@ -1,10 +1,8 @@
 # BulenCoin developer cookbook
 
-Krótkie przepisy „kopiuj i wklej” dla najczęstszych integracji. API jest stabilne na
-ścieżkach `/api/payments`, `/api/payment-link`, `/api/rewards/estimate`,
-`/api/status`, `/api/transactions`.
+Short, copy-paste friendly recipes for common integrations. Stable APIs: `/api/payments`, `/api/payment-link`, `/api/rewards/estimate`, `/api/status`, `/api/transactions`.
 
-## 1) Mikropłatności (invoice + webhook)
+## 1) Micropayments (invoice + webhook)
 
 ### Node.js (fetch / bulencoin-sdk)
 
@@ -58,14 +56,14 @@ status = requests.get(f"https://node.example/api/payments/{payment['id']}", time
 print(status["status"], status.get("transactionId"))
 ```
 
-## 2) Paywall w 15 minut (serwis WWW)
+## 2) 15-minute paywall (web backend)
 
-1. Tworzysz invoice w backendzie (`POST /api/payments` z `memo` = ID sesji/artykułu).
-2. Frontend wyświetla link/QR z `/api/payment-link` dla `to/amount/memo`.
-3. Backend subskrybuje webhook (`webhookUrl`) lub co 5s sprawdza `/api/payments/:id`.
-4. Po statusie `paid` wpuszczasz użytkownika (cache sesji w Redisie na 10–15 min).
+1. Create an invoice in the backend (`POST /api/payments`, memo = session/article ID).
+2. Frontend shows link/QR from `/api/payment-link` for that `to/amount/memo`.
+3. Backend either listens on `webhookUrl` or polls `/api/payments/:id` every 5s.
+4. After status `paid`, grant access (cache session in Redis for 10–15 minutes).
 
-Minimalny handler (Node/Express):
+Minimal handler (Node/Express):
 
 ```js
 app.post('/paywall/start', async (req, res) => {
@@ -76,7 +74,7 @@ app.post('/paywall/start', async (req, res) => {
 });
 ```
 
-## 3) Kalkulator nagród w backendzie
+## 3) Reward calculator in backend
 
 ```python
 import requests
@@ -88,22 +86,15 @@ resp = requests.post(
 print(resp["projection"]["weekly"])
 ```
 
-## 4) Paczki dla devów
+## 4) Packages for developers
 
-- **NPM (JS/TS):** `npm install bulencoin-sdk` – patrz `sdk/README.md` (createPayment,
-  verifyPayment, payment links, QR).
-- **Rust crate:** `bulencoin-sdk` w katalogu `sdk-rs/` (blocking klient `reqwest`).
-- **Super‑light mobile:** profil `phone-superlight` (`BULEN_NODE_PROFILE=phone-superlight`) +
-  API `POST /api/device/battery {"level":0.12}` do usypiania przy niskiej baterii;
-  status zwraca `superLight` i `superLightSleeping`.
-- **Testy integracyjne:** `node --test scripts/tests` uruchamia zestaw smoke/load + nowe
-  testy (HMAC webhook, super-light). Uruchamiaj je po większych zmianach API.
-- **Rust async:** `AsyncBulenClient` w `sdk-rs` (Tokio) dla tych samych endpointów.
-- **API REST:** dokument `docs/payment_integration.md`.
+- **NPM (JS/TS):** `npm install bulencoin-sdk` – see `sdk/README.md` (createPayment, verifyPayment, payment links, QR).
+- **Rust crate:** `bulencoin-sdk` in `sdk-rs/` (`reqwest` blocking client, async variant available with Tokio).
+- **Super-light mobile:** profile `phone-superlight` (`BULEN_NODE_PROFILE=phone-superlight`) + API `POST /api/device/battery {"level":0.12}` to sleep on low battery; status shows `superLight` and `superLightSleeping`.
+- **Integration tests:** `node --test scripts/tests` runs smoke/load + webhook HMAC + super-light suites. Run after API changes.
+- **REST reference:** `docs/payment_integration.md`.
 
-## 5) Bezpieczeństwo integracji
+## 5) Integration security
 
-- Produkcyjnie ustaw `BULEN_REQUIRE_SIGNATURES`, `BULEN_P2P_TOKEN`,
-  `BULEN_STATUS_TOKEN`/`BULEN_METRICS_TOKEN`, `BULEN_WEBHOOK_SECRET` (podpisuje webhooki
-  HMAC) oraz TLS na reverse proxy.
-- Testy e2e: `node --test scripts/tests/full_stack_integration_all.test.js`.
+- Production: set `BULEN_REQUIRE_SIGNATURES`, `BULEN_P2P_TOKEN`, `BULEN_STATUS_TOKEN`/`BULEN_METRICS_TOKEN`, `BULEN_WEBHOOK_SECRET` (signs webhook HMAC) and TLS via reverse proxy.
+- End-to-end tests: `node --test scripts/tests/full_stack_integration_all.test.js`.

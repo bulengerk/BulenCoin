@@ -1,81 +1,81 @@
-# BulenCoin – whitesheet dla inwestorów
+# BulenCoin – investor whitesheet
 
-Dokument streszcza założenia projektu BulenCoin z perspektywy inwestora: problem, produkt, rynek, model ekonomiczny, bezpieczeństwo oraz plan wdrożeniowy.
+This document summarizes BulenCoin from an investor perspective: problem, product, market, economics, security, and rollout plan.
 
-## W skrócie
+## At a glance
 
-- **Cel:** udowodnić, że pełna sieć PoS może działać na powszechnych urządzeniach (telefony, laptopy, serwery) z przewidywalnymi nagrodami za uptime.  
-- **Produkt:** klient BulenNode (mobilny, desktopowy, gateway), eksplorator bloków, status page i zestaw instalatorów/systemd.  
-- **Stan:** działający prototyp (HTTP API, produkcja bloków, prosta nagroda za uptime), komplet dokumentacji technicznej i bezpieczeństwa, strona www z i18n.  
-- **Model:** inflacyjna nagroda bazowa + opłaty transakcyjne + jawna nagroda za dostępność; preferencja dla tańszych urządzeń, aby sieć była zdywersyfikowana sprzętowo.  
-- **Roadmap:** publiczny testnet → bootstrap mainnetu z mieszanym zestawem węzłów → stopniowa decentralizacja komitetów walidatorów.  
-- **Potrzeby:** finansowanie na rozwój pełnego klienta, UX mobilny/desktopowy, audyty bezpieczeństwa i bootstrap infrastruktury testnetu.
+- **Goal:** prove a full PoS network can run on common devices (phones, laptops, servers) with predictable uptime rewards.
+- **Product:** BulenNode client (mobile, desktop, gateway), block explorer, status page, installers/systemd units.
+- **State:** working prototype (HTTP API, block production, simple uptime reward), complete technical/security docs, multilingual website.
+- **Model:** inflationary base reward + transaction fees + explicit uptime reward; preference for lower-cost devices to keep hardware diversity.
+- **Roadmap:** public testnet → bootstrap mainnet with mixed node set → gradual decentralization of validator committees.
+- **Needs:** funding for full client, mobile/desktop UX, security audits, and testnet bootstrap infra.
 
 ## Problem
 
-Dzisiejsze sieci L1 wymagają kosztownego sprzętu lub scentralizowanych dostawców RPC. Użytkownicy, którzy chcą wspierać sieć, zderzają się z wysokimi kosztami energii, dysku i stałym nadzorem operacyjnym. W efekcie rośnie centralizacja i bariera wejścia.
+Most L1s need expensive hardware or centralised RPC providers. Users who want to support the network face energy/disk costs and operational overhead, driving centralisation and high entry barriers.
 
-## Propozycja wartości
+## Value proposition
 
-- **Uptime jako produkt:** sieć wynagradza realną dostępność na typowych urządzeniach – nie tylko stake.  
-- **Lekki klient:** jeden kod bazowy działa na telefonach, laptopach i serwerach; parametry (porty, limity, faucet) dobierane są per profil.  
-- **Doświadczenie użytkownika:** tryby nocne / Wi‑Fi‑only na mobile, limity dysku na desktopie, instalatory i systemd na serwerach.  
-- **Koszty przewidywalne:** energooszczędny PoS, małe komitety, brak GPU/ASIC.
+- **Uptime as a product:** network rewards real availability on typical devices, not just stake.
+- **Lightweight client:** one codebase runs on phones, laptops, servers; profiles tune ports/limits/faucet.
+- **User experience:** night/Wi‑Fi-only modes on mobile, disk caps on desktop, installers and systemd on servers.
+- **Predictable cost:** energy-efficient PoS, small committees, no GPU/ASIC.
 
-## Produkt i architektura
+## Product and architecture
 
-- **BulenNode:** modularny klient (networking, konsensus PoS, storage, wallet, monitor zasobów) z P2P przez HTTP, podpisami ECDSA i mechanizmem reputacji.  
-- **Profile urządzeń:** `mobile-light`, `desktop-full`, `server-full`, `raspberry`, `gateway` – każdy ma osobne porty, wagi nagród i ustawienia faucet.  
-- **Warstwa danych:** nagłówki + stan kont + mempool; bloki zawierają transakcje z opłatą i stake walidatora.  
-- **Infrastruktura web:** eksplorator, status page, statyczna strona z i18n, skrypty instalacyjne i obrazy Docker.  
-- **Bezpieczeństwo:** ograniczenie rozmiaru JSON, opcjonalny wymóg podpisów, token P2P, rate limiting, zalecenia hardeningu w `docs/security_hardening_pl.md`.
+- **BulenNode:** modular client (networking, PoS consensus, storage, wallet, resource monitor) with HTTP-based P2P, ECDSA signatures, and reputation.
+- **Device profiles:** `mobile-light`, `desktop-full`, `server-full`, `raspberry`, `gateway` with distinct ports, reward weights, faucet defaults.
+- **Data layer:** headers + account state + mempool; blocks carry txs with fees and validator stake.
+- **Web stack:** explorer, status page, static multilingual site, install scripts, Docker images.
+- **Security:** JSON body limits, optional signature requirement, P2P token, rate limiting, hardening tips in `docs/security_hardening_pl.md` (now English).
 
-## Model ekonomiczny
+## Economic model
 
-- **Źródła nagród:** inflacyjny blok + fee + eksplicytna nagroda za uptime kalibrowana do klasy urządzenia.  
-- **Reputacja i różnorodność:** rzadkie profile (np. telefony) dostają niewielki boost selekcji, co utrzymuje heterogeniczność sieci.  
-- **Slashing:** kary za podwójne podpisy i inne próby ataku; reputacja obniża szansę wyboru do komitetu.  
-- **Delegacja:** użytkownicy mobile mogą delegować stake do walidatorów pełnych, zachowując uproszczony UX.
+- **Reward sources:** inflationary block reward + fees + explicit uptime reward calibrated per device class.
+- **Reputation/diversity:** under-represented profiles (e.g., phones) get a small selection boost to keep a heterogeneous network.
+- **Slashing:** penalties for double-signing and misbehaviour; lower reputation reduces committee selection odds.
+- **Delegation:** mobile users can delegate stake to full validators while keeping a simplified UX.
 
-## Rynek i zastosowania
+## Market and use cases
 
-- **Segmenty:** entuzjaści krypto z urządzeniami always‑on, posiadacze starszych telefonów/SBC, operatorzy małych serwerów oraz integratorzy potrzebujący lekkiej sieci PoS.  
-- **Use‑case’y:** mikropłatności, API dla gier i aplikacji mobilnych, edukacyjne wdrożenia PoS, eksperymenty badawcze z dywersyfikacją sprzętową.
+- **Segments:** crypto enthusiasts with always-on devices, owners of older phones/SBCs, small-server operators, integrators needing a light PoS network.
+- **Use cases:** micropayments, APIs for games/mobile apps, educational PoS deployments, research on hardware diversity.
 
-## Strategia wejścia na rynek
+## Go-to-market
 
-- **Testnet otwarty:** szybka dystrybucja klienta z faucetem, program nagród za uptime, leaderboard.  
-- **Partnerzy sprzętowi:** obrazy dla Raspberry Pi i mini‑serwerów; instalatory desktopowe i paczki mobilne.  
-- **Społeczność:** dokumentacja w trzech językach, prosty onboarding na stronie, kampanie edukacyjne o bezpieczeństwie kluczy.  
-- **Ekosystem:** wczesne API dla zewnętrznych portfeli i giełd, gotowy gateway node.
+- **Open testnet:** fast client distribution with faucet, uptime-reward program, leaderboard.
+- **Hardware partners:** images for Raspberry Pi/mini-servers; desktop installers and mobile packages.
+- **Community:** docs in English/Spanish/Polish on the site, simple onboarding, education on key safety.
+- **Ecosystem:** early APIs for external wallets/exchanges, ready gateway node.
 
-## Roadmap operacyjny
+## Operational roadmap
 
-1. **Faza 0 – prototyp (ukończone):** HTTP API, produkcja bloków, eksplorator/status, dokumentacja i strona.  
-2. **Faza 1 – publiczny testnet:** audyty bezpieczeństwa, telemetria minimalizująca dane, kampania mobilna/desktopowa, program uptime rewards.  
-3. **Faza 2 – bootstrap mainnetu:** mieszana pula węzłów zespołu i społeczności, ograniczone parametry centralizacji, wdrożenie delegacji stake.  
-4. **Faza 3 – decentralizacja:** redukcja udziału węzłów zespołu, rozszerzone komitety walidatorów, governance nad parametrami nagród.
+1. **Phase 0 – prototype (done):** HTTP API, block production, explorer/status, docs, website.
+2. **Phase 1 – public testnet:** security audits, privacy-minimal telemetry, mobile/desktop push, uptime rewards program.
+3. **Phase 2 – bootstrap mainnet:** mixed team/community nodes, constrained centralisation parameters, stake delegation.
+4. **Phase 3 – decentralisation:** reduce team node share, expand validator committees, governance over reward params.
 
-## Bezpieczeństwo i zgodność
+## Security and compliance
 
-- **Operacyjne:** separacja użytkowników systemowych, firewall/TLS, limity żądań, kontrola pochodzenia (CORS).  
-- **Prawne:** analiza MiCA/AML/RODO na poziomie koncepcyjnym (zawarta w `docs/legal_compliance_pl.md`); jasne ostrzeżenie, że projekt ma charakter eksperymentalny.  
-- **Prywatność:** brak telemetryki domyślnie; planowane są zgody użytkownika i minimalizacja danych w przyszłych wersjach.
+- **Operational:** user separation, firewall/TLS, request limits, origin control (CORS).
+- **Legal:** MiCA/AML/GDPR concepts covered in `docs/legal_compliance_pl.md`; clear warning that the project is experimental.
+- **Privacy:** telemetry off by default; future versions to use user consent and data minimisation.
 
-## Model finansowania i wykorzystanie środków
+## Funding and use of proceeds
 
-- **Rozwój produktu (40%):** pełny klient (storage, konsensus, sieć), aplikacje mobilne/desktopowe, UX, audyty kodu.  
-- **Infrastruktura (25%):** bootstrap testnetu/mainnetu, monitoring, CDN dla binariów, infrastruktura CI i testów integracyjnych.  
-- **Bezpieczeństwo i compliance (20%):** audyty zewnętrzne, procesy SDLC, konsultacje prawne.  
-- **Ekosystem i community (15%):** granty dla integratorów, hackathony, materiały edukacyjne.
+- **Product (40%):** full client (storage, consensus, networking), mobile/desktop apps, UX, code audits.
+- **Infrastructure (25%):** testnet/mainnet bootstrap, monitoring, CDN for binaries, CI and integration testing.
+- **Security and compliance (20%):** external audits, SDLC processes, legal consultations.
+- **Ecosystem/community (15%):** grants for integrators, hackathons, educational material.
 
-## Kluczowe KPI
+## Key KPIs
 
-- Liczba aktywnych węzłów w testnecie/mainnecie z podziałem na klasy urządzeń.  
-- Średni uptime i czas finalizacji bloku.  
-- Udział społecznościowych walidatorów w produkcji bloków (decentralizacja).  
-- Wolumen transakcji i liczba integracji API/gateway.
+- Active nodes in testnet/mainnet by device class.
+- Average uptime and block finality time.
+- Share of community validators producing blocks (decentralisation).
+- Transaction volume and count of API/gateway integrations.
 
-## Wezwanie do działania
+## Call to action
 
-Szukamy partnerów finansowych i technologicznych na fazę testnetu → mainnet bootstrap. Jesteśmy gotowi do audytów i pilotaży na sprzęcie partnerów. Kontakt: core@bulencoin.example (tymczasowy alias do ustalenia z inwestorami).
+We seek financial/technical partners for testnet → mainnet bootstrap. Ready for audits and pilots on partner hardware. Contact: core@bulencoin.example (temporary alias for investor coordination).
