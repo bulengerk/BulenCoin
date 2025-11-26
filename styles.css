@@ -575,6 +575,11 @@ section p {
   font-family: 'Space Grotesk', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+.bc-deploy .bc-step {
+  background: linear-gradient(150deg, rgba(32, 42, 80, 0.5), rgba(16, 21, 42, 0.9));
+  border: 1px solid var(--border);
+}
+
 .bc-wallet-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

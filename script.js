@@ -260,6 +260,19 @@ const translations = {
     wallet_import_button: 'Import wallet',
     wallet_import_success: 'Wallet imported. Address: {address}',
     wallet_import_error: 'Could not import backup. Check passphrase and PEM.',
+    deploy_title: 'Deploy in 5 minutes',
+    deploy_subtitle:
+      'Choose your platform: desktop/gateway installer or mobile companion. Testnet builds include safe defaults, faucet and telemetry off by default.',
+    deploy_desktop_title: 'Desktop / server',
+    deploy_desktop_body:
+      'Download the installer or use Docker Compose. Run with desktop-full or gateway profile, then visit /api/status.',
+    deploy_guide: 'Open install guide',
+    deploy_compose: 'Docker Compose',
+    deploy_mobile_title: 'Run on mobile',
+    deploy_mobile_body:
+      'Light node with aggressive pruning and battery-aware mode. Grab the APK/TestFlight build (coming soon) or pair with a gateway for read-only monitoring.',
+    deploy_mobile_learn: 'See mobile profile',
+    deploy_mobile_soon: 'APK/TestFlight – coming soon',
     footer_note:
       'BulenCoin is an experimental project. This website describes a proposed network design and does not constitute financial, legal or tax advice. Operating nodes or services based on this design may be regulated in your jurisdiction; you are responsible for complying with local law.',
   },
@@ -530,6 +543,19 @@ const translations = {
     wallet_import_button: 'Importar monedero',
     wallet_import_success: 'Monedero importado. Dirección: {address}',
     wallet_import_error: 'No se pudo importar el backup. Revisa la frase y el PEM.',
+    deploy_title: 'Despliega en 5 minutos',
+    deploy_subtitle:
+      'Elige tu plataforma: instalador escritorio/gateway o app móvil. Los builds de testnet traen configuraciones seguras por defecto, faucet y telemetría desactivada.',
+    deploy_desktop_title: 'Escritorio / servidor',
+    deploy_desktop_body:
+      'Descarga el instalador o usa Docker Compose. Ejecuta con el perfil desktop-full o gateway y visita /api/status.',
+    deploy_guide: 'Abrir guía de instalación',
+    deploy_compose: 'Docker Compose',
+    deploy_mobile_title: 'Ejecutar en móvil',
+    deploy_mobile_body:
+      'Nodo ligero con poda agresiva y modo ahorro de batería. APK/TestFlight muy pronto; o empareja con un gateway para monitorizar en solo lectura.',
+    deploy_mobile_learn: 'Ver perfil móvil',
+    deploy_mobile_soon: 'APK/TestFlight – muy pronto',
     footer_note:
       'BulenCoin es un proyecto experimental. Este sitio describe un diseño de red propuesto y no constituye asesoramiento financiero, legal ni fiscal. La operación de nodos o servicios basados en este diseño puede estar regulada en tu jurisdicción; eres responsable de cumplir la legislación local.',
     wallet_title: 'Wallet y enlaces de pago',
@@ -809,6 +835,19 @@ const translations = {
     wallet_import_button: 'Importuj portfel',
     wallet_import_success: 'Portfel zaimportowany. Adres: {address}',
     wallet_import_error: 'Nie udało się zaimportować backupu. Sprawdź hasło i PEM.',
+    deploy_title: 'Uruchom w 5 minut',
+    deploy_subtitle:
+      'Wybierz platformę: instalator desktop/gateway lub aplikacja mobilna. Buildy testnet startują z bezpiecznymi domyślnymi, faucet i telemetria są domyślnie wyłączone.',
+    deploy_desktop_title: 'Desktop / serwer',
+    deploy_desktop_body:
+      'Pobierz instalator lub użyj Docker Compose. Uruchom z profilem desktop-full lub gateway, potem odwiedź /api/status.',
+    deploy_guide: 'Otwórz przewodnik instalacji',
+    deploy_compose: 'Docker Compose',
+    deploy_mobile_title: 'Uruchom na telefonie',
+    deploy_mobile_body:
+      'Lekki węzeł z agresywnym pruningiem i trybem oszczędzania baterii. APK/TestFlight już wkrótce; albo sparuj z gatewayem do podglądu tylko-odczyt.',
+    deploy_mobile_learn: 'Zobacz profil mobilny',
+    deploy_mobile_soon: 'APK/TestFlight – wkrótce',
     footer_note:
       'BulenCoin jest projektem eksperymentalnym. Ta strona opisuje proponowany projekt sieci i nie stanowi porady inwestycyjnej, prawnej ani podatkowej. Utrzymywanie węzłów lub usług w oparciu o ten projekt może podlegać regulacjom w Twojej jurysdykcji – za zgodność z prawem odpowiadasz samodzielnie.',
     wallet_title: 'Portfel i linki płatności',

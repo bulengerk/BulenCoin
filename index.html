@@ -899,6 +899,38 @@
       <section id="wallet" class="bc-section bc-section-alt">
         <div class="bc-container bc-grid-2">
           <div class="bc-section-header">
+            <h2 data-i18n="deploy_title">Deploy in 5 minutes</h2>
+            <p data-i18n="deploy_subtitle">
+              Choose your platform: desktop/gateway installer or mobile companion. Testnet builds
+              include safe defaults, faucet and telemetry off by default.
+            </p>
+            <div class="bc-quickstart bc-deploy">
+              <div class="bc-step">
+                <strong data-i18n="deploy_desktop_title">Desktop / server</strong>
+                <p data-i18n="deploy_desktop_body">
+                  Download the installer or use Docker Compose. Run with <code>desktop-full</code> or
+                  <code>gateway</code> profile, then visit <code>/api/status</code>.
+                </p>
+                <div class="bc-button-row">
+                  <a class="bc-button" href="docs/deployment_guide.md" data-i18n="deploy_guide">Open install guide</a>
+                  <a class="bc-button bc-button-ghost" href="bulennode/docker-compose.local.yml" data-i18n="deploy_compose">Docker Compose</a>
+                </div>
+              </div>
+              <div class="bc-step">
+                <strong data-i18n="deploy_mobile_title">Run on mobile</strong>
+                <p data-i18n="deploy_mobile_body">
+                  Light node with aggressive pruning and battery-aware mode. Grab the APK/TestFlight
+                  build (coming soon) or pair with a gateway for read-only monitoring.
+                </p>
+                <div class="bc-button-row">
+                  <a class="bc-button" href="#apps" data-i18n="deploy_mobile_learn">See mobile profile</a>
+                  <span class="bc-chip" data-i18n="deploy_mobile_soon">APK/TestFlight – coming soon</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bc-section-header">
             <h2 data-i18n="wallet_title">Wallet & payment links</h2>
             <p data-i18n="wallet_body">
               Generate BIP21-style payment links and QR codes for invoices. Ideal for web/mobile
