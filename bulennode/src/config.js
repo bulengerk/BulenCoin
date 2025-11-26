@@ -237,6 +237,8 @@ const config = {
   uptimeWindowSeconds: getNumberEnv('BULEN_UPTIME_WINDOW_SECONDS', 300),
   rateLimitWindowMs: getNumberEnv('BULEN_RATE_LIMIT_WINDOW_MS', 15 * 1000),
   rateLimitMaxRequests: getNumberEnv('BULEN_RATE_LIMIT_MAX_REQUESTS', 60),
+  walletRequirePassphrase: getBoolEnv('BULEN_WALLET_REQUIRE_PASSPHRASE', securityStrict),
+  walletPassphraseMinLength: getNumberEnv('BULEN_WALLET_PASSPHRASE_MIN_LENGTH', 12),
   protocolVersion: getEnv('BULEN_PROTOCOL_VERSION', defaultProtocolVersion),
   loyaltyBoostSteps: parseLoyaltySteps(getEnv('BULEN_LOYALTY_STEPS', '')),
   deviceProtectionBoosts: parseDeviceBoosts(getEnv('BULEN_DEVICE_PROTECTION', '')),

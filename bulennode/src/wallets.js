@@ -77,6 +77,16 @@ function createLocalWallet(config, payload = {}) {
   const label = payload.label || '';
   const passphrase = payload.passphrase || '';
   const profile = payload.profile || 'generic';
+  if (config.walletRequirePassphrase && (!passphrase || passphrase.length < config.walletPassphraseMinLength)) {
+    throw new Error(
+      `Passphrase required (min length ${config.walletPassphraseMinLength || 1})`,
+    );
+  }
+  if (passphrase && passphrase.length < (config.walletPassphraseMinLength || 1)) {
+    throw new Error(
+      `Passphrase too short (min length ${config.walletPassphraseMinLength || 1})`,
+    );
+  }
   const keyEncoding = {
     publicKeyEncoding: { type: 'spki', format: 'pem' },
     privateKeyEncoding: {
@@ -97,7 +107,14 @@ function createLocalWallet(config, payload = {}) {
   const keyPath = path.join(dir, `${address}.pem`);
   fs.writeFileSync(keyPath, privateKeyPem, { mode: 0o600 });
   const createdAt = new Date().toISOString();
-  recordWalletMeta(config, { address, label, profile, keyPath, createdAt });
+  recordWalletMeta(config, {
+    address,
+    label,
+    profile,
+    keyPath,
+    createdAt,
+    passphraseProtected: Boolean(passphrase),
+  });
   return {
     address,
     publicKeyPem,

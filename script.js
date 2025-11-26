@@ -250,6 +250,9 @@ const translations = {
     wallet_creator_backup_check: 'I wrote down the seed / backup',
     wallet_creator_backup:
       'Local-only generation; write down the seed and store it offline before staking.',
+    wallet_creator_passphrase_label: 'Encryption passphrase',
+    wallet_creator_passphrase_hint: 'Used to encrypt the local keystore; minimum 12 characters.',
+    wallet_creator_passphrase_error: 'Enter a passphrase (min 12 characters) to generate the wallet securely.',
     footer_note:
       'BulenCoin is an experimental project. This website describes a proposed network design and does not constitute financial, legal or tax advice. Operating nodes or services based on this design may be regulated in your jurisdiction; you are responsible for complying with local law.',
   },
@@ -508,6 +511,11 @@ const translations = {
     wallet_creator_backup_check: 'He apuntado la semilla / backup',
     wallet_creator_backup:
       'Generación solo local; apunta la semilla y guárdala offline antes de hacer stake.',
+    wallet_creator_passphrase_label: 'Frase de cifrado',
+    wallet_creator_passphrase_hint:
+      'Se usa para cifrar el keystore local; mínimo 12 caracteres.',
+    wallet_creator_passphrase_error:
+      'Introduce una frase (min 12 caracteres) para generar el monedero de forma segura.',
     footer_note:
       'BulenCoin es un proyecto experimental. Este sitio describe un diseño de red propuesto y no constituye asesoramiento financiero, legal ni fiscal. La operación de nodos o servicios basados en este diseño puede estar regulada en tu jurisdicción; eres responsable de cumplir la legislación local.',
     wallet_title: 'Wallet y enlaces de pago',
@@ -776,6 +784,10 @@ const translations = {
     wallet_creator_backup_check: 'Zapisałem seed / backup',
     wallet_creator_backup:
       'Generacja jest tylko lokalna; zapisz seed offline zanim postawisz stake.',
+    wallet_creator_passphrase_label: 'Hasło szyfrujące',
+    wallet_creator_passphrase_hint: 'Używane do szyfrowania lokalnego keystore; minimum 12 znaków.',
+    wallet_creator_passphrase_error:
+      'Podaj hasło (min 12 znaków), aby bezpiecznie wygenerować portfel.',
     footer_note:
       'BulenCoin jest projektem eksperymentalnym. Ta strona opisuje proponowany projekt sieci i nie stanowi porady inwestycyjnej, prawnej ani podatkowej. Utrzymywanie węzłów lub usług w oparciu o ten projekt może podlegać regulacjom w Twojej jurysdykcji – za zgodność z prawem odpowiadasz samodzielnie.',
     wallet_title: 'Portfel i linki płatności',
@@ -1002,6 +1014,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const seedEl = getEl('wallet-seed', profile);
       const backupEl = getEl('wallet-backup', profile);
       const checkbox = document.querySelector(`[data-wallet-backed="${profile}"]`);
+      const passEl = getEl('wallet-passphrase', profile);
       if (!addrEl || !seedEl) return;
       const state = walletState[profile];
       if (state && state.address && state.seed) {
@@ -1014,6 +1027,9 @@ document.addEventListener('DOMContentLoaded', () => {
           checkbox.disabled = false;
           checkbox.checked = Boolean(state.backedUp);
         }
+        if (passEl) {
+          passEl.value = state.passphrase || '';
+        }
       } else {
         addrEl.textContent = dict().wallet_creator_address_hint || 'Generate to see address.';
         seedEl.textContent =
@@ -1025,6 +1041,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkbox) {
           checkbox.disabled = true;
           checkbox.checked = false;
+        }
+        if (passEl) {
+          passEl.value = '';
         }
       }
     };
@@ -1046,11 +1065,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generateWallet = async (profile) => {
       setStatus(profile, dict().wallet_creator_generate || 'Generating…');
+      const passInput = getEl('wallet-passphrase', profile);
+      const passphrase = passInput ? passInput.value : '';
+      const minPass = 12;
+      if (!passphrase || passphrase.length < minPass) {
+        setStatus(profile, dict().wallet_creator_passphrase_error || 'Passphrase too short.', 'error');
+        return;
+      }
       try {
         const res = await fetch(`${apiBase}/wallets/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ label: `${profile} wallet`, profile }),
+          body: JSON.stringify({ label: `${profile} wallet`, profile, passphrase }),
         });
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
@@ -1064,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'Key generated locally. Backup below.',
           backup: backupPem,
           backedUp: false,
+          passphrase,
         };
         setStatus(profile, 'Wallet generated. Save the backup locally.', 'success');
         renderWalletCard(profile);
@@ -1085,8 +1112,9 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         const profile = btn.dataset.walletCopy;
         const state = walletState[profile];
-        if (state?.seed && navigator.clipboard) {
-          navigator.clipboard.writeText(state.seed).catch(() => {});
+        const toCopy = state?.backup || state?.seed;
+        if (toCopy && navigator.clipboard) {
+          navigator.clipboard.writeText(toCopy).catch(() => {});
         }
       });
     });

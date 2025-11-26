@@ -738,6 +738,18 @@ function createServer(context) {
   app.post('/api/wallets/create', (request, response) => {
     try {
       const { label, passphrase, profile } = request.body || {};
+      if (config.walletRequirePassphrase && (!passphrase || passphrase.length < config.walletPassphraseMinLength)) {
+        response
+          .status(400)
+          .json({ error: 'Passphrase required', minLength: config.walletPassphraseMinLength });
+        return;
+      }
+      if (passphrase && passphrase.length < config.walletPassphraseMinLength) {
+        response
+          .status(400)
+          .json({ error: 'Passphrase too short', minLength: config.walletPassphraseMinLength });
+        return;
+      }
       const wallet = wallets.createLocalWallet(config, { label, passphrase, profile });
       response.status(201).json({
         ok: true,
@@ -746,6 +758,7 @@ function createServer(context) {
         backup: { privateKeyPem: wallet.privateKeyPem, passphraseUsed: Boolean(passphrase) },
         createdAt: wallet.createdAt,
         keyPath: wallet.keyPath,
+        passphraseRequired: config.walletRequirePassphrase,
       });
     } catch (error) {
       response.status(400).json({ error: 'Could not create wallet', details: error.message });

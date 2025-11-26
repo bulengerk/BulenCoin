@@ -556,6 +556,15 @@ section p {
   padding-top: 0.2rem;
 }
 
+.bc-input {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
 .bc-wallet-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
