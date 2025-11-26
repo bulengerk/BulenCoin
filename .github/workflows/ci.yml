@@ -67,6 +67,15 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup Node.js (for bulennode used in integration test)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install deps (bulennode)
+        working-directory: bulennode
+        run: npm ci
+
       - name: Test Rust SDK
         working-directory: sdk-rs
         run: cargo test
