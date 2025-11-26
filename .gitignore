@@ -43,3 +43,5 @@ wallets/
 wallet_addresses*
 addresses*.txt
 addresses*.csv
+
+scripts/tests/.tmp-logs
