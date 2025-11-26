@@ -227,6 +227,26 @@ const translations = {
     onboarding_mobile: 'Mobile light profile (battery-aware)',
     onboarding_note:
       'Coming soon: video walkthrough and prebuilt binaries per OS. For now, use the guides above or Docker Compose in this repo.',
+    wallet_creator_title: 'Create a wallet on any node profile',
+    wallet_creator_subtitle:
+      'Desktop, gateway and mobile share one clear flow: generate the seed locally, back it up and get an address instantly.',
+    wallet_creator_desktop_title: 'Desktop / server validator',
+    wallet_creator_desktop_body:
+      'Generate a wallet for full nodes focused on uptime and staking. Keys stay on this device.',
+    wallet_creator_gateway_title: 'Gateway / API node',
+    wallet_creator_gateway_body:
+      'Create a wallet to accept payments via API or explorer; keep auth tokens and TLS enabled.',
+    wallet_creator_mobile_title: 'Mobile light / companion',
+    wallet_creator_mobile_body:
+      'Battery-aware light node with offline seed generation and quick sync when on Wi‑Fi.',
+    wallet_creator_seed_label: 'Seed words (12)',
+    wallet_creator_seed_hint: 'Generated locally; click “Generate wallet” to create a fresh seed.',
+    wallet_creator_address_label: 'Address',
+    wallet_creator_address_hint: 'Generate to see address.',
+    wallet_creator_generate: 'Generate wallet',
+    wallet_creator_copy_seed: 'Copy seed',
+    wallet_creator_backup:
+      'Local-only generation; write down the seed and store it offline before staking.',
     footer_note:
       'BulenCoin is an experimental project. This website describes a proposed network design and does not constitute financial, legal or tax advice. Operating nodes or services based on this design may be regulated in your jurisdiction; you are responsible for complying with local law.',
   },
@@ -461,6 +481,27 @@ const translations = {
     onboarding_mobile: 'Perfil móvil light (ahorro batería)',
     onboarding_note:
       'Pronto: video tutorial y binarios precompilados. De momento usa las guías o Docker Compose de este repo.',
+    wallet_creator_title: 'Crea un monedero en cualquier perfil de nodo',
+    wallet_creator_subtitle:
+      'Escritorio, gateway y móvil comparten un flujo claro: genera la semilla localmente, guárdala y obtén una dirección al instante.',
+    wallet_creator_desktop_title: 'Validador escritorio / servidor',
+    wallet_creator_desktop_body:
+      'Genera un monedero para nodos completos centrados en uptime y stake. Las claves se quedan en este dispositivo.',
+    wallet_creator_gateway_title: 'Nodo gateway / API',
+    wallet_creator_gateway_body:
+      'Crea un monedero para cobrar pagos vía API o explorador; mantén tokens de auth y TLS activados.',
+    wallet_creator_mobile_title: 'Nodo ligero móvil / compañero',
+    wallet_creator_mobile_body:
+      'Nodo ligero y consciente de batería: semilla offline y sincronización rápida cuando haya red.',
+    wallet_creator_seed_label: 'Palabras semilla (12)',
+    wallet_creator_seed_hint:
+      'Se genera localmente; haz clic en “Generar monedero” para crear una semilla nueva.',
+    wallet_creator_address_label: 'Dirección',
+    wallet_creator_address_hint: 'Genera para ver la dirección.',
+    wallet_creator_generate: 'Generar monedero',
+    wallet_creator_copy_seed: 'Copiar semilla',
+    wallet_creator_backup:
+      'Generación solo local; apunta la semilla y guárdala offline antes de hacer stake.',
     footer_note:
       'BulenCoin es un proyecto experimental. Este sitio describe un diseño de red propuesto y no constituye asesoramiento financiero, legal ni fiscal. La operación de nodos o servicios basados en este diseño puede estar regulada en tu jurisdicción; eres responsable de cumplir la legislación local.',
     wallet_title: 'Wallet y enlaces de pago',
@@ -705,6 +746,27 @@ const translations = {
     onboarding_mobile: 'Profil mobile light (oszczędzanie baterii)',
     onboarding_note:
       'Wkrótce: wideo krok-po-kroku i gotowe binarki. Na razie korzystaj z poradników lub Docker Compose z repo.',
+    wallet_creator_title: 'Załóż portfel w każdej wersji węzła',
+    wallet_creator_subtitle:
+      'Desktop, gateway i mobile mają ten sam prosty flow: lokalne generowanie seeda, zapisanie go i natychmiastowy adres.',
+    wallet_creator_desktop_title: 'Walidator desktop / server',
+    wallet_creator_desktop_body:
+      'Portfel dla pełnych węzłów nastawionych na uptime i stake. Klucze zostają na tym urządzeniu.',
+    wallet_creator_gateway_title: 'Węzeł gateway / API',
+    wallet_creator_gateway_body:
+      'Portfel do przyjmowania płatności przez API/eksplorator; trzymaj tokeny i TLS włączone.',
+    wallet_creator_mobile_title: 'Węzeł lekki mobilny / companion',
+    wallet_creator_mobile_body:
+      'Tryb oszczędny: seed offline, szybka synchronizacja gdy jest Wi‑Fi lub zasięg.',
+    wallet_creator_seed_label: 'Słowa seeda (12)',
+    wallet_creator_seed_hint:
+      'Generowane lokalnie; kliknij „Generuj portfel”, aby utworzyć nowy seed.',
+    wallet_creator_address_label: 'Adres',
+    wallet_creator_address_hint: 'Wygeneruj, aby zobaczyć adres.',
+    wallet_creator_generate: 'Generuj portfel',
+    wallet_creator_copy_seed: 'Kopiuj seed',
+    wallet_creator_backup:
+      'Generacja jest tylko lokalna; zapisz seed offline zanim postawisz stake.',
     footer_note:
       'BulenCoin jest projektem eksperymentalnym. Ta strona opisuje proponowany projekt sieci i nie stanowi porady inwestycyjnej, prawnej ani podatkowej. Utrzymywanie węzłów lub usług w oparciu o ten projekt może podlegać regulacjom w Twojej jurysdykcji – za zgodność z prawem odpowiadasz samodzielnie.',
     wallet_title: 'Portfel i linki płatności',
@@ -762,6 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const preferred =
     (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
   const dict = () => translations[select.value] || translations.en;
+  let rerenderWalletCards = () => {};
 
   if (translations[preferred]) {
     select.value = preferred;
@@ -771,6 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   select.addEventListener('change', () => {
     applyTranslations(select.value);
+    rerenderWalletCards();
   });
 
   const form = document.getElementById('reward-form');
@@ -908,6 +972,116 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadLeaderboard();
+  }
+
+  const walletProfiles = Array.from(document.querySelectorAll('[data-wallet-card]')).map(
+    (card) => card.dataset.walletCard,
+  );
+  if (walletProfiles.length) {
+    const walletState = {};
+    const wordlist = [
+      'aurora',
+      'balance',
+      'beacon',
+      'bridge',
+      'cloud',
+      'copper',
+      'dawn',
+      'ember',
+      'fiber',
+      'glow',
+      'grove',
+      'harbor',
+      'island',
+      'juniper',
+      'lumen',
+      'mint',
+      'nebula',
+      'orbit',
+      'pixel',
+      'pulse',
+      'quartz',
+      'ripple',
+      'signal',
+      'silk',
+      'summit',
+      'torch',
+      'unity',
+      'vector',
+      'wander',
+      'yonder',
+      'zephyr',
+    ];
+
+    const fillRandom = (arr) => {
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(arr);
+      } else {
+        for (let i = 0; i < arr.length; i += 1) {
+          arr[i] = Math.floor(Math.random() * 0xffffffff);
+        }
+      }
+    };
+
+    const randomWords = (count = 12) => {
+      const buf = new Uint32Array(count);
+      fillRandom(buf);
+      return Array.from(buf).map((val) => wordlist[val % wordlist.length]);
+    };
+
+    const randomAddress = (profile = 'node') => {
+      const buf = new Uint8Array(8);
+      fillRandom(buf);
+      const hex = Array.from(buf)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 12);
+      return `addr_${profile}_${hex}`;
+    };
+
+    const renderWalletCard = (profile) => {
+      const addrEl = document.querySelector(`[data-wallet-address="${profile}"]`);
+      const seedEl = document.querySelector(`[data-wallet-seed="${profile}"]`);
+      if (!addrEl || !seedEl) return;
+      const state = walletState[profile];
+      if (state && state.address && state.seed) {
+        addrEl.textContent = state.address;
+        seedEl.textContent = state.seed;
+      } else {
+        addrEl.textContent =
+          dict().wallet_creator_address_hint || 'Generate to see address.';
+        seedEl.textContent =
+          dict().wallet_creator_seed_hint ||
+          'Generated locally; click “Generate wallet” to create a fresh seed.';
+      }
+    };
+
+    const renderAllWalletCards = () => {
+      walletProfiles.forEach((profile) => renderWalletCard(profile));
+    };
+
+    document.querySelectorAll('[data-wallet-generate]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const profile = btn.dataset.walletGenerate;
+        const words = randomWords(12).join(' ');
+        const address = randomAddress(profile);
+        walletState[profile] = { address, seed: words };
+        renderWalletCard(profile);
+      });
+    });
+
+    document.querySelectorAll('[data-wallet-copy]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const profile = btn.dataset.walletCopy;
+        const state = walletState[profile];
+        if (state?.seed && navigator.clipboard) {
+          navigator.clipboard.writeText(state.seed).catch(() => {});
+        }
+      });
+    });
+
+    rerenderWalletCards = renderAllWalletCards;
+    renderAllWalletCards();
   }
 
   const walletForm = document.getElementById('wallet-form');

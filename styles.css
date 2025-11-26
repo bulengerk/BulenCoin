@@ -556,6 +556,45 @@ section p {
   padding-top: 0.2rem;
 }
 
+.bc-wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.bc-wallet-card {
+  min-height: 100%;
+}
+
+.bc-wallet-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0.85rem 0;
+}
+
+.bc-button-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+}
+
+.bc-wallet-mini .bc-wallet-row {
+  grid-template-columns: 120px 1fr;
+}
+
+.bc-wallet-seed {
+  align-items: flex-start;
+}
+
+.bc-wallet-seed-words {
+  font-family: 'Space Grotesk', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 .bc-wallet-output {
   display: flex;
   flex-direction: column;

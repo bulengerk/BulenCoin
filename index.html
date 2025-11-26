@@ -668,6 +668,144 @@
         </div>
       </section>
 
+      <section id="wallet-maker" class="bc-section">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="wallet_creator_title">Create a wallet on any node profile</h2>
+            <p data-i18n="wallet_creator_subtitle">
+              Desktop, gateway and mobile share one clear flow: generate the seed locally, back it up
+              and get an address instantly.
+            </p>
+          </div>
+          <div class="bc-wallet-grid">
+            <div class="bc-card bc-card-contrast bc-wallet-card" data-wallet-card="desktop">
+              <span class="bc-pill">Desktop / Server</span>
+              <h3 data-i18n="wallet_creator_desktop_title">Desktop / server validator</h3>
+              <p class="bc-muted" data-i18n="wallet_creator_desktop_body">
+                Generate a wallet for full nodes focused on uptime and staking. Keys stay on this
+                device.
+              </p>
+              <div class="bc-wallet-mini">
+                <div class="bc-wallet-row">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_address_label">Address</div>
+                  <div class="bc-wallet-value" data-wallet-address="desktop">Generate to see address.</div>
+                </div>
+                <div class="bc-wallet-row bc-wallet-seed">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_seed_label">Seed words (12)</div>
+                  <div class="bc-wallet-seed-words" data-wallet-seed="desktop">
+                    Generated locally; click “Generate wallet” to create a fresh seed.
+                  </div>
+                </div>
+              </div>
+              <div class="bc-button-row">
+                <button
+                  class="bc-button"
+                  type="button"
+                  data-wallet-generate="desktop"
+                  data-i18n-label="wallet_creator_generate"
+                >
+                  Generate wallet
+                </button>
+                <button
+                  class="bc-button bc-button-ghost"
+                  type="button"
+                  data-wallet-copy="desktop"
+                  data-i18n-label="wallet_creator_copy_seed"
+                >
+                  Copy seed
+                </button>
+              </div>
+              <div class="bc-note" data-i18n="wallet_creator_backup">
+                Local-only generation; write down the seed and store it offline before staking.
+              </div>
+            </div>
+
+            <div class="bc-card bc-card-contrast bc-wallet-card" data-wallet-card="gateway">
+              <span class="bc-pill">Gateway / API</span>
+              <h3 data-i18n="wallet_creator_gateway_title">Gateway / API node</h3>
+              <p class="bc-muted" data-i18n="wallet_creator_gateway_body">
+                Create a wallet to accept payments via API or explorer; keep auth tokens and TLS
+                enabled.
+              </p>
+              <div class="bc-wallet-mini">
+                <div class="bc-wallet-row">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_address_label">Address</div>
+                  <div class="bc-wallet-value" data-wallet-address="gateway">Generate to see address.</div>
+                </div>
+                <div class="bc-wallet-row bc-wallet-seed">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_seed_label">Seed words (12)</div>
+                  <div class="bc-wallet-seed-words" data-wallet-seed="gateway">
+                    Generated locally; click “Generate wallet” to create a fresh seed.
+                  </div>
+                </div>
+              </div>
+              <div class="bc-button-row">
+                <button
+                  class="bc-button"
+                  type="button"
+                  data-wallet-generate="gateway"
+                  data-i18n-label="wallet_creator_generate"
+                >
+                  Generate wallet
+                </button>
+                <button
+                  class="bc-button bc-button-ghost"
+                  type="button"
+                  data-wallet-copy="gateway"
+                  data-i18n-label="wallet_creator_copy_seed"
+                >
+                  Copy seed
+                </button>
+              </div>
+              <div class="bc-note" data-i18n="wallet_creator_backup">
+                Local-only generation; write down the seed and store it offline before staking.
+              </div>
+            </div>
+
+            <div class="bc-card bc-card-contrast bc-wallet-card" data-wallet-card="mobile">
+              <span class="bc-pill">Mobile / Light</span>
+              <h3 data-i18n="wallet_creator_mobile_title">Mobile light / companion</h3>
+              <p class="bc-muted" data-i18n="wallet_creator_mobile_body">
+                Battery-aware light node: create the seed offline and sync when you have coverage.
+              </p>
+              <div class="bc-wallet-mini">
+                <div class="bc-wallet-row">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_address_label">Address</div>
+                  <div class="bc-wallet-value" data-wallet-address="mobile">Generate to see address.</div>
+                </div>
+                <div class="bc-wallet-row bc-wallet-seed">
+                  <div class="bc-wallet-label" data-i18n="wallet_creator_seed_label">Seed words (12)</div>
+                  <div class="bc-wallet-seed-words" data-wallet-seed="mobile">
+                    Generated locally; click “Generate wallet” to create a fresh seed.
+                  </div>
+                </div>
+              </div>
+              <div class="bc-button-row">
+                <button
+                  class="bc-button"
+                  type="button"
+                  data-wallet-generate="mobile"
+                  data-i18n-label="wallet_creator_generate"
+                >
+                  Generate wallet
+                </button>
+                <button
+                  class="bc-button bc-button-ghost"
+                  type="button"
+                  data-wallet-copy="mobile"
+                  data-i18n-label="wallet_creator_copy_seed"
+                >
+                  Copy seed
+                </button>
+              </div>
+              <div class="bc-note" data-i18n="wallet_creator_backup">
+                Local-only generation; write down the seed and store it offline before staking.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="wallet" class="bc-section bc-section-alt">
         <div class="bc-container bc-grid-2">
           <div class="bc-section-header">

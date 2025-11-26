@@ -52,3 +52,12 @@ personal data beyond what is needed for HTTP/P2P communication. It is your respo
 to deploy additional services (logging, monitoring, analytics) in a way that complies with
 local law (including GDPR/RODO where applicable).
 
+## Pre-publication hygiene
+
+- Scrub local state before packaging or publishing: remove `data/` and `.venv/` (`rm -rf data .venv`). These directories are gitignored but can be accidentally bundled in archives.
+- Treat previously present keys as compromised: the former `data/desktop-full/node_key.pem` has been deleted. Generate fresh node keys outside the repo, e.g.:
+  - `mkdir -p ~/.bulencoin/keys && chmod 700 ~/.bulencoin/keys`
+  - `openssl ecparam -name prime256v1 -genkey -noout -out ~/.bulencoin/keys/node_key.pem`
+  - `chmod 600 ~/.bulencoin/keys/node_key.pem`
+- Rotate any dev tokens or sample secrets (P2P/status/metrics/webhook/rewards) to production-only values provided via environment variables, never committed.
+- Run a secret scan (e.g. `gitleaks detect --no-git --source .`) before releasing artifacts to ensure no tokens or private keys remain.
