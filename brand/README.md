@@ -9,6 +9,8 @@ project matures; keep files small, vector-first and ready for embedding in docs/
 - `colors.md` – palette and usage notes.
 - `typography.md` – headings/body/pill text recommendations.
 - `press_note.md` – short press blurb template.
+- `messaging.md` – tone of voice, key claims, and boilerplate.
+- `usage_do_dont.md` – visual dos/don’ts (placement, clearspace, backgrounds).
 
 ## Usage
 
