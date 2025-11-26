@@ -88,12 +88,15 @@ and via Prometheus text metrics at `/metrics` for external tooling/alerting.
 
 ### Installation helpers and systemd units
 
-For convenience, the repository includes basic installation helpers:
+For convenience, the repository includes one-click installation helpers:
 
 - `scripts/install_server_node.sh` – prepares a `server-full` node on a Debian/Ubuntu‑style server,
 - `scripts/install_desktop_node.sh` – prepares a `desktop-full` node on a laptop/PC,
 - `scripts/install_raspberry_node.sh` – prepares a `raspberry` profile node on Raspberry Pi / ARM SBC,
-- `scripts/install_gateway_node.sh` – prepares a `gateway` node intended as HTTP API / explorer backend.
+- `scripts/install_gateway_node.sh` – prepares a `gateway` node intended as HTTP API / explorer backend,
+- `scripts/install_macos_node.sh [profile]` – macOS installer (Homebrew or per-user nvm); defaults to `desktop-full` if the profile is omitted,
+- `scripts/install_windows_node.ps1 -Profile <profile>` – Windows installer (winget/Chocolatey) that installs Node.js and bulennode dependencies for the chosen profile.
+- `scripts/test_installers_in_docker.sh` – Linux-only smoke test that runs all installers inside a Debian container.
 
 There are also example `systemd` unit templates:
 

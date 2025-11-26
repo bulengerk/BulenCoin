@@ -11,6 +11,13 @@ proxy z TLS, sentry nodes oraz podstawowy backup/snapshot i monitoring.
 - **Monitoring** (1): Prometheus + Alertmanager + Grafana, scrapes `/metrics`.
 - **Backup/Snapshot**: bucket S3-kompatybilny na `state.json`/`payments.json`/`wallet_sessions.json`.
 
+### Wymagania sprzętowe / OS (minimum)
+
+- OS: Debian 12 lub Ubuntu 22.04 LTS; Node.js 18 LTS (`npm` ≥ 9).
+- Walidator / gateway: min. 2 vCPU, 4 GB RAM, 40 GB SSD/NVMe; rekomendacja 4 vCPU, 8 GB RAM, 80 GB.
+- Sentry: podobnie jak gateway, ale z ostrzejszym limiterem; pamiętaj o TLS/WAF.
+- Desktop-full (niepubliczny): min. 2 vCPU, 4 GB RAM, 20 GB SSD.
+- Raspberry: Raspberry Pi 4/4GB (lub lepszy) + microSD UHS-I 32 GB / SSD po USB, stabilne łącze.
 ## Reverse proxy (nginx, przykład)
 
 ```

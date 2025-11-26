@@ -264,7 +264,9 @@ Repozytorium zawiera proste skrypty instalacyjne:
   (Debian/Ubuntu),
 - `scripts/install_desktop_node.sh` – przygotowanie węzła `desktop-full` na laptopie/PC,
 - `scripts/install_raspberry_node.sh` – przygotowanie węzła `raspberry` na Raspberry Pi,
-- `scripts/install_gateway_node.sh` – przygotowanie węzła `gateway` (bramka API).
+- `scripts/install_gateway_node.sh` – przygotowanie węzła `gateway` (bramka API),
+- `scripts/install_macos_node.sh [profile]` – instalator macOS (Homebrew lub per‑user nvm; domyślnie `desktop-full`),
+- `scripts/install_windows_node.ps1 -Profile <profile>` – instalator Windows (winget/Chocolatey) dla wybranego profilu.
 
 Skrypty:
 
@@ -283,6 +285,34 @@ Są to przykładowe pliki, które należy dostosować do:
 - rzeczywistej ścieżki repozytorium,
 - nazwy użytkownika systemowego (np. `bulen`, `pi`),
 - pliku z ustawieniami środowiska (`/etc/default/bulennode-server` itd.).
+
+Szybki smoke test instalatorów (Linux) można wykonać w kontenerze Debiana:
+
+```bash
+./scripts/test_installers_in_docker.sh
+```
+
+## 3.6. Minimalne wymagania produkcyjne (testnet/prod)
+
+Profil `server-full` / `gateway` (publiczne API / walidator):
+
+- OS: Debian 12 lub Ubuntu 22.04 LTS, Node.js 18 LTS (`node -v` >= 18, `npm -v` >= 9),
+- min. zasoby: 2 vCPU, 4 GB RAM, 40 GB SSD/NVMe; rekomendowane 4 vCPU, 8 GB RAM, 80 GB,
+- sieć: stabilne łącze, publiczne IP lub reverse proxy/WAF z TLS, P2P/HTTP porty otwarte,
+- bezpieczeństwo: `BULEN_REQUIRE_SIGNATURES=true`, `BULEN_ENABLE_FAUCET=false`,
+  `BULEN_P2P_TOKEN`, `BULEN_STATUS_TOKEN`, `BULEN_METRICS_TOKEN` ustawione,
+- proces: uruchom jako nie-root (użytkownik systemowy), `systemd` z restartem i limitami.
+
+Profil `desktop-full` (walidator niepubliczny / deweloperski):
+
+- min. zasoby: 2 vCPU, 4 GB RAM, 20 GB SSD, porty mogą pozostać zamknięte (tylko lokalne API),
+- bezpieczeństwo: faucet tylko w trybie dev, w publicznej sieci traktować jak `server-full`.
+
+Profil `raspberry` (SBC):
+
+- min. sprzęt: Raspberry Pi 4/4GB (lub lepszy) + microSD UHS-I 32 GB lub SSD po USB,
+- sieć: stałe łącze, porty HTTP/P2P przekierowane, reverse proxy z TLS gdy wystawiany,
+- bezpieczeństwo: faucet off, P2P token, monitorowanie temperatury/obciążenia.
 
 # 4. Wdrożenie sieci BulenCoin – testnet
 
