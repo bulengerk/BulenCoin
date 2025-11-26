@@ -1,6 +1,6 @@
 [package]
 name = "bulencoin-sdk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Lightweight client for BulenCoin prototype APIs (payments, status, reward estimation)."
@@ -9,8 +9,11 @@ keywords = ["bulencoin", "payments", "blockchain"]
 categories = ["web-programming", "api-bindings"]
 
 [dependencies]
-reqwest = { version = "0.11", features = ["json", "blocking"] }
+reqwest = { version = "0.11", features = ["json", "blocking", "rustls-tls"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 url = "2.4"
 urlencoding = "2.1"
+
+[dev-dependencies]
+tempfile = "3"

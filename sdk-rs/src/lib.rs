@@ -15,7 +15,12 @@ pub struct BulenClient {
 impl BulenClient {
     /// Create a new client with the given API base (e.g. "http://localhost:4100/api").
     pub fn new(base: &str) -> Result<Self, url::ParseError> {
-        let base = Url::parse(base)?;
+        let mut base = Url::parse(base)?;
+        if !base.path().ends_with('/') {
+            let mut path = base.path().to_string();
+            path.push('/');
+            base.set_path(&path);
+        }
         let http = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
@@ -64,6 +69,7 @@ impl BulenClient {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PaymentRequest {
     pub to: String,
     pub amount: u64,
@@ -76,6 +82,7 @@ pub struct PaymentRequest {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PaymentResponse {
     pub id: String,
     pub to: String,
@@ -90,6 +97,7 @@ pub struct PaymentResponse {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PaymentLinkRequest {
     pub address: String,
     pub amount: u64,
@@ -98,6 +106,7 @@ pub struct PaymentLinkRequest {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PaymentLinkResponse {
     pub ok: bool,
     pub link: String,
@@ -105,6 +114,7 @@ pub struct PaymentLinkResponse {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RewardEstimateRequest {
     pub stake: u64,
     pub uptime_hours_per_day: u64,
@@ -114,12 +124,14 @@ pub struct RewardEstimateRequest {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RewardEstimateResponse {
     pub ok: bool,
     pub projection: RewardProjection,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RewardProjection {
     pub hourly: f64,
     pub daily: f64,
@@ -131,6 +143,7 @@ pub struct RewardProjection {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NodeStatus {
     pub chain_id: String,
     pub node_id: String,
@@ -157,9 +170,33 @@ pub struct AsyncBulenClient {
     http: AsyncClient,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn payment_link_encodes_memo() {
+        let link = build_payment_link("addr", 42, Some("hello world"));
+        assert!(link.contains("bulen:addr?amount=42"));
+        assert!(link.contains("memo=hello%20world"));
+    }
+
+    #[test]
+    fn client_normalizes_base() {
+        let client = BulenClient::new("http://localhost:4100/api").unwrap();
+        let url = client.base.join("payments").expect("url");
+        assert_eq!(url.as_str(), "http://localhost:4100/api/payments");
+    }
+}
+
 impl AsyncBulenClient {
     pub fn new(base: &str) -> Result<Self, url::ParseError> {
-        let base = Url::parse(base)?;
+        let mut base = Url::parse(base)?;
+        if !base.path().ends_with('/') {
+            let mut path = base.path().to_string();
+            path.push('/');
+            base.set_path(&path);
+        }
         let http = AsyncClient::builder()
             .timeout(Duration::from_secs(10))
             .build()

@@ -26,6 +26,12 @@ This document describes the current test levels for BulenCoin services.
 5. **Docker-based check:** `docker-compose up --build` for a containerised stack; useful
    for verifying build contexts and environment variables.
 
+6. **Soak/perf (to add):** long-running node(s) with metrics scraping (CPU/RAM/disk, mempool size, height drift, 5xx), packet loss/latency scenarios, and adversarial P2P peers (drop/delay/double-sign).
+
+7. **Upgrade/backward-compat (to add):** rolling restart of mixed versions with protocol-version warnings, data-dir migration tests, snapshot verification signatures.
+
+8. **UI/UX (to add):** automated browser tests for landing/Explorer basic flows; visual/snapshot checks for regressions.
+
 ## Running the full-stack smoke test
 
 Prerequisites:

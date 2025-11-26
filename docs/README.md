@@ -34,6 +34,8 @@ project.
   them locally.
 - `payment_integration.md` – payment and wallet integration API (invoice lifecycle, memo
   binding, signed-message wallet auth, production guardrails).
+- `onboarding_quickstart.md` – 5-minute start for desktop/server/gateway/mobile light, wallet backup and safety checklist.
+- `rewards_policy.md` – prototype reward parameters and mainnet adjustment policy (transparency, no guaranteed profit).
 
 ## Legal, security and overview
 

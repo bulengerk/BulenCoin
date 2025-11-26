@@ -1,7 +1,8 @@
 # BulenCoin payment & wallet integration API
 
 This document describes the minimal HTTP flows to integrate BulenCoin as a payment method
-and to authenticate wallets via signed messages.
+and to authenticate wallets via signed messages. If you just want the shortest path to
+accepting small payments or tips, see the quick recipes below.
 
 ## Base principles
 
@@ -107,6 +108,47 @@ Response:
   "qrDataUrl": "data:image/png;base64,..."
 }
 ```
+
+## Quick recipes (payments/micropayments)
+
+**“Pay with BulenCoin” button (link + QR)**  
+1) `POST /api/payment-link` with `address`, `amount`, optional `memo`/`callback`.  
+2) Render returned `link` and `qrDataUrl`; optionally poll `/api/payments/:id` if you also create an invoice.  
+3) Optional webhook on settlement as in the invoice flow.
+
+**One-time invoice with webhook**  
+1) `POST /api/payments` with `amount`, `memo`, optional `expiresInSeconds`, `webhookUrl`.  
+2) Show `paymentId` or generate a QR via `/api/payment-link`.  
+3) On settlement, verify `x-bulen-signature` HMAC (set `BULEN_WEBHOOK_SECRET`) and update the order.
+
+HMAC verify (Node.js):
+```js
+import crypto from 'node:crypto';
+function isValid(bodyString, signatureHex, secret) {
+  const expected = crypto.createHmac('sha256', secret).update(bodyString).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signatureHex, 'hex'), Buffer.from(expected, 'hex'));
+}
+```
+
+**Micropayments / tips**  
+- Use small `amount` and short `expiresInSeconds`.  
+- Keep `BULEN_MAX_BODY_SIZE` low (default 128kb) and rate limits (`BULEN_RATE_LIMIT_WINDOW_MS`, `BULEN_RATE_LIMIT_MAX_REQUESTS`).  
+- Pre-generate multiple QR links for common amounts to avoid per-request QR generation.
+
+**Paywall / download guard**  
+1) Issue invoice with `memo` bound to the asset ID.  
+2) Poll `/api/payments/:id` or receive webhook.  
+3) Unlock content when `status` is `paid`.
+
+**Donation widget**  
+- Pre-generate a few payment links (different amounts) with QR.  
+- For live acknowledgments, poll `/api/payments/:id` or `/api/transactions` for donor address.  
+- Show device/profile info to nudge users to run a node.
+
+**Plugin hooks (future work)**  
+- WooCommerce/Shopify adapter (server-side invoices + webhook verify).  
+- Static-site snippet (client-side call to `/api/payment-link` + QR render).  
+- POS/Tip-jar mini UI cycling amounts + QR.
 
 ## Wallet authentication (signed-message)
 

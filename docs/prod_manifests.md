@@ -90,3 +90,10 @@ Traefik/ingress – analogicznie: TLS, HSTS, rate-limit middleware, forward auth
 - Log rotation (journald/logrotate) z retencją 30–90 dni.
 - Sekrety w KMS/SSM/Vault, nie w repo.
 - Systemd unit z `Restart=on-failure`, limit CPU/mem w cgroup.
+
+## TODO (kolejna iteracja)
+
+- Testy soak/perf (dni/tygodnie) z metrykami i scenariuszami sieciowymi (packet loss/latencja).
+- Adversarial/byzantine P2P (blokada/double-sign), testy upgrade/backward-compat i podpisane snapshoty.
+- Pakiety podpisane (.deb/.rpm/.pkg/.exe) + auto-update desktop; release pipeline z hashami/Sigstore.
+- Dashboard SLO/alerty (Prometheus/Grafana): height drift, peer count, 5xx/latency, mempool.

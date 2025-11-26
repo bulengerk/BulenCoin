@@ -11,13 +11,16 @@ const translations = {
     nav_docs: 'Docs',
     nav_roadmap: 'Roadmap',
     choose_language: 'Language',
-    hero_title: 'BulenCoin – a meme coin with a serious distributed systems heart',
+    hero_title: 'BulenCoin – wide-accessibility Proof of Stake experiment',
     hero_subtitle:
       'A lightweight, Proof of Stake–based network designed to run on everything from smartphones to servers, rewarding users for keeping real nodes online.',
+    hero_cta_run_desktop: 'Run on laptop/desktop',
+    hero_cta_run_pi: 'Run on Raspberry Pi',
     hero_cta_docs: 'Docs & downloads',
     hero_cta_whitesheet: 'Whitesheet (PL, PDF)',
     chip_mobile: 'Mobile · desktop · server ready',
     chip_uptime: 'Uptime rewards baked in',
+    chip_nogpu: 'No GPUs or mining rigs required',
     chip_multilingual: 'Docs: PL / EN / ES',
     hero_highlight_api: 'On-chain payments API with memo binding',
     hero_highlight_wallets: 'Wallet challenge/verify for MetaMask, WalletConnect, Ledger',
@@ -52,9 +55,34 @@ const translations = {
       'Rewards are autonomous: block reward + fees are split on-chain each block (burn, ecosystem pool, producer cut, stake-proportional remainder).',
     how_expert_point4:
       'Security knobs: required signatures, P2P tokens + handshake, optional TLS/QUIC, rate limits, faucet off in strict mode; metrics and status endpoints gated by tokens.',
+    run_title: 'Run a node on everyday devices',
+    run_subtitle:
+      'No GPU rigs. Node 18+, small SSD and one command per platform. Designed for laptops, Raspberry Pi/ARM and even light/superlight phone modes.',
+    run_card_desktop_pill: 'Laptop / desktop',
+    run_card_desktop_title: 'Full node on everyday PCs',
+    run_card_desktop_body:
+      '2 vCPU, 4 GB RAM, 20–40 GB SSD/NVMe. Reward weight 0.8–1.0. No GPU or data-center hardware needed.',
+    run_card_desktop_note:
+      'Auto-installs Node.js on Debian/Ubuntu; equivalent macOS/Windows scripts are below.',
+    run_card_pi_pill: 'Raspberry Pi / ARM',
+    run_card_pi_title: 'Keep a Pi online and earn',
+    run_card_pi_body:
+      'Pi 4 (4 GB) + microSD/SSD. Reward weight 0.75 with ARM boost. Runs 24/7 behind your router with P2P token and TLS via reverse proxy.',
+    run_card_pi_note: 'Uses the same lightweight Node.js client; faucet off for public hosts.',
+    run_card_mobile_pill: 'Mobile / superlight',
+    run_card_mobile_title: 'Light & superlight for phones',
+    run_card_mobile_body:
+      'Stores headers + recent state; aggressive pruning to protect battery and data. Runs on Android/iOS in light mode; desktop build can simulate it.',
+    run_card_mobile_note:
+      'Telemetry and selection weight favour diverse devices; uptime still rewarded.',
+    run_chip_one_command: 'One-command installers per OS',
+    run_chip_energy: 'Energy-aware defaults, no mining',
+    run_chip_reward: 'Rewards scale with device weight, not hardware price',
+    run_passive_note:
+      'Keep nodes online now to help the network grow — when the product matures, honest uptime can turn into meaningful rewards for early operators. No guaranteed profits.',
     overview_title: '1. What is BulenCoin?',
     overview_intro:
-      'BulenCoin is a meme‑themed cryptocurrency with a serious engineering goal: to prove that a modern blockchain network can be maintained by the widest possible spectrum of devices – from phones and tablets, through laptops and desktops, up to cloud servers.',
+      'BulenCoin is a lightweight Proof of Stake experiment focused on accessibility: to prove that a modern network can be maintained by the widest possible spectrum of devices – from phones and tablets, through laptops and desktops, up to cloud servers.',
     overview_goal:
       'The protocol is designed to be light enough to run in the background on a typical end‑user device, while at the same time offering predictable rewards so that users have a real incentive to keep their node online.',
     overview_layers:
@@ -169,17 +197,26 @@ const translations = {
       'New integration level that runs BulenNode, the explorer and the status service together and produces a block.',
     downloads_title: 'Downloads',
     downloads_subtitle:
-      'One-click installs for desktops/servers and Docker. Mobile builds (APK/TestFlight) are in flight.',
-    download_windows: 'Windows installer (.exe)',
-    download_windows_body: 'Signed installer with auto-update and built-in status page.',
-    download_macos: 'macOS installer (.pkg)',
-    download_macos_body: 'Notarized build with menu bar status and metrics.',
-    download_linux: 'Linux (.deb/.rpm)',
-    download_linux_body: 'Service-ready packages with systemd unit and logrotate config.',
+      'One-command installers for laptops, servers, Raspberry Pi, macOS and Windows. Mobile builds (APK/TestFlight) are in flight; signed packages (.exe/.pkg/.deb/.rpm) will follow.',
+    download_linux_cli_pill: 'Linux CLI',
+    download_linux_cli_title: 'Laptop/server one-liner',
+    download_linux_cli_body: 'Debian/Ubuntu, installs Node 18+ if missing, sets up bulennode.',
+    download_pi_cli_pill: 'Raspberry Pi / ARM',
+    download_pi_cli_title: 'Pi-friendly install',
+    download_pi_cli_body:
+      'Pi 4/ARM SBC profile with energy-aware defaults and faucet off by default for public hosts.',
+    download_macos_cli_pill: 'macOS CLI',
+    download_macos_cli_title: 'Homebrew or nvm',
+    download_macos_cli_body: 'Installs Node via Homebrew or per-user nvm, then bulennode deps.',
+    download_windows_cli_pill: 'Windows CLI',
+    download_windows_cli_title: 'Winget/Chocolatey',
+    download_windows_cli_body:
+      'Installs Node 18 LTS via winget or choco, then bulennode deps for chosen profile.',
     download_docker: 'Docker Compose',
     download_docker_body: 'Run node + dependencies locally with one command.',
-    download_coming: 'Coming soon',
-    faq_q1: 'Is BulenCoin only a meme?',
+    download_signed_note:
+      'Signed packages (.exe/.pkg/.deb/.rpm) ship later; use the one-command installers above now.',
+    faq_q1: 'Is BulenCoin just hype?',
     faq_a1:
       'No. The brand is playful, but the protocol is designed as a serious experiment in running a full crypto network on mainstream devices, combining research ideas from lightweight consensus, energy awareness and user‑friendly node operation.',
     faq_q2: 'How do I start running a node?',
@@ -301,13 +338,16 @@ const translations = {
     nav_roadmap: 'Hoja de ruta',
     choose_language: 'Idioma',
     hero_title:
-      'BulenCoin – un meme coin con un núcleo serio de sistemas distribuidos',
+      'BulenCoin – experimento de Proof of Stake de alta accesibilidad',
     hero_subtitle:
       'Una red ligera basada en Proof of Stake, diseñada para funcionar en todo, desde smartphones hasta servidores, recompensando a los usuarios por mantener nodos reales en línea.',
+    hero_cta_run_desktop: 'Ejecutar en portátil/escritorio',
+    hero_cta_run_pi: 'Ejecutar en Raspberry Pi',
     hero_cta_docs: 'Documentación y descargas',
     hero_cta_whitesheet: 'Whitesheet (PL, PDF)',
     chip_mobile: 'Listo para móvil · escritorio · servidor',
     chip_uptime: 'Recompensas por disponibilidad integradas',
+    chip_nogpu: 'Sin GPUs ni rigs de minería',
     chip_multilingual: 'Docs: PL / EN / ES',
     hero_highlight_api: 'API de pagos on-chain con memo',
     hero_highlight_wallets: 'Challenge/verify de wallets: MetaMask, WalletConnect, Ledger',
@@ -341,9 +381,34 @@ const translations = {
       'Recompensas autónomas: la block reward y las comisiones se reparten en cada bloque (burn, fondo de ecosistema, parte del productor, resto proporcional al stake).',
     how_expert_point4:
       'Controles de seguridad: firmas obligatorias, tokens P2P + handshake, TLS/QUIC opcional, rate limit, faucet desactivado en modo estricto; métricas y status protegidos por tokens.',
+    run_title: 'Ejecuta un nodo en dispositivos cotidianos',
+    run_subtitle:
+      'Sin rigs GPU. Node 18+, SSD pequeño y un comando por plataforma. Diseñado para portátiles, Raspberry Pi/ARM e incluso modos light/superlight en móviles.',
+    run_card_desktop_pill: 'Portátil / escritorio',
+    run_card_desktop_title: 'Nodo completo en PCs comunes',
+    run_card_desktop_body:
+      '2 vCPU, 4 GB RAM, 20–40 GB SSD/NVMe. Peso de recompensa 0.8–1.0. No necesitas GPU ni hardware de datacenter.',
+    run_card_desktop_note:
+      'Instala Node.js automáticamente en Debian/Ubuntu; scripts equivalentes para macOS/Windows abajo.',
+    run_card_pi_pill: 'Raspberry Pi / ARM',
+    run_card_pi_title: 'Mantén tu Pi encendida y gana',
+    run_card_pi_body:
+      'Pi 4 (4 GB) + microSD/SSD. Peso 0.75 con boost ARM. Funciona 24/7 detrás del router con token P2P y TLS vía reverse proxy.',
+    run_card_pi_note: 'Usa el mismo cliente ligero en Node.js; faucet desactivado en hosts públicos.',
+    run_card_mobile_pill: 'Móvil / superlight',
+    run_card_mobile_title: 'Light & superlight para teléfonos',
+    run_card_mobile_body:
+      'Guarda cabeceras + estado reciente; poda agresiva para cuidar batería y datos. Corre en Android/iOS en modo light; el build de escritorio lo puede simular.',
+    run_card_mobile_note:
+      'Telemetría y pesos de selección favorecen dispositivos diversos; la disponibilidad sigue recompensada.',
+    run_chip_one_command: 'Instaladores de un comando por OS',
+    run_chip_energy: 'Perfiles ahorradores, sin minería',
+    run_chip_reward: 'Recompensas escalan por perfil, no por precio de hardware',
+    run_passive_note:
+      'Mantén nodos en línea ahora para ayudar a la red: cuando el producto madure, la disponibilidad honesta puede convertirse en recompensas significativas para los primeros operadores. No hay ganancias garantizadas.',
     overview_title: '1. ¿Qué es BulenCoin?',
     overview_intro:
-      'BulenCoin es una criptomoneda con estética de meme, pero con un objetivo de ingeniería serio: demostrar que una red blockchain moderna puede mantenerse con el espectro más amplio posible de dispositivos, desde teléfonos y tabletas hasta portátiles, ordenadores de escritorio y servidores.',
+      'BulenCoin es un experimento de Proof of Stake ligero enfocado en la accesibilidad: demostrar que una red moderna puede mantenerse con el espectro más amplio posible de dispositivos, desde teléfonos y tabletas hasta portátiles, ordenadores de escritorio y servidores.',
     overview_goal:
       'El protocolo está diseñado para ser lo bastante ligero como para ejecutarse en segundo plano en un dispositivo típico, y al mismo tiempo ofrecer recompensas predecibles para que los usuarios tengan un incentivo real para mantener su nodo en línea.',
     overview_layers:
@@ -460,16 +525,27 @@ const translations = {
       'Nuevo nivel de pruebas que ejecuta BulenNode, el explorador y el servicio de estado juntos y genera un bloque.',
     downloads_title: 'Descargas',
     downloads_subtitle:
-      'Instaladores de un clic para escritorio/servidor y Docker. Las builds móviles (APK/TestFlight) están en camino.',
-    download_windows: 'Instalador Windows (.exe)',
-    download_windows_body: 'Instalador firmado con auto-update y página de estado integrada.',
-    download_macos: 'Instalador macOS (.pkg)',
-    download_macos_body: 'Build notarizada con estado y métricas en la barra de menú.',
-    download_linux: 'Linux (.deb/.rpm)',
-    download_linux_body: 'Paquetes listos para servicio con systemd i logrotate.',
+      'Instaladores de un comando para portátiles, servidores, Raspberry Pi, macOS y Windows. Builds móviles (APK/TestFlight) en camino; los paquetes firmados (.exe/.pkg/.deb/.rpm) llegarán después.',
+    download_linux_cli_pill: 'CLI Linux',
+    download_linux_cli_title: 'Un comando en portátil/servidor',
+    download_linux_cli_body:
+      'Debian/Ubuntu, instala Node 18+ si falta y configura bulennode.',
+    download_pi_cli_pill: 'Raspberry Pi / ARM',
+    download_pi_cli_title: 'Instalación para Pi',
+    download_pi_cli_body:
+      'Perfil Pi 4/ARM con ajustes de bajo consumo y faucet desactivado por defecto en hosts públicos.',
+    download_macos_cli_pill: 'CLI macOS',
+    download_macos_cli_title: 'Homebrew o nvm',
+    download_macos_cli_body:
+      'Instala Node vía Homebrew o nvm de usuario y luego dependencias de bulennode.',
+    download_windows_cli_pill: 'CLI Windows',
+    download_windows_cli_title: 'Winget/Chocolatey',
+    download_windows_cli_body:
+      'Instala Node 18 LTS con winget o choco y luego dependencias de bulennode para el perfil elegido.',
     download_docker: 'Docker Compose',
     download_docker_body: 'Ejecuta nodo + dependencias con un solo comando.',
-    download_coming: 'Pronto',
+    download_signed_note:
+      'Los paquetes firmados (.exe/.pkg/.deb/.rpm) llegarán después; usa ahora los instaladores de un comando.',
     earnings_title: 'Panel de ganancias',
     earnings_subtitle:
       'Vista en vivo de tu nodo y una proyección rápida. Usa /api/status (con token si aplica) y /api/rewards/estimate.',
@@ -485,7 +561,7 @@ const translations = {
     earnings_note: 'Es orientativo; depende del uso de la red y los parámetros.',
     earnings_error: 'No se pudo cargar status/rewards. Revisa el nodo y tokens.',
     faq_title: '9. Preguntas frecuentes – BulenCoin en la práctica',
-    faq_q1: '¿BulenCoin es solo un meme?',
+    faq_q1: '¿BulenCoin es solo ruido?',
     faq_a1:
       'No. La marca es divertida, pero el protocolo está diseñado como un experimento serio para ejecutar una red cripto completa en dispositivos comunes, combinando ideas de consenso ligero, eficiencia energética y operación de nodos amigable para el usuario.',
     faq_q2: '¿Cómo empiezo a ejecutar un nodo?',
@@ -621,13 +697,16 @@ const translations = {
     nav_roadmap: 'Roadmap',
     choose_language: 'Język',
     hero_title:
-      'BulenCoin – memcoin z poważnym sercem inżynierii rozproszonych systemów',
+      'BulenCoin – eksperyment Proof of Stake nastawiony na szeroką dostępność',
     hero_subtitle:
       'Lekka sieć oparta na Proof of Stake, zaprojektowana tak, aby działała od smartfonów po serwery i nagradzała użytkowników za utrzymywanie prawdziwych węzłów online.',
+    hero_cta_run_desktop: 'Uruchom na laptopie/PC',
+    hero_cta_run_pi: 'Uruchom na Raspberry Pi',
     hero_cta_docs: 'Dokumentacja i pliki',
     hero_cta_whitesheet: 'Whitesheet (PL, PDF)',
     chip_mobile: 'Gotowe na mobile · desktop · serwer',
     chip_uptime: 'Nagrody za uptime w rdzeniu',
+    chip_nogpu: 'Bez GPU i koparek',
     chip_multilingual: 'Docs: PL / EN / ES',
     hero_highlight_api: 'On-chain payments API z memo do spięcia transakcji z zamówieniem',
     hero_highlight_wallets: 'Challenge/verify dla portfeli MetaMask, WalletConnect, Ledger',
@@ -661,9 +740,34 @@ const translations = {
       'Nagrody są autonomiczne: block reward + fee dzielone w każdym bloku (burn, pula ekosystemu, część producenta, reszta proporcjonalna do stake).',
     how_expert_point4:
       'Przełączniki bezpieczeństwa: wymagane podpisy, tokeny P2P + handshake, opcjonalnie TLS/QUIC, rate limiting, faucet off w trybie strict; metryki i status chronione tokenami.',
+    run_title: 'Uruchom węzeł na zwykłym sprzęcie',
+    run_subtitle:
+      'Bez koparek GPU. Node 18+, mały SSD i jeden skrypt na platformę. Dla laptopów, Raspberry Pi/ARM oraz trybów light/superlight na telefonach.',
+    run_card_desktop_pill: 'Laptop / desktop',
+    run_card_desktop_title: 'Pełny węzeł na PC',
+    run_card_desktop_body:
+      '2 vCPU, 4 GB RAM, 20–40 GB SSD/NVMe. Waga nagród 0.8–1.0. Bez wymagań na GPU czy serwerownię.',
+    run_card_desktop_note:
+      'Automatycznie instaluje Node.js na Debian/Ubuntu; odpowiedniki dla macOS/Windows niżej.',
+    run_card_pi_pill: 'Raspberry Pi / ARM',
+    run_card_pi_title: 'Pi online = nagrody',
+    run_card_pi_body:
+      'Pi 4 (4 GB) + microSD/SSD. Waga 0.75 z boostem ARM. Może działać 24/7 za routerem z tokenem P2P i TLS przez reverse proxy.',
+    run_card_pi_note: 'Ten sam lekki klient Node.js; faucet wyłączony na publicznych hostach.',
+    run_card_mobile_pill: 'Mobile / superlight',
+    run_card_mobile_title: 'Light & superlight na telefonach',
+    run_card_mobile_body:
+      'Trzyma nagłówki + świeży stan; agresywne przycinanie chroni baterię i transfer. Działa na Android/iOS w trybie light; desktop może to zasymulować.',
+    run_card_mobile_note:
+      'Telemetria i wagi selekcji promują różnorodne urządzenia; uptime wciąż nagradzany.',
+    run_chip_one_command: 'Instalatory jednym poleceniem',
+    run_chip_energy: 'Tryby oszczędne, zero kopania',
+    run_chip_reward: 'Nagrody rosną wagą profilu, nie ceną sprzętu',
+    run_passive_note:
+      'Trzymaj węzły online już dziś, wspierając sieć — gdy produkt dojrzeje, uczciwy uptime może przełożyć się na realne nagrody dla pionierów. Brak gwarancji zysku.',
     overview_title: '1. Czym jest BulenCoin?',
     overview_intro:
-      'BulenCoin to kryptowaluta o memowym charakterze, ale z poważnym celem technicznym: pokazaniem, że nowoczesna sieć blockchain może być utrzymywana przez możliwie najszersze spektrum urządzeń – od telefonów i tabletów, przez laptopy i komputery stacjonarne, aż po serwery.',
+      'BulenCoin to lekki eksperyment Proof of Stake skupiony na dostępności: pokazaniu, że nowoczesna sieć może być utrzymywana przez możliwie najszersze spektrum urządzeń – od telefonów i tabletów, przez laptopy i komputery stacjonarne, aż po serwery.',
     overview_goal:
       'Protokół jest zaprojektowany tak, by był na tyle lekki, aby działał w tle na typowym urządzeniu użytkownika, a jednocześnie oferował przewidywalne nagrody, tak aby użytkownik miał realną motywację do utrzymywania węzła online.',
     overview_layers:
@@ -779,16 +883,27 @@ const translations = {
       'Nowy poziom testów: jednoczesne uruchomienie BulenNode, eksploratora i statusu z produkcją bloku.',
     downloads_title: 'Pobierz',
     downloads_subtitle:
-      'Instalatory jednym kliknięciem na desktop/serwer oraz Docker. Buildy mobilne (APK/TestFlight) są w przygotowaniu.',
-    download_windows: 'Instalator Windows (.exe)',
-    download_windows_body: 'Podpisany instalator z auto-update i wbudowaną stroną statusu.',
-    download_macos: 'Instalator macOS (.pkg)',
-    download_macos_body: 'Znotaryzowany build z widżetem statusu i metryk.',
-    download_linux: 'Linux (.deb/.rpm)',
-    download_linux_body: 'Pakiety gotowe do usług z systemd i logrotate.',
+      'Instalatory jednym poleceniem dla laptopów, serwerów, Raspberry Pi, macOS i Windows. Buildy mobilne (APK/TestFlight) w drodze; podpisane pakiety (.exe/.pkg/.deb/.rpm) później.',
+    download_linux_cli_pill: 'CLI Linux',
+    download_linux_cli_title: 'Jedna komenda na laptop/serwer',
+    download_linux_cli_body:
+      'Debian/Ubuntu, instalacja Node 18+ jeśli brakuje i setup bulennode.',
+    download_pi_cli_pill: 'Raspberry Pi / ARM',
+    download_pi_cli_title: 'Instalacja pod Pi',
+    download_pi_cli_body:
+      'Profil Pi 4/ARM z oszczędnymi ustawieniami i faucet off domyślnie na publicznych hostach.',
+    download_macos_cli_pill: 'CLI macOS',
+    download_macos_cli_title: 'Homebrew lub nvm',
+    download_macos_cli_body:
+      'Instaluje Node przez Homebrew lub per-user nvm, potem zależności bulennode.',
+    download_windows_cli_pill: 'CLI Windows',
+    download_windows_cli_title: 'Winget/Chocolatey',
+    download_windows_cli_body:
+      'Instaluje Node 18 LTS przez winget lub choco, potem zależności bulennode dla wskazanego profilu.',
     download_docker: 'Docker Compose',
     download_docker_body: 'Uruchom node + zależności jednym poleceniem.',
-    download_coming: 'Wkrótce',
+    download_signed_note:
+      'Podpisane pakiety (.exe/.pkg/.deb/.rpm) później; teraz użyj instalatorów jednym poleceniem powyżej.',
     earnings_title: 'Panel zarobków',
     earnings_subtitle:
       'Widok live Twojego węzła i szybka projekcja. Korzysta z /api/status (z tokenem, jeśli ustawiony) i /api/rewards/estimate.',
@@ -804,7 +919,7 @@ const translations = {
     earnings_note: 'Wartości orientacyjne; zależą od parametrów sieci.',
     earnings_error: 'Nie udało się pobrać status/rewards. Sprawdź node i tokeny.',
     faq_title: '9. FAQ – BulenCoin w praktyce',
-    faq_q1: 'Czy BulenCoin to tylko mem?',
+    faq_q1: 'Czy BulenCoin to tylko hype?',
     faq_a1:
       'Nie. Branding jest memowy, ale protokół jest próbą poważnego projektu, który pokazuje, że pełna sieć kryptowalutowa może działać na zwykłych urządzeniach. Łączy on pomysły z lekkiego konsensusu, dbałości o energię i prostego utrzymywania węzła.',
     faq_q2: 'Jak zacząć utrzymywać węzeł?',
@@ -1032,7 +1147,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    form.dispatchEvent(new Event('submit'));
+    const evt = new Event('submit', { bubbles: true, cancelable: true, composed: true });
+    form.dispatchEvent(evt);
   }
 
   const leaderboardTable = document.getElementById('leaderboard-table');

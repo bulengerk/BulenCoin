@@ -2,17 +2,17 @@ const express = require('express');
 const morgan = require('morgan');
 const axios = require('axios');
 
-const nodeApiBase =
-  process.env.BULENNODE_API_BASE ||
-  process.env.BULENNODE_API ||
-  'http://localhost:4100/api';
-const port = Number(process.env.EXPLORER_PORT || '4200');
-const logFormat = process.env.EXPLORER_LOG_FORMAT || 'dev';
-const explorerTitle = process.env.EXPLORER_TITLE || 'BulenCoin Explorer';
-const rewardsHubBase =
-  process.env.REWARDS_HUB_BASE ||
-  process.env.REWARDS_HUB ||
-  'http://localhost:4400';
+const defaultConfig = {
+  nodeApiBase:
+    process.env.BULENNODE_API_BASE ||
+    process.env.BULENNODE_API ||
+    'http://localhost:4100/api',
+  port: Number(process.env.EXPLORER_PORT || '4200'),
+  logFormat: process.env.EXPLORER_LOG_FORMAT || 'dev',
+  explorerTitle: process.env.EXPLORER_TITLE || 'BulenCoin Explorer',
+  rewardsHubBase:
+    process.env.REWARDS_HUB_BASE || process.env.REWARDS_HUB || 'http://localhost:4400',
+};
 
 function escapeHtml(value) {
   return String(value)
@@ -23,12 +23,12 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-async function fetchStatus() {
+async function fetchStatus(nodeApiBase) {
   const response = await axios.get(`${nodeApiBase}/status`);
   return response.data;
 }
 
-async function fetchPeers() {
+async function fetchPeers(nodeApiBase) {
   try {
     const response = await axios.get(`${nodeApiBase}/status`);
     return response.data.peers || [];
@@ -37,7 +37,7 @@ async function fetchPeers() {
   }
 }
 
-async function fetchMempool() {
+async function fetchMempool(nodeApiBase) {
   try {
     const response = await axios.get(`${nodeApiBase}/mempool`);
     return response.data || [];
@@ -46,24 +46,24 @@ async function fetchMempool() {
   }
 }
 
-async function fetchBlocks(limit, offset) {
+async function fetchBlocks(nodeApiBase, limit, offset) {
   const response = await axios.get(`${nodeApiBase}/blocks`, {
     params: { limit, offset },
   });
   return response.data;
 }
 
-async function fetchBlock(height) {
+async function fetchBlock(nodeApiBase, height) {
   const response = await axios.get(`${nodeApiBase}/blocks/${height}`);
   return response.data;
 }
 
-async function fetchAccount(address) {
+async function fetchAccount(nodeApiBase, address) {
   const response = await axios.get(`${nodeApiBase}/accounts/${address}`);
   return response.data;
 }
 
-async function fetchLeaderboard() {
+async function fetchLeaderboard(rewardsHubBase) {
   try {
     const response = await axios.get(`${rewardsHubBase}/leaderboard`);
     return response.data.entries || [];
@@ -87,7 +87,7 @@ function summarizeValidators(blocks) {
   }));
 }
 
-function renderLayout(title, bodyHtml) {
+function renderLayout(title, bodyHtml, brandTitle = defaultConfig.explorerTitle, apiBase = defaultConfig.nodeApiBase) {
   return `
 <!doctype html>
 <html lang="en">
@@ -119,7 +119,7 @@ function renderLayout(title, bodyHtml) {
   <body>
     <header>
       <div class="container">
-        <strong>${escapeHtml(explorerTitle)}</strong>
+        <strong>${escapeHtml(brandTitle)}</strong>
         <span style="margin-left: 1rem; font-size: 0.85rem;"><a href="/">Latest blocks</a></span>
       </div>
     </header>
@@ -128,7 +128,7 @@ function renderLayout(title, bodyHtml) {
     </main>
     <footer>
       <div class="container">
-        Connected to node API at ${escapeHtml(nodeApiBase)}
+        Connected to node API at ${escapeHtml(apiBase)}
       </div>
     </footer>
   </body>
@@ -136,19 +136,22 @@ function renderLayout(title, bodyHtml) {
 `;
 }
 
-function createServer() {
+function createServer(configOverrides = {}) {
+  const config = { ...defaultConfig, ...configOverrides };
   const app = express();
-  app.use(morgan(logFormat));
+  if (config.logFormat && config.logFormat !== 'none') {
+    app.use(morgan(config.logFormat));
+  }
 
   app.get('/', async (request, response) => {
     try {
       const [status, blocksPage, mempool, peers, leaderboard] =
         await Promise.all([
-          fetchStatus(),
-          fetchBlocks(20, 0),
-          fetchMempool(),
-          fetchPeers(),
-          fetchLeaderboard(),
+          fetchStatus(config.nodeApiBase),
+          fetchBlocks(config.nodeApiBase, 20, 0),
+          fetchMempool(config.nodeApiBase),
+          fetchPeers(config.nodeApiBase),
+          fetchLeaderboard(config.rewardsHubBase),
         ]);
       const rows = blocksPage.blocks
         .map(
@@ -229,7 +232,7 @@ function createServer() {
           <tbody>${validatorRows || '<tr><td colspan="3">No data</td></tr>'}</tbody>
         </table>
         <h2>Rewards leaderboard (telemetry)</h2>
-        <div class="meta">Source: ${escapeHtml(rewardsHubBase)}</div>
+        <div class="meta">Source: ${escapeHtml(config.rewardsHubBase)}</div>
         <table>
           <thead><tr><th>Node</th><th>Score</th><th>Stake</th><th>Uptime</th><th>Badges</th></tr></thead>
           <tbody>
@@ -270,7 +273,9 @@ function createServer() {
           <tbody>${mempoolRows || '<tr><td colspan="5">Empty</td></tr>'}</tbody>
         </table>
       `;
-      response.send(renderLayout('BulenCoin Explorer', bodyHtml));
+      response.send(
+        renderLayout('BulenCoin Explorer', bodyHtml, config.explorerTitle, config.nodeApiBase),
+      );
     } catch (error) {
       console.error(error);
       response
@@ -279,6 +284,8 @@ function createServer() {
           renderLayout(
             'Error',
             '<div class="error">Failed to load data from node API.</div>',
+            config.explorerTitle,
+            config.nodeApiBase,
           ),
         );
     }
@@ -287,7 +294,7 @@ function createServer() {
   app.get('/blocks/:height', async (request, response) => {
     const height = request.params.height;
     try {
-      const block = await fetchBlock(height);
+      const block = await fetchBlock(config.nodeApiBase, height);
       const transactionsRows = block.transactions
         .map(
           (transaction) => `
@@ -334,7 +341,9 @@ function createServer() {
         }
         <p><a href="/">Back to latest blocks</a></p>
       `;
-      response.send(renderLayout(`Block #${block.index}`, bodyHtml));
+      response.send(
+        renderLayout(`Block #${block.index}`, bodyHtml, config.explorerTitle, config.nodeApiBase),
+      );
     } catch (error) {
       console.error(error);
       response
@@ -343,6 +352,8 @@ function createServer() {
           renderLayout(
             'Block not found',
             `<div class="error">Failed to load block ${height} from node API.</div>`,
+            config.explorerTitle,
+            config.nodeApiBase,
           ),
         );
     }
@@ -360,7 +371,7 @@ function createServer() {
   app.get('/accounts/:address', async (request, response) => {
     const address = request.params.address;
     try {
-      const account = await fetchAccount(address);
+      const account = await fetchAccount(config.nodeApiBase, address);
       const bodyHtml = `
         <h1>Account ${escapeHtml(account.address)}</h1>
         <div class="meta">
@@ -370,7 +381,9 @@ function createServer() {
         </div>
         <p><a href="/">Back to latest blocks</a></p>
       `;
-      response.send(renderLayout(`Account ${account.address}`, bodyHtml));
+      response.send(
+        renderLayout(`Account ${account.address}`, bodyHtml, config.explorerTitle, config.nodeApiBase),
+      );
     } catch (error) {
       console.error(error);
       response
@@ -379,14 +392,33 @@ function createServer() {
           renderLayout(
             'Account not found',
             `<div class="error">Failed to load account ${address} from node API.</div>`,
+            config.explorerTitle,
+            config.nodeApiBase,
           ),
         );
     }
   });
 
-  app.listen(port, () => {
-    console.log(`BulenCoin Explorer listening on http://localhost:${port}`);
+  const server = app.listen(config.port, () => {
+    console.log(`BulenCoin Explorer listening on http://localhost:${config.port}`);
   });
+  return server;
 }
 
-createServer();
+if (require.main === module) {
+  createServer();
+}
+
+module.exports = {
+  createServer,
+  summarizeValidators,
+  escapeHtml,
+  renderLayout,
+  fetchStatus,
+  fetchPeers,
+  fetchMempool,
+  fetchBlocks,
+  fetchBlock,
+  fetchAccount,
+  fetchLeaderboard,
+};

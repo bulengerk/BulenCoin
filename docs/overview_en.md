@@ -3,7 +3,7 @@ title: BulenCoin – technical overview (EN)
 language: en
 ---
 
-BulenCoin is a meme‑style cryptocurrency project with a serious engineering objective:
+BulenCoin is a lightweight Proof of Stake experiment focused on wide accessibility:
 demonstrating that a modern blockchain network can be maintained by a wide range of
 hardware, from smartphones and tablets to laptops, desktops and servers.
 

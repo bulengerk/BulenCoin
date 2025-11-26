@@ -690,6 +690,32 @@ section p {
   gap: 1rem;
 }
 
+.bc-device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.bc-codeblock {
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: 'Space Grotesk', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92rem;
+  overflow-x: auto;
+}
+
+.bc-codeblock code {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.bc-run-highlights {
+  margin-top: 1rem;
+}
+
 .bc-doc-card {
   display: block;
   padding: 1.2rem 1.3rem;
@@ -752,6 +778,12 @@ section p {
   color: var(--muted);
   font-size: 0.78rem;
   letter-spacing: 0.02em;
+}
+
+.bc-smallprint {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .bc-footer {

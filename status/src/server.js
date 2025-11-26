@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const axios = require('axios');
 
-const port = Number(process.env.STATUS_PORT || '4300');
+const defaultPort = Number(process.env.STATUS_PORT || '4300');
 const nodesEnv = process.env.STATUS_NODES || '';
 
 const nodeStatusUrls = nodesEnv
@@ -131,17 +131,18 @@ function renderHtmlSummary(aggregate, details) {
 `;
 }
 
-function createServer() {
+function createServer(options = {}) {
+  const { port = defaultPort, statusUrls = nodeStatusUrls } = options;
   const app = express();
   app.use(morgan('dev'));
 
   app.get('/status', async (request, response) => {
     try {
-      if (!nodeStatusUrls.length) {
+      if (!statusUrls.length) {
         response.json({ nodeCount: 0, byDeviceClass: [] });
         return;
       }
-      const results = await Promise.allSettled(nodeStatusUrls.map(fetchStatus));
+      const results = await Promise.allSettled(statusUrls.map(fetchStatus));
       const statuses = results
         .filter((item) => item.status === 'fulfilled')
         .map((item) => item.value);
@@ -158,11 +159,11 @@ function createServer() {
 
   app.get('/', async (request, response) => {
     try {
-      if (!nodeStatusUrls.length) {
+      if (!statusUrls.length) {
         response.send('<p>No nodes configured. Set STATUS_NODES env variable.</p>');
         return;
       }
-      const results = await Promise.allSettled(nodeStatusUrls.map(fetchStatus));
+      const results = await Promise.allSettled(statusUrls.map(fetchStatus));
       const statuses = results
         .filter((item) => item.status === 'fulfilled')
         .map((item) => item.value);
@@ -174,13 +175,22 @@ function createServer() {
     }
   });
 
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`BulenCoin status service listening on http://localhost:${port}`);
-    if (!nodeStatusUrls.length) {
+    if (!statusUrls.length) {
       console.log('No STATUS_NODES configured; aggregation endpoints will be empty.');
     }
   });
+  return server;
 }
 
-createServer();
+if (require.main === module) {
+  createServer();
+}
 
+module.exports = {
+  fetchStatus,
+  aggregateStatuses,
+  renderHtmlSummary,
+  createServer,
+};

@@ -5,7 +5,7 @@
     <title>BulenCoin – Lightweight Multiplatform Crypto Network</title>
     <meta
       name="description"
-      content="BulenCoin is a meme coin with a serious goal: a lightweight, energy‑aware Proof of Stake network that runs on phones, laptops and servers."
+      content="BulenCoin is a lightweight, energy‑aware Proof of Stake experiment focused on wide accessibility: phones, laptops, servers, Raspberry Pi."
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -115,14 +115,22 @@
           <div class="bc-hero-copy">
             <p class="bc-eyebrow">Energy-aware PoS for everyday hardware</p>
             <h1 data-i18n="hero_title">
-              BulenCoin – a meme coin with a serious distributed systems heart
+              BulenCoin – wide-accessibility Proof of Stake experiment
             </h1>
             <p class="bc-hero-subtitle" data-i18n="hero_subtitle">
               A lightweight, Proof of Stake–based network designed to run on everything from
               smartphones to servers, rewarding users for keeping real nodes online.
             </p>
             <div class="bc-cta-row">
-              <a class="bc-button" href="#docs" data-i18n="hero_cta_docs">Docs & downloads</a>
+              <a class="bc-button" href="#run-everywhere" data-i18n="hero_cta_run_desktop"
+                >Run on laptop/desktop</a
+              >
+              <a class="bc-button bc-button-ghost" href="#run-everywhere" data-i18n="hero_cta_run_pi"
+                >Run on Raspberry Pi</a
+              >
+              <a class="bc-button bc-button-ghost" href="#docs" data-i18n="hero_cta_docs"
+                >Docs & downloads</a
+              >
               <a
                 class="bc-button bc-button-ghost"
                 href="docs/whitesheet_investor_pl.pdf"
@@ -135,6 +143,7 @@
             <div class="bc-chip-row">
               <span class="bc-chip" data-i18n="chip_mobile">Mobile · desktop · server ready</span>
               <span class="bc-chip" data-i18n="chip_uptime">Uptime rewards baked in</span>
+              <span class="bc-chip" data-i18n="chip_nogpu">No GPUs or mining rigs required</span>
               <span class="bc-chip" data-i18n="chip_multilingual">Docs: PL / EN / ES</span>
             </div>
             <ul class="bc-hero-highlights">
@@ -169,6 +178,66 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="run-everywhere" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="run_title">Run a node on everyday devices</h2>
+            <p data-i18n="run_subtitle">
+              No GPU rigs. Node 18+, small SSD and one command per platform. Designed for laptops,
+              Raspberry Pi/ARM and even light/superlight phone modes.
+            </p>
+          </div>
+          <div class="bc-device-grid">
+            <article class="bc-card">
+              <div class="bc-doc-pill" data-i18n="run_card_desktop_pill">Laptop / desktop</div>
+              <h3 data-i18n="run_card_desktop_title">Full node on everyday PCs</h3>
+              <p data-i18n="run_card_desktop_body">
+                2 vCPU, 4 GB RAM, 20–40 GB SSD/NVMe. Reward weight 0.8–1.0. No GPU or data-center
+                hardware needed.
+              </p>
+              <div class="bc-codeblock"><code>./scripts/install_desktop_node.sh</code></div>
+              <p class="bc-muted" data-i18n="run_card_desktop_note">
+                Auto-installs Node.js on Debian/Ubuntu; equivalent macOS/Windows scripts are below.
+              </p>
+            </article>
+            <article class="bc-card">
+              <div class="bc-doc-pill" data-i18n="run_card_pi_pill">Raspberry Pi / ARM</div>
+              <h3 data-i18n="run_card_pi_title">Keep a Pi online and earn</h3>
+              <p data-i18n="run_card_pi_body">
+                Pi 4 (4 GB) + microSD/SSD. Reward weight 0.75 with ARM boost. Runs 24/7 behind your
+                router with P2P token and TLS via reverse proxy.
+              </p>
+              <div class="bc-codeblock"><code>./scripts/install_raspberry_node.sh</code></div>
+              <p class="bc-muted" data-i18n="run_card_pi_note">
+                Uses the same lightweight Node.js client; faucet off for public hosts.
+              </p>
+            </article>
+            <article class="bc-card">
+              <div class="bc-doc-pill" data-i18n="run_card_mobile_pill">Mobile / superlight</div>
+              <h3 data-i18n="run_card_mobile_title">Light & superlight for phones</h3>
+              <p data-i18n="run_card_mobile_body">
+                Stores headers + recent state; aggressive pruning to protect battery and data. Runs
+                on Android/iOS in light mode; desktop build can simulate it.
+              </p>
+              <div class="bc-codeblock">
+                <code>BULEN_NODE_PROFILE=phone-superlight npm start</code>
+              </div>
+              <p class="bc-muted" data-i18n="run_card_mobile_note">
+                Telemetry and selection weight favour diverse devices; uptime still rewarded.
+              </p>
+            </article>
+          </div>
+          <div class="bc-chip-row bc-run-highlights">
+            <span class="bc-chip" data-i18n="run_chip_one_command">One-command installers per OS</span>
+            <span class="bc-chip" data-i18n="run_chip_energy">Energy-aware defaults, no mining</span>
+            <span class="bc-chip" data-i18n="run_chip_reward">Rewards scale with device weight, not hardware price</span>
+          </div>
+          <p class="bc-muted" style="margin-top: 0.6rem;" data-i18n="run_passive_note">
+            Keep nodes online now to help the network grow — when the product matures, honest uptime can turn into meaningful rewards for early operators. No guaranteed profits.
+          </p>
         </div>
       </section>
 
@@ -235,34 +304,54 @@
           <div class="bc-section-header">
             <h2 data-i18n="downloads_title">Downloads</h2>
             <p data-i18n="downloads_subtitle">
-              One-click installs for desktops/servers and Docker. Mobile builds (APK/TestFlight) are in flight.
+              One-command installers for laptops, servers, Raspberry Pi, macOS and Windows. Mobile builds (APK/TestFlight) are in flight; signed packages (.exe/.pkg/.deb/.rpm) will follow.
             </p>
           </div>
           <div class="bc-docs-grid">
-            <div class="bc-doc-card">
-              <span class="bc-doc-pill">Windows</span>
-              <h3 data-i18n="download_windows">Windows installer (.exe)</h3>
-              <p class="bc-muted" data-i18n="download_windows_body">Signed installer with auto-update and built-in status page.</p>
-              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
-            </div>
-            <div class="bc-doc-card">
-              <span class="bc-doc-pill">macOS</span>
-              <h3 data-i18n="download_macos">macOS installer (.pkg)</h3>
-              <p class="bc-muted" data-i18n="download_macos_body">Apple-notarized build with menu bar status and metrics.</p>
-              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
-            </div>
-            <div class="bc-doc-card">
-              <span class="bc-doc-pill">Linux</span>
-              <h3 data-i18n="download_linux">Linux (.deb/.rpm)</h3>
-              <p class="bc-muted" data-i18n="download_linux_body">Service-ready packages with systemd unit and logrotate config.</p>
-              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
-            </div>
+            <article class="bc-doc-card">
+              <span class="bc-doc-pill" data-i18n="download_linux_cli_pill">Linux CLI</span>
+              <h3 data-i18n="download_linux_cli_title">Laptop/server one-liner</h3>
+              <p class="bc-muted" data-i18n="download_linux_cli_body">
+                Debian/Ubuntu, installs Node 18+ if missing, sets up bulennode.
+              </p>
+              <div class="bc-codeblock"><code>./scripts/install_desktop_node.sh</code></div>
+              <div class="bc-codeblock"><code>./scripts/install_server_node.sh</code></div>
+            </article>
+            <article class="bc-doc-card">
+              <span class="bc-doc-pill" data-i18n="download_pi_cli_pill">Raspberry Pi / ARM</span>
+              <h3 data-i18n="download_pi_cli_title">Pi-friendly install</h3>
+              <p class="bc-muted" data-i18n="download_pi_cli_body">
+                Pi 4/ARM SBC profile with energy-aware defaults and faucet off by default for public hosts.
+              </p>
+              <div class="bc-codeblock"><code>./scripts/install_raspberry_node.sh</code></div>
+            </article>
+            <article class="bc-doc-card">
+              <span class="bc-doc-pill" data-i18n="download_macos_cli_pill">macOS CLI</span>
+              <h3 data-i18n="download_macos_cli_title">Homebrew or nvm</h3>
+              <p class="bc-muted" data-i18n="download_macos_cli_body">
+                Installs Node via Homebrew or per-user nvm, then bulennode deps.
+              </p>
+              <div class="bc-codeblock"><code>./scripts/install_macos_node.sh desktop-full</code></div>
+            </article>
+            <article class="bc-doc-card">
+              <span class="bc-doc-pill" data-i18n="download_windows_cli_pill">Windows CLI</span>
+              <h3 data-i18n="download_windows_cli_title">Winget/Chocolatey</h3>
+              <p class="bc-muted" data-i18n="download_windows_cli_body">
+                Installs Node 18 LTS via winget or choco, then bulennode deps for chosen profile.
+              </p>
+              <div class="bc-codeblock">
+                <code>powershell -ExecutionPolicy Bypass -File scripts/install_windows_node.ps1 -Profile desktop-full</code>
+              </div>
+            </article>
             <a class="bc-doc-card" href="bulennode/docker-compose.local.yml">
               <span class="bc-doc-pill">Docker</span>
               <h3 data-i18n="download_docker">Docker Compose</h3>
               <p class="bc-muted" data-i18n="download_docker_body">Run node + dependencies locally with one command.</p>
             </a>
           </div>
+          <p class="bc-muted bc-smallprint" data-i18n="download_signed_note">
+            Signed packages (.exe/.pkg/.deb/.rpm) ship later; use the one-command installers above now.
+          </p>
         </div>
       </section>
 
@@ -270,10 +359,9 @@
         <div class="bc-container">
           <h2 data-i18n="overview_title">1. What is BulenCoin?</h2>
           <p data-i18n="overview_intro">
-            BulenCoin is a meme‑themed cryptocurrency with a serious engineering goal: to
-            prove that a modern blockchain network can be maintained by the widest possible
-            spectrum of devices – from phones and tablets, through laptops and desktops, up
-            to cloud servers.
+            BulenCoin is a lightweight PoS experiment focused on accessibility: showing that a
+            modern network can be maintained by the widest possible spectrum of devices – from
+            phones and tablets, through laptops and desktops, up to cloud servers.
           </p>
           <p data-i18n="overview_goal">
             The protocol is designed to be light enough to run in the background on a
@@ -1125,7 +1213,7 @@
           <h2 data-i18n="faq_title">9. FAQ – BulenCoin in practice</h2>
           <div class="bc-faq">
             <div class="bc-faq-item">
-              <h3 data-i18n="faq_q1">Is BulenCoin only a meme?</h3>
+              <h3 data-i18n="faq_q1">Is BulenCoin just hype?</h3>
               <p data-i18n="faq_a1">
                 No. The brand is playful, but the protocol is designed as a serious
                 experiment in running a full crypto network on mainstream devices,

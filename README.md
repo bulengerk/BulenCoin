@@ -1,354 +1,88 @@
-# BulenCoin – network design, docs and website
+# BulenCoin
 
-This repository contains:
+Lightweight, multi‑platform crypto network designed to run on everyday hardware (phones, laptops, servers, Raspberry Pi). Built to be accessible, energy‑aware and community‑operated — no mining rigs, no paywalls. This repo ships the prototype node, explorer, status service, rewards hub, SDKs, docs and the public website.
 
-- a cleaned‑up specification of the BulenCoin network in Polish (`docs/bulencoin_spec_pl.md`),
-- an investor‑oriented whitesheet in Polish (`docs/whitesheet_investor_pl.md` with PDF),
-- a deployment guide for the web layer and the future BulenCoin network (`docs/deployment_guide.md`),
-- a static, multilingual website describing BulenCoin (`index.html`, `styles.css`, `script.js`),
-- a legal and compliance overview in Polish (`docs/legal_compliance_pl.md`),
-- a security hardening guide in Polish (`docs/security_hardening_pl.md`),
-- an English overview and deployment guides (`docs/overview_en.md`, `docs/deployment_guide_en.md`),
-- a documentation index (`docs/README.md`).
+## What’s inside
 
-Additionally, it includes prototype infrastructure services implemented in Node.js:
+- `bulennode/` – prototype node (HTTP API, PoS‑style block production, simple P2P over HTTP).
+- `explorer/` – minimal web explorer that reads from a BulenNode.
+- `status/` – lightweight status aggregator/HTML summary.
+- `rewards-hub/` – telemetry leaderboard + badges with HMAC-protected reports (opt‑in, privacy‑minded).
+- `sdk/`, `sdk-rs/` – JS/TS and Rust SDKs for payments/status/payment links.
+- `docs/` – spec, deployment/security guides, testing strategy, prod manifests.
+- `index.html`, `styles.css`, `script.js` – static multilingual landing page.
+- `bulennode-rs/` – early Rust rewrite of the node (API + block production + metrics).
+- Payments/micropayments recipes: `docs/payment_integration.md` (link/QR, invoices, webhook HMAC, paywall/tips/donations).
 
-- `bulennode/` – a minimal BulenNode service with HTTP API, simple PoS‑like block production and basic P2P gossip over HTTP,
-- `explorer/` – a lightweight web explorer that reads chain data from a BulenNode instance.
-- `bulennode-rs/` – wip Rust rewrite of the BulenNode (HTTP API + block production + metrics).
-- deployment notes and manifests in `docs/prod_manifests.md` (reverse proxy TLS, sentry nodes, backups, monitoring).
-- `rewards-hub/` – prototype rewards leaderboard and badges fed by BulenNode telemetry.
-- `sdk/` – JS/TS helpers for merchants (payments, payment links/QR, status polling).
-- `sdk-rs/` – Rust client crate (blocking) for payments/status/payment links.
+## Current prototype products
 
-For a map of all documentation, see `docs/README.md`.
+- **BulenNode (JS)**: lightweight PoS-like node with HTTP API, faucet (dev), simple P2P gossip, payments/invoice flow, reward projection, Prometheus metrics. Profiles for laptop/server/gateway/Raspberry Pi/mobile-light/superlight.
+- **Explorer**: minimal web UI consuming a BulenNode (`/blocks`, `/accounts/:address`, mempool, rewards leaderboard from rewards-hub).
+- **Status service**: aggregates multiple node `/api/status` endpoints into JSON + HTML table (by device class, reward weight, uptime).
+- **Rewards hub**: opt-in telemetry + badges with HMAC and token; supports referrals/allowlist, leaderboard, signed share payloads.
+- **SDKs**: JS/TS (`sdk/`) and Rust (`sdk-rs/`) helpers for payments, payment links/QR, status polling.
 
-The specification is based on the original `bulencoin_spec.pdf` and describes:
+## Quick start (pick your path)
 
-- network architecture and node types,
-- consensus and reward model (lightweight Proof of Stake with committees),
-- mobile, desktop and gateway node applications (BulenNode),
-- technical requirements, security and launch phases (testnet → mainnet).
+**One-command installers (recommended):**
+- Linux desktop/server: `./scripts/install_desktop_node.sh` or `./scripts/install_server_node.sh`
+- Raspberry Pi / ARM: `./scripts/install_raspberry_node.sh`
+- macOS: `./scripts/install_macos_node.sh desktop-full`
+- Windows: `powershell -ExecutionPolicy Bypass -File scripts/install_windows_node.ps1 -Profile desktop-full`
 
-## Architecture at a glance
+**Source:**  
+```bash
+cd bulennode
+npm install
+npm start
+```
 
-- **Consensus**: stake-weighted committee, producer signature + committee quorum certificate, finality checkpoints signed by the producer over `{height, hash, snapshotHash}`.
-- **State**: on-chain balances/stake + monetary counters (burn/ecosystem/minted), finalized snapshots with checksum for super-light bootstrap.
-- **P2P**: HTTP-based gossip with handshake/token, peer book with scoring/discovery, backpressure on concurrent P2P requests.
-- **Security**: per-tx signatures (chainId-bound), per-block producer + committee signatures, optional TLS/handshake for P2P, rate limiting and max body size on HTTP.
-- **Economy**: fee splits (burn/ecosystem/producer/stakers), block rewards behind `enableProtocolRewards`, payments/invoice flow with optional webhook HMAC.
+**Docker (local dev):**  
+```bash
+cd bulennode && docker compose -f docker-compose.local.yml up --build
+```
 
-## Running the website locally
+## Node profiles (reward weights)
 
-From the repository root:
+- `desktop-full` (0.8) – laptop/desktop validator  
+- `server-full` (1.0) – server validator  
+- `gateway` (0.9) – observer/API role (no faucet)  
+- `raspberry` (0.75) – Pi/ARM SBC  
+- `mobile-light` / `tablet-light` (0.5 / 0.6) – light nodes  
+- `phone-superlight` (0.35) – observer with aggressive pruning
 
+Set via `BULEN_NODE_PROFILE`. Profiles pick ports, faucet default and reward weight; override with env vars.
+
+## Minimums & security defaults
+
+- Node.js 18+, Debian/Ubuntu 22.04+; for servers/gateways: 2 vCPU / 4 GB RAM / 40 GB SSD (4 vCPU / 8 GB recommended). Pi: Pi 4 (4 GB) + microSD/SSD.
+- Public hosts: `BULEN_REQUIRE_SIGNATURES=true`, `BULEN_ENABLE_FAUCET=false`, `BULEN_P2P_TOKEN`, `BULEN_STATUS_TOKEN`, `BULEN_METRICS_TOKEN`, rate limits tuned.
+- Telemetry/reporting HMAC: `BULEN_REWARDS_HMAC_SECRET` (node) / `REWARDS_HMAC_SECRET` (hub).
+- Non‑custodial by design: keep keys/seed local, prefer TLS and tokens, and treat everything here as experimental/educational rather than a promise of profit.
+
+## Tests
+
+- BulenNode unit/integration: `cd bulennode && node --test`
+- Explorer: `cd explorer && node --test`
+- Status: `cd status && node --test`
+- Rewards hub: `cd rewards-hub && node --test`
+- Full-stack suites (node + explorer + status + payments/security/load): `node --test scripts/tests/*.test.js`
+- Installer smoke (Linux-only, needs Docker access): `./scripts/test_installers_in_docker.sh`
+
+## Docs
+
+- Spec (PL): `docs/bulencoin_spec_pl.md`
+- Deployment guides: `docs/deployment_guide.md` (PL), `docs/deployment_guide_en.md` (EN)
+- Security hardening (PL): `docs/security_hardening_pl.md`
+- Prod manifests/topology: `docs/prod_manifests.md`
+- Testing strategy: `docs/testing_strategy.md`
+- Quickstart: `docs/onboarding_quickstart.md`
+- Rewards parameters: `docs/rewards_policy.md`
+
+## Website
+
+Static landing with translations (EN/ES/PL). Serve locally:
 ```bash
 python3 -m http.server 8080
+# open http://localhost:8080
 ```
-
-Then open `http://localhost:8080` in your browser. Use the language selector in the top‑right corner to switch between English, Spanish and Polish.
-
-## Running a local BulenNode
-
-From the repository root, install dependencies and start the node:
-
-```bash
-cd bulennode
-npm install
-npm start
-```
-
-By default this:
-
-- creates a local data directory under `data/desktop-full`,
-- starts an HTTP API on `http://localhost:4100`,
-- produces blocks automatically when there are pending transactions.
-
-### Node profiles and device classes
-
-Nodes use `BULEN_NODE_PROFILE` to select a default configuration and reward weighting:
-
-- `desktop-full` (default) – typical laptop/desktop validator (`deviceClass=desktop`, `rewardWeight=0.8`),
-- `server-full` – server‑grade validator with higher relative uptime weight (`deviceClass=server`, `rewardWeight=1.0`),
-- `mobile-light` – light node on a phone (`deviceClass=phone`, `rewardWeight=0.5`),
-- `tablet-light` – light node on a tablet (`deviceClass=tablet`, `rewardWeight=0.6`),
-- `phone-superlight` – observer mode for phones (headers + snapshot, aggressive pruning, `superLightMode=true`, `rewardWeight=0.35`),
-- `raspberry` – full/partial node on Raspberry Pi or similar ARM single‑board computers (`deviceClass=raspberry`, `rewardWeight=0.75`),
-- `gateway` – API gateway node (`deviceClass=server`, `rewardWeight=0.9`, `nodeRole=observer`).
-
-These defaults influence:
-
-- HTTP/P2P ports (per profile),
-- whether the faucet is enabled by default on that profile,
-- relative weight in the prototype uptime‑reward model (reported via `/api/status` as `rewardWeight`).
-
-The node also tracks basic uptime metrics and a local reward estimate (based on
-`rewardWeight` and `BULEN_BASE_UPTIME_REWARD`); these values are exposed in `/api/status`
-and via Prometheus text metrics at `/metrics` for external tooling/alerting.
-
-### Installation helpers and systemd units
-
-For convenience, the repository includes one-click installation helpers:
-
-- `scripts/install_server_node.sh` – prepares a `server-full` node on a Debian/Ubuntu‑style server,
-- `scripts/install_desktop_node.sh` – prepares a `desktop-full` node on a laptop/PC,
-- `scripts/install_raspberry_node.sh` – prepares a `raspberry` profile node on Raspberry Pi / ARM SBC,
-- `scripts/install_gateway_node.sh` – prepares a `gateway` node intended as HTTP API / explorer backend,
-- `scripts/install_macos_node.sh [profile]` – macOS installer (Homebrew or per-user nvm); defaults to `desktop-full` if the profile is omitted,
-- `scripts/install_windows_node.ps1 -Profile <profile>` – Windows installer (winget/Chocolatey) that installs Node.js and bulennode dependencies for the chosen profile.
-- `scripts/test_installers_in_docker.sh` – Linux-only smoke test that runs all installers inside a Debian container.
-
-There are also example `systemd` unit templates:
-
-- `scripts/systemd/bulennode-server.service` – for a server‑grade node under `/opt/bulencoin/bulennode`,
-- `scripts/systemd/bulennode-raspberry.service` – for a Raspberry Pi node under `/home/pi/bulencoin/bulennode`.
-
-These units expect environment variables (profile, security flags, peers) to be provided via
-`/etc/default/bulennode-server` or `/etc/default/bulennode-raspberry`.
-
-### Docker images (prototype)
-
-For experimentation and local testing, you can build Docker images:
-
-```bash
-cd bulennode
-docker build -t bulennode:dev .
-
-cd ../explorer
-docker build -t bulen-explorer:dev .
-```
-
-Example docker-compose setup can then wire `bulennode` and `explorer` together by pointing
-`BULENNODE_API_BASE` at the node container.
-
-Security‑related configuration (environment variables):
-
-- `BULEN_REQUIRE_SIGNATURES` – when set to `true`, BulenNode requires each transaction to include:
-  - `publicKey` (PEM‑encoded public key),
-  - `signature` (base64, ECDSA over a canonical JSON payload),
-  - `nonce` strictly increasing per account; unsigned or malformed transactions are rejected.
-- `BULEN_P2P_TOKEN` – shared secret token; when set, P2P HTTP endpoints (`/p2p/tx`, `/p2p/block`) only accept requests that include the matching `x-bulen-p2p-token` header.
-- `BULEN_ENABLE_FAUCET` – controls test faucet endpoint (`/api/faucet`); defaults to `true` in development and **must** be `false` in any semi‑public deployment.
-- `BULEN_MAX_BODY_SIZE` – maximum JSON body size for API requests (default `128kb`).
-- `BULEN_RATE_LIMIT_WINDOW_MS` / `BULEN_RATE_LIMIT_MAX_REQUESTS` – request limiter window (ms) and max burst per IP (default `15000` / `60`).
-- `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` – optional shared secrets required in headers for `/api/status` and `/metrics` on public-facing hosts.
-- `BULEN_REWARDS_HUB` / `BULEN_REWARDS_TOKEN` – optional telemetry target for uptime/stake reports (prototype rewards hub); set both to enable reporting.
-- `BULEN_WEBHOOK_SECRET` – optional HMAC secret; when set, outgoing payment webhooks include header `x-bulen-signature` (sha256 HMAC of the JSON body).
-- `BULEN_REWARDS_HMAC_SECRET` – optional HMAC secret for telemetry reports to rewards-hub (header `x-bulen-signature`).
-- `BULEN_DEVICE_TOKEN` – optional token to protect `/api/device/battery`; in production a token is required if super-light mode is used.
-
-Example usage (in another terminal):
-
-```bash
-curl -X POST http://localhost:4100/api/faucet \
-  -H 'Content-Type: application/json' \
-  -d '{"address":"alice","amount":10000}'
-
-curl -X POST http://localhost:4100/api/faucet \
-  -H 'Content-Type: application/json' \
-  -d '{"address":"bob","amount":0}'
-
-curl -X POST http://localhost:4100/api/transactions \
-  -H 'Content-Type: application/json' \
-  -d '{"from":"alice","to":"bob","amount":150,"fee":1}'
-```
-
-After one or two block intervals, the transaction will be included in a block and balances will update.
-
-You can inspect node status at `http://localhost:4100/api/status`.
-
-Key HTTP APIs (prototype):
-
-- `GET /api/status` – node info, profile, reward weight, reward projection, peers, payments counters,
-- `GET /api/blocks` / `GET /api/blocks/:height` – recent blocks and single block by height,
-- `GET /api/accounts/:address` – balance/stake/nonce/reputation,
-- `GET /api/mempool` – pending transactions,
-- `POST /api/payments` + `GET /api/payments/:id` – invoice lifecycle (supports `webhookUrl`),
-- `POST /api/payment-link` – BIP21-like link and QR code,
-- `POST /api/rewards/estimate` – reward/loyalty projection (mirrors calculator on `/api/status`),
-- `POST /api/wallets/challenge` / `POST /api/wallets/verify` – signed-message wallet login,
-- `GET /metrics` – Prometheus metrics (optionally protected by `BULEN_METRICS_TOKEN`).
-
-Metrics endpoint (Prometheus format):
-
-- `GET /metrics` – exposes node info, height, mempool size, stake total, uptime, reward estimate, payments counts, rate‑limit config and protocol version. Useful for Prometheus scraping and Grafana dashboards.
-- Sample Grafana: import `docs/grafana-dashboard.json` after adding a Prometheus datasource scraping `/metrics` (use header `x-bulen-metrics-token` if set).
-
-Health and metadata endpoints:
-
-- `GET /healthz` or `GET /api/health` – simple liveness probe for load balancers/monitors,
-- `GET /api/info` – node metadata (version, profile, device class, security flags).
-
-To connect multiple nodes together, start additional BulenNode instances with `BULEN_PEERS` pointing at other nodes, for example:
-
-```bash
-cd bulennode
-PORT=4102 BULEN_HTTP_PORT=4102 BULEN_NODE_ID=node2 BULEN_PEERS=localhost:4100 npm start
-```
-
-### Quick local 2-node demo (P2P + payments)
-
-```bash
-# terminal 1
-cd bulennode
-BULEN_HTTP_PORT=4100 BULEN_P2P_PORT=4101 BULEN_NODE_ID=node-a npm start
-
-# terminal 2
-cd bulennode
-BULEN_HTTP_PORT=4200 BULEN_P2P_PORT=4201 BULEN_NODE_ID=node-b BULEN_PEERS=127.0.0.1:4100 npm start
-
-# fund & send (from terminal 3)
-curl -X POST http://127.0.0.1:4100/api/faucet -H 'Content-Type: application/json' -d '{"address":"alice","amount":1000}'
-curl -X POST http://127.0.0.1:4100/api/transactions -H 'Content-Type: application/json' -d '{"from":"alice","to":"bob","amount":123,"fee":1}'
-# wait ~1s; the block from node-a is gossiped to node-b
-curl http://127.0.0.1:4200/api/accounts/bob
-```
-
-Docker-compose wariant (2 węzły):
-
-```bash
-cd bulennode
-docker compose -f docker-compose.local.yml up --build
-
-# w drugim terminalu
-curl -X POST http://127.0.0.1:4100/api/faucet -H 'Content-Type: application/json' -d '{"address":"alice","amount":1000}'
-curl -X POST http://127.0.0.1:4100/api/transactions -H 'Content-Type: application/json' -d '{"from":"alice","to":"bob","amount":123,"fee":1}'
-curl http://127.0.0.1:4200/api/accounts/bob
-```
-
-TLS P2P demo (self-signed):
-
-```bash
-cd bulennode
-# generate self-signed certs (example)
-mkdir -p certs
-openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/node-a.key -out certs/node-a.crt -subj "/CN=node-a" -days 365
-openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/node-b.key -out certs/node-b.crt -subj "/CN=node-b" -days 365
-
-docker compose -f docker-compose.tls.yml up --build
-```
-
-Oba węzły wymagają handshake + TLS; certyfikaty z `certs/` są montowane read-only.
-
-### Threat model / production checklist
-
-- Require signatures: set `BULEN_REQUIRE_SIGNATURES=true` and ensure tx include `publicKey`, `signature`, `nonce`, correct `chainId`.
-- Lock down P2P: `BULEN_P2P_REQUIRE_HANDSHAKE=true` or `BULEN_P2P_TOKEN` set; enable TLS if exposed beyond LAN.
-- Disable faucet and test-only switches in any public environment: `BULEN_ENABLE_FAUCET=false`, `BULEN_ALLOW_UNSIGNED_BLOCKS=false`.
-- Protect observability: set `BULEN_STATUS_TOKEN` and `BULEN_METRICS_TOKEN` when exposing `/api/status` or `/metrics`.
-- Persist and protect keys: node keys live under `data/<profile>/node_key.pem`; keep `.gitignore` for keys/secrets intact.
-
-### Rust prototype node
-
-A minimal Rust rewrite prototype lives in `bulennode-rs/`. It exposes `/healthz`,
-`/api/status`, `/api/blocks`, `/api/accounts/:address`, `/api/transactions` and
-`/metrics`, with in-memory state and periodic block production.
-
-Run it on a non-conflicting port:
-
-```bash
-cd bulennode-rs
-cargo run
-```
-
-Environment variables: `BULEN_HTTP_PORT` (default `5100`), `BULEN_BLOCK_INTERVAL_MS`,
-`BULEN_CHAIN_ID`, `BULEN_NODE_ID`.
-
-## Running the block explorer
-
-With a BulenNode running on `http://localhost:4100`, start the explorer:
-
-```bash
-cd explorer
-npm install
-npm start
-```
-
-## Tests and CI
-
-Prototype test suite (Node.js):
-
-```bash
-cd bulennode
-npm install
-npm test
-```
-
-The suite covers consensus (signatures, forks, checkpoints), P2P gossip fanout, payments, wallet login, protocol compatibility, security guardrails and state checksums. For CI, run `npm ci && npm test` in `bulennode/`; the website/explorer are static and can be linted with your preferred HTML/CSS/JS linters.
-
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs the BulenNode tests on push/PR using Node 18.
-
-## How to review the codebase quickly
-
-- Start from `bulennode/src/server.js` (HTTP/P2P endpoints), `bulennode/src/consensus.js` (fork-choice, finality, signatures) and `bulennode/src/p2p.js` (gossip, handshake).
-- Look at `bulennode/test/` for intended behaviours (consensus_fork, p2p_gossip_fanout, payments, protocol_compat, security_guardrails).
-- For economic rules, see `bulennode/src/chain.js` (fee splits, block reward, monetary fields) and `bulennode/src/rewards.js`.
-
-Then open `http://localhost:4200` in your browser to see:
-
-- latest blocks,
-- individual block details,
-- basic account information.
-
-The explorer can be customised via environment variables:
-
-- `BULENNODE_API_BASE` – base URL of the BulenNode API (default `http://localhost:4100/api`),
-- `EXPLORER_PORT` – HTTP port (default `4200`),
-- `EXPLORER_TITLE` – title/brand shown in the header,
-- `EXPLORER_LOG_FORMAT` – morgan log format (default `dev`),
-- `REWARDS_HUB_BASE` – base URL for the rewards leaderboard/badges (default `http://localhost:4400`).
-
-Developer docs and SDKs:
-
-- Cookbook: `docs/dev_cookbook.md` (payments, paywall, reward calc; Node/Go/Python).
-- JS/TS: `sdk/` (`npm install bulencoin-sdk`).
-- Rust: `sdk-rs/` crate `bulencoin-sdk` (blocking client, reqwest).
-- Super-light mobile: profile `phone-superlight` + API `POST /api/device/battery` to sleep on low battery; status exposes `superLight`/`superLightSleeping`.
-- Integration tests: run `node --test scripts/tests` (added webhook signature and super-light tests to increase coverage).
-
-## Status aggregation service
-
-The `status/` directory contains a small service that aggregates status information from
-multiple BulenNode instances:
-
-- `GET /status` – JSON with aggregated metrics and per-node entries,
-- `GET /` – simple HTML summary by device class and node.
-
-To run:
-
-```bash
-cd status
-npm install
-STATUS_PORT=4300 STATUS_NODES=http://localhost:4100/api/status npm start
-```
-
-Then open `http://localhost:4300` in your browser.
-
-## Development, tests and contributions
-
-See `CONTRIBUTING.md` for detailed contribution guidelines. In short:
-
-- use Node.js 18+,
-- for BulenNode:
-  - `cd bulennode && npm install && node --test`,
-- for explorer and status services:
-  - `cd explorer && npm install`,
-  - `cd status && npm install`,
-- for a full stack via Docker:
-  - `docker-compose up --build`.
-- full-stack smoke test (BulenNode + Explorer + Status on test ports):
-  - `node --test scripts/tests/full_stack_smoke.test.js`.
-- security guardrails test (signatures required, P2P token, rate limiter):
-  - `node --test scripts/tests/security_guardrails.test.js`.
-- full-stack (payments + wallet + explorer + status):
-  - `node --test scripts/tests/full_stack_integration_all.test.js`.
-- 30s load test for BulenNode:
-  - `node --test scripts/tests/node_load_30s.test.js`.
-- payments and wallet integration API:
-  - see `docs/payment_integration.md` for endpoints and sample flows.
-
-
-## Next steps
-
-- Implement the BulenNode client (networking, consensus, storage and wallet modules) according to `docs/bulencoin_spec_pl.md`.
-- Follow `docs/deployment_guide.md` when planning testnet and mainnet infrastructure.

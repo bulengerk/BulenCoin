@@ -6,6 +6,7 @@ const os = require('os');
 
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer, startBlockProducer } = require('../src/server');
+const payments = require('../src/payments');
 const { startUptimeSampler } = require('../src/rewards');
 
 function cloneConfig(overrides) {
@@ -83,6 +84,51 @@ test('payments API tracks invoices until paid', async () => {
     assert.strictEqual(statusRes.status, 200);
     assert.strictEqual(statusRes.body.status, 'paid');
     assert.ok(statusRes.body.transactionId);
+  } finally {
+    if (Array.isArray(context.timers)) {
+      context.timers.forEach((handle) => clearInterval(handle));
+    }
+    server.close();
+  }
+});
+
+test('payments expire when past expiresAt', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-payments-expire-'));
+  const config = cloneConfig({
+    nodeId: 'node-payments-expire',
+    dataDir,
+    httpPort: 0,
+    blockIntervalMs: 200,
+    enableFaucet: false,
+    requireSignatures: false,
+  });
+
+  const context = createNodeContext(config);
+  const server = createServer(context);
+  startBlockProducer(context);
+  startUptimeSampler(context);
+
+  const addressInfo = server.address();
+  const baseUrl = `http://127.0.0.1:${addressInfo.port}`;
+
+  try {
+    const paymentRes = await fetchJson(`${baseUrl}/api/payments`, {
+      method: 'POST',
+      body: JSON.stringify({ to: 'merchant-exp', amount: 5, memo: 'expire-test', expiresInSeconds: 60 }),
+    });
+    assert.strictEqual(paymentRes.status, 201);
+    const paymentId = paymentRes.body.id;
+
+    // Force expiry by adjusting payment and recomputing status
+    const payment = payments.getPayment(context, paymentId);
+    payment.expiresAt = new Date(Date.now() - 1000).toISOString();
+    payments.updatePaymentStatus(context, payment);
+
+    const statusRes = await fetchJson(`${baseUrl}/api/payments/${paymentId}`, {
+      method: 'GET',
+    });
+    assert.strictEqual(statusRes.status, 200);
+    assert.strictEqual(statusRes.body.status, 'expired');
   } finally {
     if (Array.isArray(context.timers)) {
       context.timers.forEach((handle) => clearInterval(handle));
