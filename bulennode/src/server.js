@@ -731,6 +731,41 @@ function createServer(context) {
     });
   });
 
+  app.get('/api/wallets', (request, response) => {
+    response.json({ ok: true, wallets: wallets.listWallets(config) });
+  });
+
+  app.post('/api/wallets/create', (request, response) => {
+    try {
+      const { label, passphrase, profile } = request.body || {};
+      const wallet = wallets.createLocalWallet(config, { label, passphrase, profile });
+      response.status(201).json({
+        ok: true,
+        address: wallet.address,
+        publicKey: wallet.publicKeyPem,
+        backup: { privateKeyPem: wallet.privateKeyPem, passphraseUsed: Boolean(passphrase) },
+        createdAt: wallet.createdAt,
+        keyPath: wallet.keyPath,
+      });
+    } catch (error) {
+      response.status(400).json({ error: 'Could not create wallet', details: error.message });
+    }
+  });
+
+  app.post('/api/wallets/backup-confirm', (request, response) => {
+    const address = request.body && request.body.address;
+    if (!address) {
+      response.status(400).json({ error: 'Missing address' });
+      return;
+    }
+    const updated = wallets.markBackedUp(config, address);
+    if (!updated) {
+      response.status(404).json({ error: 'Wallet not found' });
+      return;
+    }
+    response.json({ ok: true, address, backedUpAt: updated.backedUpAt });
+  });
+
   app.post('/api/device/battery', (request, response) => {
     if (!config.superLightMode) {
       response.status(400).json({ error: 'Super-light mode disabled' });

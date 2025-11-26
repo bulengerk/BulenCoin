@@ -241,10 +241,13 @@ const translations = {
       'Battery-aware light node with offline seed generation and quick sync when on Wi‑Fi.',
     wallet_creator_seed_label: 'Seed words (12)',
     wallet_creator_seed_hint: 'Generated locally; click “Generate wallet” to create a fresh seed.',
+    wallet_creator_seed_generated: 'Key generated locally. Backup below.',
     wallet_creator_address_label: 'Address',
     wallet_creator_address_hint: 'Generate to see address.',
     wallet_creator_generate: 'Generate wallet',
     wallet_creator_copy_seed: 'Copy seed',
+    wallet_creator_backup_label: 'Backup',
+    wallet_creator_backup_check: 'I wrote down the seed / backup',
     wallet_creator_backup:
       'Local-only generation; write down the seed and store it offline before staking.',
     footer_note:
@@ -496,10 +499,13 @@ const translations = {
     wallet_creator_seed_label: 'Palabras semilla (12)',
     wallet_creator_seed_hint:
       'Se genera localmente; haz clic en “Generar monedero” para crear una semilla nueva.',
+    wallet_creator_seed_generated: 'Clave generada localmente. Backup abajo.',
     wallet_creator_address_label: 'Dirección',
     wallet_creator_address_hint: 'Genera para ver la dirección.',
     wallet_creator_generate: 'Generar monedero',
     wallet_creator_copy_seed: 'Copiar semilla',
+    wallet_creator_backup_label: 'Backup',
+    wallet_creator_backup_check: 'He apuntado la semilla / backup',
     wallet_creator_backup:
       'Generación solo local; apunta la semilla y guárdala offline antes de hacer stake.',
     footer_note:
@@ -761,10 +767,13 @@ const translations = {
     wallet_creator_seed_label: 'Słowa seeda (12)',
     wallet_creator_seed_hint:
       'Generowane lokalnie; kliknij „Generuj portfel”, aby utworzyć nowy seed.',
+    wallet_creator_seed_generated: 'Klucz wygenerowany lokalnie. Backup poniżej.',
     wallet_creator_address_label: 'Adres',
     wallet_creator_address_hint: 'Wygeneruj, aby zobaczyć adres.',
     wallet_creator_generate: 'Generuj portfel',
     wallet_creator_copy_seed: 'Kopiuj seed',
+    wallet_creator_backup_label: 'Backup',
+    wallet_creator_backup_check: 'Zapisałem seed / backup',
     wallet_creator_backup:
       'Generacja jest tylko lokalna; zapisz seed offline zanim postawisz stake.',
     footer_note:
@@ -979,80 +988,44 @@ document.addEventListener('DOMContentLoaded', () => {
   );
   if (walletProfiles.length) {
     const walletState = {};
-    const wordlist = [
-      'aurora',
-      'balance',
-      'beacon',
-      'bridge',
-      'cloud',
-      'copper',
-      'dawn',
-      'ember',
-      'fiber',
-      'glow',
-      'grove',
-      'harbor',
-      'island',
-      'juniper',
-      'lumen',
-      'mint',
-      'nebula',
-      'orbit',
-      'pixel',
-      'pulse',
-      'quartz',
-      'ripple',
-      'signal',
-      'silk',
-      'summit',
-      'torch',
-      'unity',
-      'vector',
-      'wander',
-      'yonder',
-      'zephyr',
-    ];
-
-    const fillRandom = (arr) => {
-      if (window.crypto && window.crypto.getRandomValues) {
-        window.crypto.getRandomValues(arr);
-      } else {
-        for (let i = 0; i < arr.length; i += 1) {
-          arr[i] = Math.floor(Math.random() * 0xffffffff);
-        }
-      }
+    const getEl = (attr, profile) =>
+      document.querySelector(`[data-${attr}="${profile}"]`) ||
+      document.querySelector(`[data-${attr}=${profile}]`);
+    const setStatus = (profile, message, tone = 'muted') => {
+      const el = document.querySelector(`[data-wallet-status="${profile}"]`);
+      if (!el) return;
+      el.textContent = message || '';
+      el.style.color = tone === 'success' ? '#6ee7b7' : tone === 'error' ? '#fca5a5' : 'var(--muted)';
     };
-
-    const randomWords = (count = 12) => {
-      const buf = new Uint32Array(count);
-      fillRandom(buf);
-      return Array.from(buf).map((val) => wordlist[val % wordlist.length]);
-    };
-
-    const randomAddress = (profile = 'node') => {
-      const buf = new Uint8Array(8);
-      fillRandom(buf);
-      const hex = Array.from(buf)
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
-        .slice(0, 12);
-      return `addr_${profile}_${hex}`;
-    };
-
     const renderWalletCard = (profile) => {
-      const addrEl = document.querySelector(`[data-wallet-address="${profile}"]`);
-      const seedEl = document.querySelector(`[data-wallet-seed="${profile}"]`);
+      const addrEl = getEl('wallet-address', profile);
+      const seedEl = getEl('wallet-seed', profile);
+      const backupEl = getEl('wallet-backup', profile);
+      const checkbox = document.querySelector(`[data-wallet-backed="${profile}"]`);
       if (!addrEl || !seedEl) return;
       const state = walletState[profile];
       if (state && state.address && state.seed) {
         addrEl.textContent = state.address;
         seedEl.textContent = state.seed;
+        if (backupEl) {
+          backupEl.textContent = state.backup || (dict().wallet_creator_seed_hint || '');
+        }
+        if (checkbox) {
+          checkbox.disabled = false;
+          checkbox.checked = Boolean(state.backedUp);
+        }
       } else {
-        addrEl.textContent =
-          dict().wallet_creator_address_hint || 'Generate to see address.';
+        addrEl.textContent = dict().wallet_creator_address_hint || 'Generate to see address.';
         seedEl.textContent =
           dict().wallet_creator_seed_hint ||
           'Generated locally; click “Generate wallet” to create a fresh seed.';
+        if (backupEl) {
+          backupEl.textContent = 'Backup will appear here after generation. Store it offline.';
+        }
+        if (checkbox) {
+          checkbox.disabled = true;
+          checkbox.checked = false;
+        }
       }
     };
 
@@ -1060,13 +1033,51 @@ document.addEventListener('DOMContentLoaded', () => {
       walletProfiles.forEach((profile) => renderWalletCard(profile));
     };
 
+    const hydrateFormsWithAddress = (address) => {
+      const walletAddressInput = document.getElementById('wallet-address');
+      if (walletAddressInput) {
+        walletAddressInput.value = address;
+      }
+      const stakeInput = document.getElementById('calc-stake-address');
+      if (stakeInput) {
+        stakeInput.value = address;
+      }
+    };
+
+    const generateWallet = async (profile) => {
+      setStatus(profile, dict().wallet_creator_generate || 'Generating…');
+      try {
+        const res = await fetch(`${apiBase}/wallets/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ label: `${profile} wallet`, profile }),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const backupPem = (data.backup && data.backup.privateKeyPem) || '';
+        walletState[profile] = {
+          address: data.address,
+          seed:
+            dict().wallet_creator_seed_generated ||
+            'Key generated locally. Backup below.',
+          backup: backupPem,
+          backedUp: false,
+        };
+        setStatus(profile, 'Wallet generated. Save the backup locally.', 'success');
+        renderWalletCard(profile);
+        hydrateFormsWithAddress(data.address);
+      } catch (error) {
+        console.error('wallet generate error', error);
+        setStatus(profile, 'Could not create wallet. Is BulenNode running?', 'error');
+      }
+    };
+
     document.querySelectorAll('[data-wallet-generate]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const profile = btn.dataset.walletGenerate;
-        const words = randomWords(12).join(' ');
-        const address = randomAddress(profile);
-        walletState[profile] = { address, seed: words };
-        renderWalletCard(profile);
+        generateWallet(profile);
       });
     });
 
@@ -1076,6 +1087,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const state = walletState[profile];
         if (state?.seed && navigator.clipboard) {
           navigator.clipboard.writeText(state.seed).catch(() => {});
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-wallet-backed]').forEach((checkbox) => {
+      checkbox.addEventListener('change', async () => {
+        const profile = checkbox.dataset.walletBacked;
+        const state = walletState[profile];
+        if (!state?.address) return;
+        if (!checkbox.checked) {
+          state.backedUp = false;
+          setStatus(profile, '');
+          return;
+        }
+        try {
+          const res = await fetch(`${apiBase}/wallets/backup-confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: state.address }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          state.backedUp = true;
+          setStatus(profile, 'Backup confirmed.', 'success');
+        } catch (error) {
+          console.error('backup confirm error', error);
+          checkbox.checked = false;
+          state.backedUp = false;
+          setStatus(profile, 'Could not record backup confirmation.', 'error');
         }
       });
     });

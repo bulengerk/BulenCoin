@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { deriveAddressFromPublicKey } = require('./identity');
 
 function storagePath(config) {
   return path.join(config.dataDir, 'wallet_sessions.json');
@@ -23,8 +24,91 @@ function saveStore(config, store) {
   fs.writeFileSync(storagePath(config), JSON.stringify(store, null, 2));
 }
 
+function walletDir(config) {
+  return path.join(config.dataDir, 'wallets');
+}
+
+function walletMetaPath(config) {
+  return path.join(walletDir(config), 'wallets_meta.json');
+}
+
+function loadWalletMeta(config) {
+  try {
+    const data = JSON.parse(fs.readFileSync(walletMetaPath(config), 'utf-8'));
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.wallets)) return data.wallets;
+  } catch (error) {
+    // ignore
+  }
+  return [];
+}
+
+function saveWalletMeta(config, meta) {
+  fs.mkdirSync(walletDir(config), { recursive: true });
+  fs.writeFileSync(walletMetaPath(config), JSON.stringify({ wallets: meta }, null, 2));
+}
+
 function randomId(prefix) {
   return `${prefix}_${Date.now().toString(16)}_${crypto.randomBytes(6).toString('hex')}`;
+}
+
+function recordWalletMeta(config, entry) {
+  const list = loadWalletMeta(config);
+  const existing = list.find((w) => w.address === entry.address);
+  if (existing) {
+    Object.assign(existing, entry);
+  } else {
+    list.push(entry);
+  }
+  saveWalletMeta(config, list);
+  return entry;
+}
+
+function markBackedUp(config, address) {
+  const list = loadWalletMeta(config);
+  const item = list.find((w) => w.address === address);
+  if (!item) return null;
+  item.backedUpAt = new Date().toISOString();
+  saveWalletMeta(config, list);
+  return item;
+}
+
+function createLocalWallet(config, payload = {}) {
+  const label = payload.label || '';
+  const passphrase = payload.passphrase || '';
+  const profile = payload.profile || 'generic';
+  const keyEncoding = {
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: {
+      type: 'pkcs8',
+      format: 'pem',
+    },
+  };
+  if (passphrase) {
+    keyEncoding.privateKeyEncoding.cipher = 'aes-256-cbc';
+    keyEncoding.privateKeyEncoding.passphrase = passphrase;
+  }
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'secp256k1' });
+  const privateKeyPem = privateKey.export(keyEncoding.privateKeyEncoding);
+  const publicKeyPem = publicKey.export(keyEncoding.publicKeyEncoding);
+  const address = deriveAddressFromPublicKey(publicKeyPem);
+  const dir = walletDir(config);
+  fs.mkdirSync(dir, { recursive: true });
+  const keyPath = path.join(dir, `${address}.pem`);
+  fs.writeFileSync(keyPath, privateKeyPem, { mode: 0o600 });
+  const createdAt = new Date().toISOString();
+  recordWalletMeta(config, { address, label, profile, keyPath, createdAt });
+  return {
+    address,
+    publicKeyPem,
+    privateKeyPem,
+    keyPath,
+    createdAt,
+  };
+}
+
+function listWallets(config) {
+  return loadWalletMeta(config);
 }
 
 function createChallenge(context, payload) {
@@ -122,4 +206,8 @@ module.exports = {
   verifyChallenge,
   getSession,
   pruneExpired,
+  createLocalWallet,
+  listWallets,
+  markBackedUp,
+  loadWalletMeta,
 };
