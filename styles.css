@@ -565,6 +565,16 @@ section p {
   color: var(--text);
 }
 
+.bc-textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-family: 'Space Grotesk', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 .bc-wallet-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

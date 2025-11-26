@@ -872,6 +872,27 @@
               </div>
             </div>
           </div>
+          <div class="bc-card bc-card-contrast bc-wallet-card">
+            <span class="bc-pill">Migrate</span>
+            <h3 data-i18n="wallet_import_title">Import an existing wallet</h3>
+            <p class="bc-muted" data-i18n="wallet_import_body">
+              Paste the encrypted backup from another device (app/server/laptop) and unlock it with
+              your passphrase to reuse the same address everywhere.
+            </p>
+            <label class="bc-wallet-label" for="wallet-import-pass" data-i18n-label="wallet_creator_passphrase_label">Encryption passphrase</label>
+            <input id="wallet-import-pass" type="password" class="bc-input" placeholder="••••••••••" aria-describedby="wallet-import-pass-hint" />
+            <div class="bc-muted" id="wallet-import-pass-hint" data-i18n="wallet_creator_passphrase_hint">
+              Used to decrypt the backup; never share it.
+            </div>
+            <label class="bc-wallet-label" for="wallet-import-pem" data-i18n-label="wallet_import_paste_label">Paste backup (PEM)</label>
+            <textarea id="wallet-import-pem" class="bc-textarea" rows="6" placeholder="-----BEGIN ENCRYPTED PRIVATE KEY-----"></textarea>
+            <div class="bc-button-row">
+              <button id="wallet-import-btn" class="bc-button" type="button" data-i18n-label="wallet_import_button">
+                Import wallet
+              </button>
+            </div>
+            <div class="bc-note" id="wallet-import-status"></div>
+          </div>
         </div>
       </section>
 

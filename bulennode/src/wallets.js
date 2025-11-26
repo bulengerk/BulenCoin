@@ -128,6 +128,38 @@ function listWallets(config) {
   return loadWalletMeta(config);
 }
 
+function importWallet(config, payload = {}) {
+  const { backup, passphrase, label, profile } = payload;
+  if (!backup || typeof backup !== 'string') {
+    throw new Error('Missing wallet backup (PEM)');
+  }
+  const isEncrypted = backup.includes('ENCRYPTED');
+  if (config.walletRequirePassphrase && !isEncrypted && !passphrase) {
+    throw new Error('Encrypted backup + passphrase required');
+  }
+  const keyObject = crypto.createPrivateKey({
+    key: backup,
+    format: 'pem',
+    passphrase,
+  });
+  const publicKeyPem = crypto.createPublicKey(keyObject).export({ type: 'spki', format: 'pem' });
+  const address = deriveAddressFromPublicKey(publicKeyPem);
+  const dir = walletDir(config);
+  fs.mkdirSync(dir, { recursive: true });
+  const keyPath = path.join(dir, `${address}.pem`);
+  fs.writeFileSync(keyPath, backup, { mode: 0o600 });
+  const importedAt = new Date().toISOString();
+  recordWalletMeta(config, {
+    address,
+    label,
+    profile,
+    keyPath,
+    importedAt,
+    passphraseProtected: isEncrypted || Boolean(passphrase),
+  });
+  return { address, publicKeyPem, keyPath, importedAt, passphraseProtected: isEncrypted || Boolean(passphrase) };
+}
+
 function createChallenge(context, payload) {
   const { config, walletStore } = context;
   const now = Date.now();
@@ -225,6 +257,7 @@ module.exports = {
   pruneExpired,
   createLocalWallet,
   listWallets,
+  importWallet,
   markBackedUp,
   loadWalletMeta,
 };

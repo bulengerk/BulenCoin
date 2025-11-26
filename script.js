@@ -253,6 +253,13 @@ const translations = {
     wallet_creator_passphrase_label: 'Encryption passphrase',
     wallet_creator_passphrase_hint: 'Used to encrypt the local keystore; minimum 12 characters.',
     wallet_creator_passphrase_error: 'Enter a passphrase (min 12 characters) to generate the wallet securely.',
+    wallet_import_title: 'Import an existing wallet',
+    wallet_import_body:
+      'Paste the encrypted backup from another device and unlock it with your passphrase to reuse the same address everywhere.',
+    wallet_import_paste_label: 'Paste backup (PEM)',
+    wallet_import_button: 'Import wallet',
+    wallet_import_success: 'Wallet imported. Address: {address}',
+    wallet_import_error: 'Could not import backup. Check passphrase and PEM.',
     footer_note:
       'BulenCoin is an experimental project. This website describes a proposed network design and does not constitute financial, legal or tax advice. Operating nodes or services based on this design may be regulated in your jurisdiction; you are responsible for complying with local law.',
   },
@@ -516,6 +523,13 @@ const translations = {
       'Se usa para cifrar el keystore local; mínimo 12 caracteres.',
     wallet_creator_passphrase_error:
       'Introduce una frase (min 12 caracteres) para generar el monedero de forma segura.',
+    wallet_import_title: 'Importar un monedero existente',
+    wallet_import_body:
+      'Pega el backup cifrado desde otro dispositivo y desbloquéalo con tu frase para reutilizar la misma dirección en todas partes.',
+    wallet_import_paste_label: 'Pega el backup (PEM)',
+    wallet_import_button: 'Importar monedero',
+    wallet_import_success: 'Monedero importado. Dirección: {address}',
+    wallet_import_error: 'No se pudo importar el backup. Revisa la frase y el PEM.',
     footer_note:
       'BulenCoin es un proyecto experimental. Este sitio describe un diseño de red propuesto y no constituye asesoramiento financiero, legal ni fiscal. La operación de nodos o servicios basados en este diseño puede estar regulada en tu jurisdicción; eres responsable de cumplir la legislación local.',
     wallet_title: 'Wallet y enlaces de pago',
@@ -788,6 +802,13 @@ const translations = {
     wallet_creator_passphrase_hint: 'Używane do szyfrowania lokalnego keystore; minimum 12 znaków.',
     wallet_creator_passphrase_error:
       'Podaj hasło (min 12 znaków), aby bezpiecznie wygenerować portfel.',
+    wallet_import_title: 'Zaimportuj istniejący portfel',
+    wallet_import_body:
+      'Wklej zaszyfrowany backup z innego urządzenia i odblokuj hasłem, aby używać tego samego adresu wszędzie.',
+    wallet_import_paste_label: 'Wklej backup (PEM)',
+    wallet_import_button: 'Importuj portfel',
+    wallet_import_success: 'Portfel zaimportowany. Adres: {address}',
+    wallet_import_error: 'Nie udało się zaimportować backupu. Sprawdź hasło i PEM.',
     footer_note:
       'BulenCoin jest projektem eksperymentalnym. Ta strona opisuje proponowany projekt sieci i nie stanowi porady inwestycyjnej, prawnej ani podatkowej. Utrzymywanie węzłów lub usług w oparciu o ten projekt może podlegać regulacjom w Twojej jurysdykcji – za zgodność z prawem odpowiadasz samodzielnie.',
     wallet_title: 'Portfel i linki płatności',
@@ -846,6 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
     (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
   const dict = () => translations[select.value] || translations.en;
   let rerenderWalletCards = () => {};
+  let hydrateFormsWithAddress = () => {};
 
   if (translations[preferred]) {
     select.value = preferred;
@@ -1052,7 +1074,7 @@ document.addEventListener('DOMContentLoaded', () => {
       walletProfiles.forEach((profile) => renderWalletCard(profile));
     };
 
-    const hydrateFormsWithAddress = (address) => {
+    hydrateFormsWithAddress = (address) => {
       const walletAddressInput = document.getElementById('wallet-address');
       if (walletAddressInput) {
         walletAddressInput.value = address;
@@ -1202,6 +1224,48 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         console.error('payment link error', error);
         setError('Could not generate link/QR. Is BulenNode running?');
+      }
+    });
+  }
+
+  const importBtn = document.getElementById('wallet-import-btn');
+  if (importBtn) {
+    const statusEl = document.getElementById('wallet-import-status');
+    const pemEl = document.getElementById('wallet-import-pem');
+    const passEl = document.getElementById('wallet-import-pass');
+    const setStatus = (msg, tone = 'muted') => {
+      if (!statusEl) return;
+      statusEl.textContent = msg || '';
+      statusEl.style.color =
+        tone === 'success' ? '#6ee7b7' : tone === 'error' ? '#fca5a5' : 'var(--muted)';
+    };
+    importBtn.addEventListener('click', async () => {
+      const backup = (pemEl?.value || '').trim();
+      const passphrase = passEl?.value || '';
+      if (!backup) {
+        setStatus(dict().wallet_import_error || 'Paste an encrypted backup first.', 'error');
+        return;
+      }
+      setStatus('Importing...', 'muted');
+      try {
+        const res = await fetch(`${apiBase}/wallets/import`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ backup, passphrase, label: 'imported', profile: 'migrated' }),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const addr = data.address || '';
+        const template = dict().wallet_import_success || 'Wallet imported.';
+        setStatus(template.replace('{address}', addr), 'success');
+        if (addr) {
+          hydrateFormsWithAddress(addr);
+        }
+      } catch (error) {
+        console.error('wallet import error', error);
+        setStatus(dict().wallet_import_error || 'Could not import backup.', 'error');
       }
     });
   }

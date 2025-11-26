@@ -765,6 +765,16 @@ function createServer(context) {
     }
   });
 
+  app.post('/api/wallets/import', (request, response) => {
+    try {
+      const { backup, passphrase, label, profile } = request.body || {};
+      const wallet = wallets.importWallet(config, { backup, passphrase, label, profile });
+      response.status(201).json({ ok: true, address: wallet.address, importedAt: wallet.importedAt, keyPath: wallet.keyPath });
+    } catch (error) {
+      response.status(400).json({ error: 'Could not import wallet', details: error.message });
+    }
+  });
+
   app.post('/api/wallets/backup-confirm', (request, response) => {
     const address = request.body && request.body.address;
     if (!address) {
