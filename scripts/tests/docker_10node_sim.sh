@@ -74,6 +74,7 @@ for i in $(seq 1 "$NODE_COUNT"); do
     -e BULEN_METRICS_TOKEN="sim-metrics" \
     -e BULEN_PEERS="$peers" \
     -e BULEN_REQUIRE_SIGNATURES="false" \
+    -e BULEN_ENABLE_FAUCET="true" \
     "$IMAGE" >/dev/null
   docker logs -f "$name" >"$LOGS_DIR/$name.log" 2>&1 &
 done
@@ -81,7 +82,10 @@ done
 log "Injecting warm-up transactions to trigger block production..."
 for i in $(seq 1 "$NODE_COUNT"); do
   name="bulen-node-$i"
-  docker exec "$name" node -e "fetch('http://localhost:4100/api/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:'seed-$i',to:'sink',amount:1,fee:0.1,nonce:1})}).then(r=>r.text()).then(t=>console.log(t)).catch(err=>{console.error(err); process.exit(1);});" >/dev/null 2>&1 || warn "warm-up tx failed on $name"
+  # 1) Fund the account via faucet
+  docker exec "$name" node -e "fetch('http://localhost:4100/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:'seed-$i',amount:100})}).catch(()=>{});" >/dev/null 2>&1 || warn "faucet failed on $name"
+  # 2) Submit unsigned TX (signatures disabled) to include in blocks
+  docker exec "$name" node -e "fetch('http://localhost:4100/api/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:'seed-$i',to:'sink',amount:1,fee:0.1,nonce:1})}).catch(()=>{});" >/dev/null 2>&1 || warn "warm-up tx failed on $name"
 done
 
 log "Waiting ${WAIT_SECONDS}s for nodes to gossip..."
@@ -94,7 +98,7 @@ for i in $(seq 1 "$NODE_COUNT"); do
     warn " - $name: not running (see $LOGS_DIR/$name.log)"
     continue;
   fi
-status=$(docker exec "$name" node -e "fetch('http://localhost:4100/api/status').then(r=>r.json()).then(j=>{const h=j.height||j.state?.height||j.blockHeight||0; const peers=(j.peers&&j.peers.length)||j.peerCount||0; console.log(JSON.stringify({height:h, peers}));}).catch(err=>{console.error(err); process.exit(1);});")
+  status=$(docker exec "$name" node -e "fetch('http://localhost:4100/api/status',{headers:{'x-bulen-status-token':'sim-status'}}).then(r=>r.json()).then(j=>{const h=j.height||j.state?.height||j.blockHeight||0; const peers=(j.peers&&j.peers.length)||j.peerCount||0; console.log(JSON.stringify({height:h, peers}));}).catch(err=>{console.error(err); process.exit(1);});")
   height=$(echo "$status" | sed -n 's/.*"height":\([0-9]*\).*/\1/p')
   peers=$(echo "$status" | sed -n 's/.*"peers":\([0-9]*\).*/\1/p')
   printf " - %s: height=%s peers=%s (http://localhost:%s/api/status)\n" "$name" "${height:-?}" "${peers:-?}" "$((BASE_HTTP_PORT + i))"
