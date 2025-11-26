@@ -78,6 +78,12 @@ for i in $(seq 1 "$NODE_COUNT"); do
   docker logs -f "$name" >"$LOGS_DIR/$name.log" 2>&1 &
 done
 
+log "Injecting warm-up transactions to trigger block production..."
+for i in $(seq 1 "$NODE_COUNT"); do
+  name="bulen-node-$i"
+  docker exec "$name" node -e "fetch('http://localhost:4100/api/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:'seed-$i',to:'sink',amount:1,fee:0.1,nonce:1})}).then(r=>r.text()).then(t=>console.log(t)).catch(err=>{console.error(err); process.exit(1);});" >/dev/null 2>&1 || warn "warm-up tx failed on $name"
+done
+
 log "Waiting ${WAIT_SECONDS}s for nodes to gossip..."
 sleep "$WAIT_SECONDS"
 
