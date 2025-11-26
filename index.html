@@ -230,6 +230,42 @@
         </div>
       </section>
 
+      <section id="downloads" class="bc-section">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="downloads_title">Downloads</h2>
+            <p data-i18n="downloads_subtitle">
+              One-click installs for desktops/servers and Docker. Mobile builds (APK/TestFlight) are in flight.
+            </p>
+          </div>
+          <div class="bc-docs-grid">
+            <div class="bc-doc-card">
+              <span class="bc-doc-pill">Windows</span>
+              <h3 data-i18n="download_windows">Windows installer (.exe)</h3>
+              <p class="bc-muted" data-i18n="download_windows_body">Signed installer with auto-update and built-in status page.</p>
+              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
+            </div>
+            <div class="bc-doc-card">
+              <span class="bc-doc-pill">macOS</span>
+              <h3 data-i18n="download_macos">macOS installer (.pkg)</h3>
+              <p class="bc-muted" data-i18n="download_macos_body">Apple-notarized build with menu bar status and metrics.</p>
+              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
+            </div>
+            <div class="bc-doc-card">
+              <span class="bc-doc-pill">Linux</span>
+              <h3 data-i18n="download_linux">Linux (.deb/.rpm)</h3>
+              <p class="bc-muted" data-i18n="download_linux_body">Service-ready packages with systemd unit and logrotate config.</p>
+              <span class="bc-chip" data-i18n="download_coming">Coming soon</span>
+            </div>
+            <a class="bc-doc-card" href="bulennode/docker-compose.local.yml">
+              <span class="bc-doc-pill">Docker</span>
+              <h3 data-i18n="download_docker">Docker Compose</h3>
+              <p class="bc-muted" data-i18n="download_docker_body">Run node + dependencies locally with one command.</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section id="overview" class="bc-section">
         <div class="bc-container">
           <h2 data-i18n="overview_title">1. What is BulenCoin?</h2>
@@ -929,6 +965,55 @@
               </div>
             </div>
           </div>
+
+          <section id="earnings" class="bc-section">
+            <div class="bc-container bc-grid-2">
+              <div class="bc-section-header">
+                <h2 data-i18n="earnings_title">Earnings dashboard</h2>
+                <p data-i18n="earnings_subtitle">
+                  Live view of your node and a quick projection. Uses `/api/status` (with token if set) and `/api/rewards/estimate`.
+                </p>
+                <div class="bc-button-row">
+                  <input id="earnings-token" class="bc-input" type="text" placeholder="Status token (optional)" aria-label="Status token" />
+                  <button id="earnings-refresh" class="bc-button" type="button" data-i18n-label="earnings_refresh">Refresh</button>
+                </div>
+                <div id="earnings-error" class="bc-error" hidden></div>
+              </div>
+              <div class="bc-earnings-grid">
+                <div class="bc-card bc-card-contrast">
+                  <h3 data-i18n="earnings_metrics_title">Node metrics</h3>
+                  <div class="bc-metric">
+                    <span data-i18n="earnings_height">Height</span>
+                    <strong id="earnings-height">–</strong>
+                  </div>
+                  <div class="bc-metric">
+                    <span data-i18n="earnings_peers">Peers</span>
+                    <strong id="earnings-peers">–</strong>
+                  </div>
+                  <div class="bc-metric">
+                    <span data-i18n="earnings_uptime">Uptime (h)</span>
+                    <strong id="earnings-uptime">–</strong>
+                  </div>
+                  <div class="bc-metric">
+                    <span data-i18n="earnings_reward_weight">Reward weight</span>
+                    <strong id="earnings-weight">–</strong>
+                  </div>
+                </div>
+                <div class="bc-card bc-card-contrast">
+                  <h3 data-i18n="earnings_projection_title">Projection</h3>
+                  <label for="earnings-stake" data-i18n-label="earnings_stake_label">Stake (BULEN)</label>
+                  <input id="earnings-stake" class="bc-input" type="number" min="0" step="10" value="1000" />
+                  <div class="bc-metric bc-metric-large">
+                    <span data-i18n="earnings_weekly">Weekly (est.)</span>
+                    <strong id="earnings-weekly">–</strong>
+                  </div>
+                  <div class="bc-note" data-i18n="earnings_note">
+                    Indicative only; depends on network usage and parameters.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <div class="bc-section-header">
             <h2 data-i18n="wallet_title">Wallet & payment links</h2>

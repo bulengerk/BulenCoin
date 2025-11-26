@@ -167,6 +167,18 @@ const translations = {
     docs_testing_title: 'Full‑stack integration',
     docs_testing_body:
       'New integration level that runs BulenNode, the explorer and the status service together and produces a block.',
+    downloads_title: 'Downloads',
+    downloads_subtitle:
+      'One-click installs for desktops/servers and Docker. Mobile builds (APK/TestFlight) are in flight.',
+    download_windows: 'Windows installer (.exe)',
+    download_windows_body: 'Signed installer with auto-update and built-in status page.',
+    download_macos: 'macOS installer (.pkg)',
+    download_macos_body: 'Notarized build with menu bar status and metrics.',
+    download_linux: 'Linux (.deb/.rpm)',
+    download_linux_body: 'Service-ready packages with systemd unit and logrotate config.',
+    download_docker: 'Docker Compose',
+    download_docker_body: 'Run node + dependencies locally with one command.',
+    download_coming: 'Coming soon',
     faq_q1: 'Is BulenCoin only a meme?',
     faq_a1:
       'No. The brand is playful, but the protocol is designed as a serious experiment in running a full crypto network on mainstream devices, combining research ideas from lightweight consensus, energy awareness and user‑friendly node operation.',
@@ -446,6 +458,32 @@ const translations = {
     docs_testing_title: 'Integración full-stack',
     docs_testing_body:
       'Nuevo nivel de pruebas que ejecuta BulenNode, el explorador y el servicio de estado juntos y genera un bloque.',
+    downloads_title: 'Descargas',
+    downloads_subtitle:
+      'Instaladores de un clic para escritorio/servidor y Docker. Las builds móviles (APK/TestFlight) están en camino.',
+    download_windows: 'Instalador Windows (.exe)',
+    download_windows_body: 'Instalador firmado con auto-update y página de estado integrada.',
+    download_macos: 'Instalador macOS (.pkg)',
+    download_macos_body: 'Build notarizada con estado y métricas en la barra de menú.',
+    download_linux: 'Linux (.deb/.rpm)',
+    download_linux_body: 'Paquetes listos para servicio con systemd i logrotate.',
+    download_docker: 'Docker Compose',
+    download_docker_body: 'Ejecuta nodo + dependencias con un solo comando.',
+    download_coming: 'Pronto',
+    earnings_title: 'Panel de ganancias',
+    earnings_subtitle:
+      'Vista en vivo de tu nodo y una proyección rápida. Usa /api/status (con token si aplica) y /api/rewards/estimate.',
+    earnings_refresh: 'Actualizar',
+    earnings_metrics_title: 'Métricas del nodo',
+    earnings_height: 'Altura',
+    earnings_peers: 'Peers',
+    earnings_uptime: 'Disponibilidad (h)',
+    earnings_reward_weight: 'Peso de recompensa',
+    earnings_projection_title: 'Proyección',
+    earnings_stake_label: 'Stake (BULEN)',
+    earnings_weekly: 'Semanal (est.)',
+    earnings_note: 'Es orientativo; depende del uso de la red y los parámetros.',
+    earnings_error: 'No se pudo cargar status/rewards. Revisa el nodo y tokens.',
     faq_title: '9. Preguntas frecuentes – BulenCoin en la práctica',
     faq_q1: '¿BulenCoin es solo un meme?',
     faq_a1:
@@ -739,6 +777,32 @@ const translations = {
     docs_testing_title: 'Integracja full‑stack',
     docs_testing_body:
       'Nowy poziom testów: jednoczesne uruchomienie BulenNode, eksploratora i statusu z produkcją bloku.',
+    downloads_title: 'Pobierz',
+    downloads_subtitle:
+      'Instalatory jednym kliknięciem na desktop/serwer oraz Docker. Buildy mobilne (APK/TestFlight) są w przygotowaniu.',
+    download_windows: 'Instalator Windows (.exe)',
+    download_windows_body: 'Podpisany instalator z auto-update i wbudowaną stroną statusu.',
+    download_macos: 'Instalator macOS (.pkg)',
+    download_macos_body: 'Znotaryzowany build z widżetem statusu i metryk.',
+    download_linux: 'Linux (.deb/.rpm)',
+    download_linux_body: 'Pakiety gotowe do usług z systemd i logrotate.',
+    download_docker: 'Docker Compose',
+    download_docker_body: 'Uruchom node + zależności jednym poleceniem.',
+    download_coming: 'Wkrótce',
+    earnings_title: 'Panel zarobków',
+    earnings_subtitle:
+      'Widok live Twojego węzła i szybka projekcja. Korzysta z /api/status (z tokenem, jeśli ustawiony) i /api/rewards/estimate.',
+    earnings_refresh: 'Odśwież',
+    earnings_metrics_title: 'Metryki węzła',
+    earnings_height: 'Wysokość',
+    earnings_peers: 'Peery',
+    earnings_uptime: 'Uptime (h)',
+    earnings_reward_weight: 'Waga nagród',
+    earnings_projection_title: 'Projekcja',
+    earnings_stake_label: 'Stake (BULEN)',
+    earnings_weekly: 'Tydzień (szac.)',
+    earnings_note: 'Wartości orientacyjne; zależą od parametrów sieci.',
+    earnings_error: 'Nie udało się pobrać status/rewards. Sprawdź node i tokeny.',
     faq_title: '9. FAQ – BulenCoin w praktyce',
     faq_q1: 'Czy BulenCoin to tylko mem?',
     faq_a1:
@@ -1210,6 +1274,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rerenderWalletCards = renderAllWalletCards;
     renderAllWalletCards();
+  }
+
+  const earningsRefresh = document.getElementById('earnings-refresh');
+  if (earningsRefresh) {
+    const errEl = document.getElementById('earnings-error');
+    const heightEl = document.getElementById('earnings-height');
+    const peersEl = document.getElementById('earnings-peers');
+    const uptimeEl = document.getElementById('earnings-uptime');
+    const weightEl = document.getElementById('earnings-weight');
+    const weeklyEl = document.getElementById('earnings-weekly');
+    const stakeInput = document.getElementById('earnings-stake');
+    const tokenInput = document.getElementById('earnings-token');
+
+    const setError = (msg) => {
+      if (!errEl) return;
+      errEl.textContent = msg || '';
+      errEl.hidden = !msg;
+    };
+
+    const refresh = async () => {
+      setError('');
+      const statusHeaders = { 'Content-Type': 'application/json' };
+      const tokenVal = (tokenInput && tokenInput.value.trim()) || '';
+      if (tokenVal) {
+        statusHeaders['x-bulen-status-token'] = tokenVal;
+      }
+      try {
+        const statusRes = await fetch(`${apiBase}/status`, { headers: statusHeaders });
+        if (!statusRes.ok) {
+          throw new Error(`Status HTTP ${statusRes.status}`);
+        }
+        const statusData = await statusRes.json();
+        const height =
+          statusData.height ||
+          statusData.blockHeight ||
+          (statusData.state && statusData.state.height) ||
+          0;
+        const peers =
+          (statusData.peers && statusData.peers.length) ||
+          statusData.peerCount ||
+          (statusData.peerBook && statusData.peerBook.length) ||
+          0;
+        const uptimeSeconds =
+          (statusData.metrics && statusData.metrics.uptimeSeconds) ||
+          statusData.uptimeSeconds ||
+          0;
+        const rewardWeight =
+          (statusData.metrics && statusData.metrics.rewardWeight) ||
+          statusData.rewardWeight ||
+          1;
+        const deviceClass =
+          (statusData.metrics && statusData.metrics.deviceClass) ||
+          statusData.deviceClass ||
+          'desktop';
+
+        if (heightEl) heightEl.textContent = height;
+        if (peersEl) peersEl.textContent = peers;
+        if (uptimeEl) uptimeEl.textContent = (uptimeSeconds / 3600).toFixed(1);
+        if (weightEl) weightEl.textContent = Number(rewardWeight).toFixed(2);
+
+        const stake = Number(stakeInput?.value || 0);
+        const uptimeHours = Math.min(24, uptimeSeconds / 3600 || 24);
+        const estimateRes = await fetch(`${apiBase}/rewards/estimate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stake,
+            uptimeHoursPerDay: uptimeHours,
+            days: 7,
+            deviceClass,
+          }),
+        });
+        if (estimateRes.ok) {
+          const est = await estimateRes.json();
+          const weekly = est.projection && est.projection.weekly ? est.projection.weekly : null;
+          if (weeklyEl) {
+            weeklyEl.textContent =
+              typeof weekly === 'number' ? weekly.toFixed(2).replace(/\.00$/, '') : '–';
+          }
+        } else {
+          throw new Error(`Estimate HTTP ${estimateRes.status}`);
+        }
+      } catch (error) {
+        console.error('earnings refresh failed', error);
+        setError(dict().earnings_error || 'Unable to load status/rewards.');
+      }
+    };
+
+    earningsRefresh.addEventListener('click', (event) => {
+      event.preventDefault();
+      refresh();
+    });
+
+    refresh();
   }
 
   const walletForm = document.getElementById('wallet-form');

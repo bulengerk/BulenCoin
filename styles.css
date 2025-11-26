@@ -701,6 +701,33 @@ section p {
   height: 100%;
 }
 
+.bc-earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.bc-metric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bc-metric:last-child {
+  border-bottom: none;
+}
+
+.bc-metric strong {
+  font-size: 1.1rem;
+}
+
+.bc-metric-large {
+  border: none;
+  margin-top: 0.3rem;
+}
+
 .bc-doc-card:hover {
   transform: translateY(-4px);
   border-color: rgba(103, 242, 214, 0.5);
