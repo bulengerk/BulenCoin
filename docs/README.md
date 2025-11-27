@@ -32,5 +32,6 @@ This directory holds the technical and operational documentation for the BulenCo
 - `metrics.md` – available Prometheus metrics and dashboards.
 - `downloads.md` – where to fetch artifacts/binaries.
 - `grafana-dashboard.json` – Grafana dashboard for Bulen metrics.
+- `press_kits.md` – ready-made blurbs for press/HN/Reddit/Twitter/LinkedIn and a micropayments one-liner.
 
 If you add new documentation, link it here so it remains discoverable for future contributors and operators.

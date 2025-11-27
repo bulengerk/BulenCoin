@@ -37,3 +37,6 @@ We’re announcing BulenCoin, an experimental Proof of Stake network designed fo
 - Live: API <url>, explorer <url>, status <url>. Experimental; feedback welcome.
 
 > Replace `<url>` and contact before posting.
+
+## One-liner for micropayments
+“BulenCoin ships a built-in micropayments rail: create invoices, render BIP21 links/QRs, and verify status/webhooks via `/api/payments` and `/api/payment-link`, with JS/Rust SDKs included.”
