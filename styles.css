@@ -268,6 +268,11 @@ select {
   font-size: 0.88rem;
 }
 
+.bc-chip-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .bc-hero-highlights {
   list-style: none;
   padding: 0;

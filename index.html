@@ -1061,6 +1061,19 @@
                 <p data-i18n="earnings_subtitle">
                   Live view of your node and a quick projection. Uses `/api/status` (with token if set) and `/api/rewards/estimate`.
                 </p>
+                <div id="live-links" class="bc-live-links" hidden>
+                  <div class="bc-card bc-card-contrast">
+                    <h3 data-i18n="live_title">Live endpoints</h3>
+                    <p class="bc-muted" data-i18n="live_subtitle">
+                      We detected a running node. Open the API, explorer or status page below.
+                    </p>
+                    <div class="bc-chip-row">
+                      <a id="live-link-api" class="bc-chip bc-chip-link" href="#" target="_blank" rel="noopener" data-i18n="live_api">API</a>
+                      <a id="live-link-explorer" class="bc-chip bc-chip-link" href="#" target="_blank" rel="noopener" data-i18n="live_explorer">Explorer</a>
+                      <a id="live-link-status" class="bc-chip bc-chip-link" href="#" target="_blank" rel="noopener" data-i18n="live_status">Status</a>
+                    </div>
+                  </div>
+                </div>
                 <div class="bc-button-row">
                   <input id="earnings-token" class="bc-input" type="text" placeholder="Status token (optional)" aria-label="Status token" />
                   <button id="earnings-refresh" class="bc-button" type="button" data-i18n-label="earnings_refresh">Refresh</button>

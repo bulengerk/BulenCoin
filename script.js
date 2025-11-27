@@ -25,6 +25,11 @@ const translations = {
     hero_highlight_api: 'On-chain payments API with memo binding',
     hero_highlight_wallets: 'Wallet challenge/verify for MetaMask, WalletConnect, Ledger',
     hero_highlight_tests: 'Full-stack tests ship with the stack (node + explorer + status)',
+    live_title: 'Live endpoints',
+    live_subtitle: 'Detected a running node. Open the API, explorer or status page.',
+    live_api: 'API',
+    live_explorer: 'Explorer',
+    live_status: 'Status',
     hero_card1_title: 'Runs everywhere',
     hero_card1_body:
       'Mobile, desktop and server nodes cooperate in one network. Phones and tablets can participate without burning the battery.',
@@ -352,6 +357,11 @@ const translations = {
     hero_highlight_api: 'API de pagos on-chain con memo',
     hero_highlight_wallets: 'Challenge/verify de wallets: MetaMask, WalletConnect, Ledger',
     hero_highlight_tests: 'Tests full-stack incluidos (nodo + explorer + status)',
+    live_title: 'Endpoints activos',
+    live_subtitle: 'Nodo detectado. Abre la API, el explorer o la página de estado.',
+    live_api: 'API',
+    live_explorer: 'Explorer',
+    live_status: 'Status',
     hero_card1_title: 'Funciona en todas partes',
     hero_card1_body:
       'Nodos móviles, de escritorio y de servidor cooperan en una sola red. Los teléfonos y las tabletas pueden participar sin destruir la batería.',
@@ -711,6 +721,11 @@ const translations = {
     hero_highlight_api: 'On-chain payments API z memo do spięcia transakcji z zamówieniem',
     hero_highlight_wallets: 'Challenge/verify dla portfeli MetaMask, WalletConnect, Ledger',
     hero_highlight_tests: 'Full-stack testy w pakiecie (node + explorer + status)',
+    live_title: 'Działające endpointy',
+    live_subtitle: 'Wykryto węzeł. Otwórz API, eksplorator lub stronę statusu.',
+    live_api: 'API',
+    live_explorer: 'Eksplorator',
+    live_status: 'Status',
     hero_card1_title: 'Działa wszędzie',
     hero_card1_body:
       'W jednym łańcuchu współpracują węzły mobilne, desktopowe i serwerowe. Telefony i tablety mogą brać udział bez drastycznego drenażu baterii.',
@@ -1044,6 +1059,8 @@ const translations = {
 };
 
 const apiBase = window.BULEN_API_BASE || 'http://localhost:4100/api';
+const explorerBase = window.BULEN_EXPLORER_BASE || '';
+const statusBase = window.BULEN_STATUS_BASE || '';
 const rewardsHubBase = window.REWARDS_HUB_BASE || 'http://localhost:4400';
 const createElement = (tag, attrs = {}, children = []) => {
   const el = document.createElement(tag);
@@ -1484,6 +1501,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     refresh();
+  }
+
+  const liveLinks = document.getElementById('live-links');
+  if (liveLinks) {
+    const apiLink = document.getElementById('live-link-api');
+    const explorerLink = document.getElementById('live-link-explorer');
+    const statusLink = document.getElementById('live-link-status');
+
+    const setLink = (el, url) => {
+      if (!el) return;
+      if (url) {
+        el.href = url;
+        el.hidden = false;
+      } else {
+        el.hidden = true;
+      }
+    };
+
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/health`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`health ${res.status}`);
+        setLink(apiLink, apiBase);
+        setLink(explorerLink, explorerBase);
+        setLink(statusLink, statusBase);
+        liveLinks.hidden = false;
+      } catch (err) {
+        // node not reachable; keep hidden
+        console.warn('live links not shown:', err.message || err);
+      }
+    })();
   }
 
   const walletForm = document.getElementById('wallet-form');
