@@ -29,6 +29,16 @@ function computeDeviceProtectionBoost(config, metrics) {
   return 1;
 }
 
+function computeEfficiencyBoost(metrics) {
+  const watts = Number(metrics.powerWatts || 0);
+  if (Number.isNaN(watts) || watts <= 0) return 1;
+  // Simple tiering: reward lower power draw with a modest boost.
+  if (watts <= 5) return 1.2;
+  if (watts <= 10) return 1.1;
+  if (watts <= 20) return 1.05;
+  return 1;
+}
+
 function startUptimeSampler(context) {
   const { config, metrics } = context;
   const intervalSeconds = Math.max(5, Math.min(config.uptimeWindowSeconds, 60));
@@ -54,14 +64,20 @@ function computeRewardEstimate(config, metrics) {
   const hours = metrics.uptimeSeconds / 3600;
   const loyaltyBoost = computeLoyaltyBoost(config, metrics);
   const deviceBoost = computeDeviceProtectionBoost(config, metrics);
+  const efficiencyBoost = computeEfficiencyBoost(metrics);
   const hourly =
-    config.baseUptimeRewardPerHour * (metrics.rewardWeight || 1) * loyaltyBoost * deviceBoost;
+    config.baseUptimeRewardPerHour *
+    (metrics.rewardWeight || 1) *
+    loyaltyBoost *
+    deviceBoost *
+    efficiencyBoost;
   const total = hours * hourly;
   return {
     hourly,
     total,
     loyaltyBoost,
     deviceBoost,
+    efficiencyBoost,
   };
 }
 
@@ -92,6 +108,7 @@ function computeRewardProjection(config, metrics, options = {}) {
     days,
     loyaltyBoost: base.loyaltyBoost,
     deviceBoost: base.deviceBoost,
+    efficiencyBoost: base.efficiencyBoost,
   };
 }
 
@@ -102,5 +119,6 @@ module.exports = {
   computeRewardEstimate,
   computeLoyaltyBoost,
   computeDeviceProtectionBoost,
+  computeEfficiencyBoost,
   computeRewardProjection,
 };

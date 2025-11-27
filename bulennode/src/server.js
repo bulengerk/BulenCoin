@@ -35,7 +35,12 @@ const {
   selectCommittee,
   snapshotAtHeight,
 } = require('./consensus');
-const { createMetrics, computeRewardEstimate, computeRewardProjection } = require('./rewards');
+const {
+  createMetrics,
+  computeRewardEstimate,
+  computeRewardProjection,
+  computeEfficiencyBoost,
+} = require('./rewards');
 const payments = require('./payments');
 const wallets = require('./wallets');
 const QRCode = require('qrcode');
@@ -353,10 +358,12 @@ function createServer(context) {
         startedAt: metrics.startedAt,
         uptimeSeconds: metrics.uptimeSeconds,
         producedBlocks: metrics.producedBlocks,
+        powerWatts: metrics.powerWatts || null,
         uptimeRewardEstimateHourly: reward.hourly,
         uptimeRewardEstimateTotal: reward.total,
         loyaltyBoost: reward.loyaltyBoost,
         deviceBoost: reward.deviceBoost,
+        efficiencyBoost: reward.efficiencyBoost,
       },
       rewardProjection: {
         hourly: projection.hourly,
@@ -457,6 +464,10 @@ function createServer(context) {
     lines.push(`bulen_reward_estimate_total${formatLabels()} ${reward.total}`);
     lines.push(`bulen_loyalty_boost${formatLabels()} ${reward.loyaltyBoost}`);
     lines.push(`bulen_device_boost${formatLabels()} ${reward.deviceBoost}`);
+    lines.push(`bulen_efficiency_boost${formatLabels()} ${reward.efficiencyBoost}`);
+    if (typeof metrics.powerWatts === 'number') {
+      lines.push(`bulen_power_watts${formatLabels()} ${metrics.powerWatts}`);
+    }
     lines.push(`bulen_reward_projection_weekly${formatLabels()} ${projection.weekly}`);
     lines.push(
       `bulen_payments_total${formatLabels()} ${context.payments.length}`,
@@ -787,6 +798,41 @@ function createServer(context) {
       return;
     }
     response.json({ ok: true, address, backedUpAt: updated.backedUpAt });
+  });
+
+  app.post('/api/device/energy', (request, response) => {
+    const requireToken = Boolean(config.deviceControlToken) || process.env.NODE_ENV === 'production';
+    if (requireToken) {
+      const token = request.headers['x-bulen-device-token'];
+      if (!token || token !== config.deviceControlToken) {
+        response.status(403).json({ error: 'Forbidden' });
+        return;
+      }
+    }
+    const powerWatts = Number((request.body && request.body.powerWatts) || 0);
+    const batteryLevel = request.body && request.body.batteryLevel;
+    if (powerWatts && (Number.isNaN(powerWatts) || powerWatts < 0 || powerWatts > 500)) {
+      response.status(400).json({ error: 'Invalid powerWatts (0..500)' });
+      return;
+    }
+    if (batteryLevel !== undefined) {
+      const level = Number(batteryLevel);
+      if (Number.isNaN(level) || level < 0 || level > 1) {
+        response.status(400).json({ error: 'Invalid batteryLevel (0..1)' });
+        return;
+      }
+      context.lastBatteryLevel = level;
+    }
+    if (powerWatts > 0) {
+      context.metrics.powerWatts = powerWatts;
+      context.metrics.efficiencyBoost = rewards.computeEfficiencyBoost(context.metrics);
+    }
+    response.json({
+      ok: true,
+      powerWatts: powerWatts > 0 ? powerWatts : null,
+      efficiencyBoost: context.metrics.efficiencyBoost || 1,
+      batteryLevel: context.lastBatteryLevel ?? null,
+    });
   });
 
   app.post('/api/device/battery', (request, response) => {
