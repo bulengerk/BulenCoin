@@ -1,0 +1,956 @@
+{
+  "start": "2025-11-27T07:15:34.465Z",
+  "durationSec": 120,
+  "txPerSecond": 1,
+  "apiBase": "http://127.0.0.1:5510/api",
+  "requests": [
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 4
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 7
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 5
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 4
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 3
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 4
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 4
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    },
+    {
+      "type": "tx",
+      "status": 202,
+      "ok": true,
+      "latencyMs": 2
+    }
+  ],
+  "health": [
+    {
+      "ts": "2025-11-27T07:15:39.562Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 6,
+      "height": 4,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:15:44.558Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 9,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:15:49.558Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 3,
+      "height": 14,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:15:54.558Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 19,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:15:59.560Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 24,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:04.562Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 3,
+      "height": 29,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:09.563Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 34,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:14.565Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 39,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:19.566Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 44,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:24.568Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 49,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:29.571Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 54,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:34.573Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 59,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:39.574Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 64,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:44.575Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 69,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:49.577Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 74,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:54.579Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 79,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:16:59.582Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 3,
+      "height": 84,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:04.582Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 89,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:09.583Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 94,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:14.584Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 99,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:19.585Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 104,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:24.589Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 5,
+      "height": 109,
+      "peers": 0,
+      "mempool": 0
+    },
+    {
+      "ts": "2025-11-27T07:17:29.587Z",
+      "ok": true,
+      "status": 200,
+      "latencyMs": 2,
+      "height": 114,
+      "peers": 0,
+      "mempool": 0
+    }
+  ],
+  "errors": [],
+  "end": "2025-11-27T07:17:34.556Z",
+  "summary": {
+    "sent": 119,
+    "failed": 0,
+    "totalRequests": 119,
+    "txLatencyMs": {
+      "count": 119,
+      "min": 2,
+      "p50": 2,
+      "p90": 3,
+      "p99": 5,
+      "max": 7,
+      "avg": 2.41
+    },
+    "healthLatencyMs": {
+      "count": 23,
+      "min": 2,
+      "p50": 2,
+      "p90": 3,
+      "p99": 6,
+      "max": 6,
+      "avg": 2.43
+    }
+  }
+}
