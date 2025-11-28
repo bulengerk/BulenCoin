@@ -23,7 +23,78 @@ specification, see `docs/bulencoin_spec_pl.md` (Polish).
   - `docs/bulencoin_spec_pl.md` – full protocol spec (PL),
   - `docs/deployment_guide.md` – detailed deployment guide (PL),
   - `docs/legal_compliance_pl.md` – high‑level legal/compliance notes (PL),
-  - `docs/security_hardening_pl.md` – hardening and logging guidelines (PL).
+- `docs/security_hardening_pl.md` – hardening and logging guidelines (PL).
+
+# 1.1 Production quickstart (full stack)
+
+Goal: run validator + explorer + status + rewards hub behind TLS on one host with minimal,
+repeatable steps. Works for a cloud VM (Ubuntu 22.04, Node 18+).
+
+1) Install deps  
+```bash
+sudo apt-get update && sudo apt-get install -y nodejs npm git docker.io docker-compose
+```
+
+2) Clone repo and install node deps where needed  
+```bash
+git clone https://example.com/bulencoin.git && cd bulencoin
+(cd bulennode && npm install)
+(cd explorer && npm install)
+(cd status && npm install)
+(cd rewards-hub && npm install)
+```
+
+3) Create `.env.prod` (edit tokens/hostnames; keep faucet off)  
+```bash
+cat > .env.prod <<'EOF'
+BULEN_REQUIRE_SIGNATURES=true
+BULEN_P2P_TOKEN=change-me-shared
+BULEN_STATUS_TOKEN=status-secret
+BULEN_METRICS_TOKEN=metrics-secret
+BULEN_WEBHOOK_SECRET=webhook-secret
+BULEN_REWARDS_HMAC_SECRET=rewards-hmac
+BULEN_ENABLE_FAUCET=false
+BULEN_PROTOCOL_VERSION=1.0.0
+BULEN_HTTP_PORT=5410
+EXPLORER_PORT=5420
+STATUS_PORT=5430
+EXPLORER_TITLE=BulenCoin Explorer
+BULENNODE_API_BASE=https://api.bulen.example/api
+STATUS_NODES=https://api.bulen.example/api/status
+REWARDS_HUB_PORT=4400
+EOF
+```
+
+4) TLS termination (nginx/traefik) in front of ports 5410/5420/5430/4400. Minimum:
+HSTS, rate limit, forward auth tokens, proxy_pass to localhost ports. See
+`docs/prod_manifests.md` for a working nginx stanza.
+
+5) Launch everything with docker-compose (uses repo `docker-compose.yml`)  
+```bash
+BULEN_HTTP_PORT=5410 EXPLORER_PORT=5420 STATUS_PORT=5430 docker-compose up --build -d
+```
+
+6) Smoke check  
+```bash
+curl -H "x-bulen-status-token: $BULEN_STATUS_TOKEN" https://api.bulen.example/api/status
+curl https://explorer.bulen.example
+curl https://status.bulen.example/status
+curl https://rewards.bulen.example/leaderboard
+```
+
+7) Monitoring (Prometheus): scrape `https://api.bulen.example/metrics` with header
+`x-bulen-metrics-token: $BULEN_METRICS_TOKEN`. Import a basic Grafana dashboard using
+height/peers/mempool/rewards series. Alerts: host down, height stall, peer count low,
+5xx/429 spikes.
+
+8) Backups: every 10–15 min sync `data/` (node) and any `payments`/`session` files to S3
+with versioning. Test restore monthly.
+
+9) Upgrades: `git pull && npm install` in each service dir, restart the compose stack.
+Keep `BULEN_PROTOCOL_VERSION` aligned; nodes reject mismatched major versions.
+
+10) Security checklist: faucet off, P2P token set, TLS on, status/metrics tokens required,
+rate-limit on proxy, non-root service users, log rotation enabled.
 
 # 2. Running the static website
 

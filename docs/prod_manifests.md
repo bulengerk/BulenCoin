@@ -98,12 +98,17 @@ Traefik/ingress: same principles—TLS, HSTS, rate-limit middleware, optional fo
 - Secrets in KMS/SSM/Vault, not in the repo.
 - Systemd unit with `Restart=on-failure`; optionally cap CPU/mem via cgroups.
 
-## TODO (next iteration)
+## 10-step production runbook (single host, TLS at proxy)
 
-- Soak/perf tests (days/weeks) with metrics and network fault scenarios.
-- Adversarial/byzantine P2P (blocking/double-sign), upgrade/backward-compat tests, signed
-  snapshots.
-- Signed packages (.deb/.rpm/.pkg/.exe) + auto-update desktop; release pipeline with
-  hashes/Sigstore.
-- SLO/alert dashboard (Prometheus/Grafana): height drift, peer count, 5xx/latency,
-  mempool.
+1. VM: Ubuntu 22.04 LTS, 4 vCPU/8 GB RAM/80 GB SSD, DNS for `api|explorer|status|rewards`.
+2. Install deps: `apt-get install -y nodejs npm docker.io docker-compose nginx certbot`.
+3. Clone: `git clone https://example.com/bulencoin.git && cd bulencoin`.
+4. Install service deps: `npm install` in `bulennode/`, `explorer/`, `status/`, `rewards-hub/`.
+5. Copy `.env.prod` from docs (tokens, ports, disable faucet, protocol version).
+6. Obtain certs: `certbot certonly --nginx -d api.bulen.example -d explorer...`.
+7. Configure nginx (see snippet above) proxying 5410/5420/5430/4400 with HSTS + rate limits +
+   `proxy_set_header x-bulen-status-token ...` where needed.
+8. Start stack: `BULEN_HTTP_PORT=5410 EXPLORER_PORT=5420 STATUS_PORT=5430 docker-compose up -d`.
+9. Smoke test: `/api/status` with token, explorer home, status HTML/JSON, rewards leaderboard.
+10. Add Prometheus scrape + backup cron (rsync `data/` to S3). Document restore and upgrade
+    (`git pull && docker-compose up -d --build`).

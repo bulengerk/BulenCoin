@@ -7,6 +7,8 @@ const translations = {
     nav_consensus: 'Consensus',
     nav_economics: 'Economics',
     nav_apps: 'Apps',
+    nav_community: 'Community',
+    nav_partners: 'Partners',
     nav_security: 'Security',
     nav_docs: 'Docs',
     nav_roadmap: 'Roadmap',
@@ -157,6 +159,12 @@ const translations = {
       'Emission/fees: 8%→6%→4%→2.5%→1.5% annual taper, rewards split 60% validators/committee, 20% uptime/loyalty, 20% ecosystem pool; fees: 30% burned, 60% validators, 10% ecosystem; parameters are published and only adjustable within narrow governance bands.',
     economics_payouts:
       'Payout cadence: testnet settles daily to exercise tooling; mainnet pays per epoch (~weekly) after finality, with public calendars/dashboards showing burns, pool balances and epoch IDs.',
+    economics_loyalty_title: '6.1 Age & loyalty multipliers',
+    economics_loyalty_body:
+      'Older nodes with continuous uptime and committed stake earn more: +2% per online month (capped 1.5x) minus downtime penalty, plus up to +50% loyalty boost for long-lived stake. Bonuses decay after downtime and reset on withdrawals or slashing.',
+    economics_loyalty_point1: 'Age score: signed uptime receipts; 2-day grace, decay after.',
+    economics_loyalty_point2: 'Loyalty pool: commit 10–50% stake; full maturity at 18 months.',
+    economics_loyalty_point3: 'Safety valves: caps (1.5x age, 1.5x total), reset on fraud.',
     roadmap_title: '7. Launch phases and deployment',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -237,6 +245,10 @@ const translations = {
     calc_device_label: 'Device class',
     calc_uptime_label: 'Hours online per day',
     calc_days_label: 'Projection window (days)',
+    calc_age_label: 'Node age (days online)',
+    calc_offline_label: 'Offline days in last 30',
+    calc_loyalty_pct_label: 'Stake committed to loyalty (%)',
+    calc_loyalty_months_label: 'Months since last withdrawal',
     calc_button: 'Calculate',
     calc_result_title: 'Weekly projection',
     calc_result_subtitle: 'Indicative only; real rewards depend on network usage and parameters.',
@@ -260,6 +272,79 @@ const translations = {
     leaderboard_badge_mobile: 'Mobile / gateway hero',
     leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
     leaderboard_source_prefix: 'Rewards hub:',
+    community_title: 'Community layer: proof, support and visibility',
+    community_subtitle:
+      'Pods, rituals and public signals so newcomers see who keeps nodes online and where to ask for help.',
+    community_highlights_title: 'Live contributions & uptime proof',
+    community_highlights_body:
+      'Rolling feed of merged fixes, docs, meetups and nodes pledged for uptime; metrics below refresh from the community dataset.',
+    community_metric_contributors: 'Active contributors',
+    community_metric_hours: 'Mentor hours this week',
+    community_metric_nodes: 'Nodes reporting to pods',
+    community_note: 'Public feed is opt-in; items expire after 14 days to avoid stale bragging.',
+    community_support_title: 'Support pods & rituals',
+    community_support_point1: 'Daily health pings + signed uptime receipts.',
+    community_support_point2: 'Weekly office hours (infra + wallet UX) and paired debugging.',
+    community_support_point3: 'Moderated chat: copy/paste ready snippets, not hype.',
+    community_support_point4: 'Local crews run meetups; notes land in docs within 24h.',
+    community_support_body:
+      'Want to help? Join a pod, pick an issue from the board and ship with a mentor who can sign off on uptime and reward traces.',
+    community_cta_join: 'Open the operator runbook',
+    community_tag_docs: 'docs',
+    community_tag_infra: 'infra',
+    community_tag_wallets: 'wallets',
+    community_tag_education: 'education',
+    community_feed_empty: 'No public signals yet — opt in to show your pod and uptime receipts.',
+    partner_title: 'Partner & referral program (sane terms)',
+    partner_subtitle:
+      'Tiered revenue share with caps, hands-on integration help and transparent reporting so partners know what they earn.',
+    partner_tier_product: 'Product & app partners',
+    partner_tier_product_title: 'Ship BulenCoin in your product',
+    partner_tier_product_body:
+      'Wallets, POS apps and dev tools get co-owned docs, SDK pairing and shared SLOs. 8% success fee for 90 days, then 3% with quality gates.',
+    partner_tier_product_point1: 'Joint backlog & QA sign-off for each release.',
+    partner_tier_product_point2: 'Sandbox keys + mock data for demos.',
+    partner_tier_product_point3: 'Co-marketing that ships only after uptime proves out.',
+    partner_tier_infra: 'Infrastructure & hosting',
+    partner_tier_infra_title: 'Keep nodes and gateways up',
+    partner_tier_infra_body:
+      'Operators who maintain public gateways or explorers get boosted referral rates (up to 12%) tied to signed uptime receipts and latency SLOs.',
+    partner_tier_infra_point1: 'Telemetry tokens + probes to verify uptime.',
+    partner_tier_infra_point2: 'Back-pressure & rate-limit templates baked in.',
+    partner_tier_infra_point3: 'Incident channel with humans, not bots.',
+    partner_tier_creator: 'Creators & local crews',
+    partner_tier_creator_title: 'Teach, translate, host meetups',
+    partner_tier_creator_body:
+      'Local leaders earn fixed grants + tracked referrals when workshops convert to real nodes. We publish proof-of-impact dashboards monthly.',
+    partner_tier_creator_point1: 'Starter kits: slides, demos, QR-ready handouts.',
+    partner_tier_creator_point2: 'Translation budget with review from core team.',
+    partner_tier_creator_point3: 'Referral IDs mapped to wallets for transparent payouts.',
+    referral_calc_title: 'Referral calculator',
+    referral_calc_subtitle:
+      'Estimate monthly payouts with sane caps. Partners get a base share plus a reliability bonus from node uptime.',
+    referral_role_label: 'Partner type',
+    referral_role_product: 'Product / app',
+    referral_role_infra: 'Infrastructure',
+    referral_role_creator: 'Creator / community',
+    referral_referrals_label: 'Qualified leads per month',
+    referral_conversion_label: 'Conversion rate (%)',
+    referral_value_label: 'Avg monthly volume per conversion (BULEN)',
+    referral_uptime_label: 'Your uptime (0-100%)',
+    referral_calc_button: 'Calculate',
+    referral_metric_monthly: 'Projected monthly payout',
+    referral_metric_bonus: 'Reliability bonus',
+    referral_metric_pool: 'Ecosystem pool impact',
+    referral_code_title: 'Get your referral code',
+    referral_code_subtitle:
+      'Generate a deterministic code you can share now; map it to a wallet later without re-issuing links.',
+    referral_code_handle: 'Your brand / node ID',
+    referral_code_contact: 'Contact (for approvals)',
+    referral_code_button: 'Generate code',
+    referral_code_result_label: 'Code',
+    referral_code_note:
+      'Codes use HMAC + timestamp so they are unique but verifiable; share the code in proposals or during onboarding.',
+    referral_error_inputs: 'Enter positive numbers for leads, conversion and volume.',
+    referral_code_error: 'Add your brand/node ID before generating a code.',
     onboarding_title: 'Start in 5 minutes (testnet)',
     onboarding_body:
       'Grab test tokens, install a one-click package, create a wallet with a seed backup and join the network with safe defaults. Works on desktop, gateway or mobile light mode.',
@@ -338,6 +423,8 @@ const translations = {
     nav_consensus: 'Consenso',
     nav_economics: 'Economía',
     nav_apps: 'Aplicaciones',
+    nav_community: 'Comunidad',
+    nav_partners: 'Socios',
     nav_security: 'Seguridad',
     nav_docs: 'Documentación',
     nav_roadmap: 'Hoja de ruta',
@@ -488,6 +575,12 @@ const translations = {
       'Emisión/tarifas: inflación 8%→6%→4%→2.5%→1.5% anual, reparto de recompensas 60% validadores/comité, 20% uptime/lealtad, 20% fondo de ecosistema; comisiones: 30% quemadas, 60% validadores, 10% ecosistema; parámetros públicos y ajustables solo en bandas acotadas por gobernanza.',
     economics_payouts:
       'Pagos: en testnet liquidación diaria para ejercitar herramientas; en mainnet pagos por época (~semanal) tras finalización, con calendarios/paneles públicos que muestran quemas, saldos del fondo e IDs de época.',
+    economics_loyalty_title: '6.1 Multiplicadores de antigüedad y lealtad',
+    economics_loyalty_body:
+      'Nodos veteranos con uptime continuo y stake comprometido ganan más: +2% por mes online (tope 1.5x) menos penalización por caídas, más hasta +50% de boost de lealtad para stake de largo plazo. Las bonificaciones decaen tras downtime y se reinician al retirar o por slashing.',
+    economics_loyalty_point1: 'Puntaje de edad: recibos de uptime firmados; 2 días de gracia, luego decay.',
+    economics_loyalty_point2: 'Pool de lealtad: compromete 10–50% del stake; madurez completa a 18 meses.',
+    economics_loyalty_point3: 'Válvulas de seguridad: topes (1.5x edad, 1.5x total), reset ante fraude.',
     roadmap_title: '7. Fases de lanzamiento y despliegue',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -587,6 +680,10 @@ const translations = {
     calc_device_label: 'Clase de dispositivo',
     calc_uptime_label: 'Horas en línea por día',
     calc_days_label: 'Ventana de proyección (días)',
+    calc_age_label: 'Antigüedad del nodo (días online)',
+    calc_offline_label: 'Días offline en últimos 30',
+    calc_loyalty_pct_label: 'Stake en pool de lealtad (%)',
+    calc_loyalty_months_label: 'Meses desde último retiro',
     calc_button: 'Calcular',
     calc_result_title: 'Proyección semanal',
     calc_result_subtitle: 'Indicativo; las recompensas reales dependen del uso y parámetros.',
@@ -610,6 +707,81 @@ const translations = {
     leaderboard_badge_mobile: 'Héroe móvil / gateway',
     leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
     leaderboard_source_prefix: 'Rewards hub:',
+    community_title: 'Capa comunitaria: prueba, soporte y visibilidad',
+    community_subtitle:
+      'Pods, rituales y señales públicas para que los recién llegados vean quién mantiene nodos en línea y dónde pedir ayuda.',
+    community_highlights_title: 'Contribuciones en vivo y prueba de disponibilidad',
+    community_highlights_body:
+      'Feed de fixes, docs, meetups y nodos comprometidos con uptime; las métricas se refrescan con el dataset comunitario.',
+    community_metric_contributors: 'Contribuidores activos',
+    community_metric_hours: 'Horas de mentoría esta semana',
+    community_metric_nodes: 'Nodos reportando a pods',
+    community_note:
+      'El feed público es opt-in; los ítems caducan a los 14 días para evitar ruido obsoleto.',
+    community_support_title: 'Pods de soporte y rituales',
+    community_support_point1: 'Pings diarios de salud + recibos firmados de uptime.',
+    community_support_point2:
+      'Office hours semanales (infra + UX de wallet) y depuración en pareja.',
+    community_support_point3: 'Chat moderado: snippets listos para pegar, no hype.',
+    community_support_point4: 'Equipos locales hacen meetups; las notas llegan a docs en 24h.',
+    community_support_body:
+      '¿Quieres ayudar? Únete a un pod, elige un issue y entrega con un mentor que pueda firmar uptime y trazas de recompensa.',
+    community_cta_join: 'Abrir runbook operatora',
+    community_tag_docs: 'docs',
+    community_tag_infra: 'infra',
+    community_tag_wallets: 'wallets',
+    community_tag_education: 'educación',
+    community_feed_empty: 'Aún no hay señales públicas — activa el feed para mostrar tu pod.',
+    partner_title: 'Programa de partners y referidos (términos sensatos)',
+    partner_subtitle:
+      'Revenue share escalonado con topes, ayuda de integración y reporting transparente para saber cuánto ganas.',
+    partner_tier_product: 'Partners de producto y apps',
+    partner_tier_product_title: 'Incluye BulenCoin en tu producto',
+    partner_tier_product_body:
+      'Wallets, POS y devtools reciben docs co-propiedad, pairing de SDK y SLOs compartidos. 8% de success fee 90 días, luego 3% con puertas de calidad.',
+    partner_tier_product_point1: 'Backlog conjunto y QA firmado por release.',
+    partner_tier_product_point2: 'Claves de sandbox + datos mock para demos.',
+    partner_tier_product_point3: 'Co-marketing solo después de probar uptime.',
+    partner_tier_infra: 'Infraestructura y hosting',
+    partner_tier_infra_title: 'Mantén nodos y gateways en línea',
+    partner_tier_infra_body:
+      'Operadores de gateways/explorers públicos obtienen tasas de referido mayores (hasta 12%) ligadas a recibos de uptime firmados y SLOs de latencia.',
+    partner_tier_infra_point1: 'Tokens de telemetría + sondas para verificar uptime.',
+    partner_tier_infra_point2: 'Plantillas de back-pressure y rate limit incluidas.',
+    partner_tier_infra_point3: 'Canal de incidentes con humanos, no bots.',
+    partner_tier_creator: 'Creadores y comunidades locales',
+    partner_tier_creator_title: 'Enseña, traduce, organiza meetups',
+    partner_tier_creator_body:
+      'Líderes locales ganan grants fijos + referidos trazables cuando talleres se convierten en nodos reales. Publicamos dashboards de impacto mensuales.',
+    partner_tier_creator_point1: 'Kits de arranque: slides, demos, handouts con QR.',
+    partner_tier_creator_point2: 'Presupuesto de traducción con revisión del core team.',
+    partner_tier_creator_point3: 'IDs de referido mapeados a wallets para pagos transparentes.',
+    referral_calc_title: 'Calculadora de referidos',
+    referral_calc_subtitle:
+      'Estima pagos mensuales con topes. Base + bonus de fiabilidad según uptime del nodo.',
+    referral_role_label: 'Tipo de partner',
+    referral_role_product: 'Producto / app',
+    referral_role_infra: 'Infraestructura',
+    referral_role_creator: 'Creador / comunidad',
+    referral_referrals_label: 'Leads cualificados por mes',
+    referral_conversion_label: 'Tasa de conversión (%)',
+    referral_value_label: 'Volumen medio mensual por conversión (BULEN)',
+    referral_uptime_label: 'Tu uptime (0-100%)',
+    referral_calc_button: 'Calcular',
+    referral_metric_monthly: 'Pago mensual proyectado',
+    referral_metric_bonus: 'Bonus de fiabilidad',
+    referral_metric_pool: 'Impacto en fondo de ecosistema',
+    referral_code_title: 'Obtén tu código de referido',
+    referral_code_subtitle:
+      'Genera un código determinista compartible ahora; asígnalo a una wallet después sin reenviar enlaces.',
+    referral_code_handle: 'Tu marca / ID de nodo',
+    referral_code_contact: 'Contacto (para aprobación)',
+    referral_code_button: 'Generar código',
+    referral_code_result_label: 'Código',
+    referral_code_note:
+      'Los códigos usan HMAC + timestamp: únicos pero verificables; úsalos en propuestas u onboarding.',
+    referral_error_inputs: 'Ingresa números válidos de leads, conversión y volumen.',
+    referral_code_error: 'Añade tu marca o ID de nodo antes de generar el código.',
     onboarding_title: 'Empieza en 5 minutos (testnet)',
     onboarding_body:
       'Obtén tokens de prueba, instala un paquete de un clic, crea un wallet con copia de seed y únete con ajustes seguros. Funciona en escritorio, gateway o modo light móvil.',
@@ -702,6 +874,8 @@ const translations = {
     nav_consensus: 'Konsensus',
     nav_economics: 'Ekonomia',
     nav_apps: 'Aplikacje',
+    nav_community: 'Społeczność',
+    nav_partners: 'Partnerzy',
     nav_security: 'Bezpieczeństwo',
     nav_docs: 'Dokumentacja',
     nav_roadmap: 'Roadmap',
@@ -852,6 +1026,12 @@ const translations = {
       'Emisja/opłaty: inflacja 8%→6%→4%→2.5%→1.5% (roczna, malejąca), podział nagród 60% walidator/komitet, 20% uptime/lojalność, 20% fundusz ekosystemu; opłaty: 30% spalane, 60% walidatorzy, 10% ekosystem; parametry publikowane i zmieniane tylko w wąskich widełkach governance.',
     economics_payouts:
       'Wypłaty: w testnecie symulacja dzienna (narzędzia), w mainnecie rozliczenia per epoka (~tydzień) po finalności, z publicznym kalendarzem/panelami (spalanie opłat, saldo funduszu, ID epok).',
+    economics_loyalty_title: '6.1 Mnożniki wieku i lojalności',
+    economics_loyalty_body:
+      'Starsze węzły z ciągłym uptime i zadeklarowanym stake zarabiają więcej: +2% za miesiąc online (limit 1.5x) minus kara za przestoje, plus do +50% boost lojalności za długoterminowy stake. Bonusy wygasają po downtime i resetują się przy wypłatach lub slashowaniu.',
+    economics_loyalty_point1: 'Wiek: podpisane potwierdzenia uptime; 2 dni luzu, potem degradacja.',
+    economics_loyalty_point2: 'Pula lojalności: zadeklaruj 10–50% stake; pełna dojrzałość po 18 miesiącach.',
+    economics_loyalty_point3: 'Bezpieczeństwo: limity (1.5x wieku, 1.5x łączny), reset przy nadużyciach.',
     roadmap_title: '7. Fazy uruchomienia i wdrożenia',
     roadmap_testnet_title: '7.1 Testnet',
     roadmap_testnet_body:
@@ -950,6 +1130,10 @@ const translations = {
     calc_device_label: 'Klasa urządzenia',
     calc_uptime_label: 'Godzin online dziennie',
     calc_days_label: 'Okno projekcji (dni)',
+    calc_age_label: 'Wiek węzła (dni online)',
+    calc_offline_label: 'Dni offline w ostatnich 30',
+    calc_loyalty_pct_label: 'Stake w puli lojalności (%)',
+    calc_loyalty_months_label: 'Miesiące od ostatniej wypłaty',
     calc_button: 'Oblicz',
     calc_result_title: 'Projekcja tygodniowa',
     calc_result_subtitle: 'Wartości poglądowe; nagrody zależą od obciążenia i parametrów sieci.',
@@ -973,6 +1157,80 @@ const translations = {
     leaderboard_badge_mobile: 'Bohater mobile/gateway',
     leaderboard_badge_staker: 'Stake ≥ 1000 BULEN',
     leaderboard_source_prefix: 'Rewards hub:',
+    community_title: 'Warstwa społecznościowa: dowody, wsparcie i widoczność',
+    community_subtitle:
+      'Pody, rytuały i publiczne sygnały, żeby nowi widzieli kto trzyma węzły online i gdzie pytać o pomoc.',
+    community_highlights_title: 'Na żywo: wkład i dowody uptime',
+    community_highlights_body:
+      'Strumień poprawek, dokumentacji, meetupów i węzłów z deklaracją uptime; metryki poniżej odświeżają się z danych społeczności.',
+    community_metric_contributors: 'Aktywni kontrybutorzy',
+    community_metric_hours: 'Godziny mentoringu w tym tygodniu',
+    community_metric_nodes: 'Węzły raportujące do podów',
+    community_note:
+      'Feed publiczny jest opcjonalny; wpisy wygasają po 14 dniach, żeby nie było starego marketingu.',
+    community_support_title: 'Pody wsparcia i rytuały',
+    community_support_point1: 'Codzienne pingowanie zdrowia + podpisane potwierdzenia uptime.',
+    community_support_point2: 'Cotygodniowe office hours (infra + UX wallet) i debug w parach.',
+    community_support_point3: 'Moderowany czat: gotowe snippet-y do wklejenia, zero hype.',
+    community_support_point4: 'Lokalne ekipy robią meetupy; notatki trafiają do docs w 24h.',
+    community_support_body:
+      'Chcesz pomóc? Dołącz do podu, wybierz issue z tablicy i wysyłaj z mentorem, który podpisze uptime i ścieżki nagród.',
+    community_cta_join: 'Otwórz runbook operatora',
+    community_tag_docs: 'docs',
+    community_tag_infra: 'infra',
+    community_tag_wallets: 'wallety',
+    community_tag_education: 'edukacja',
+    community_feed_empty: 'Brak publicznych sygnałów — włącz feed, aby pokazać swój pod.',
+    partner_title: 'Program partnerski i polecenia (sensowne zasady)',
+    partner_subtitle:
+      'Wielopoziomowy podział przychodów z limitami, wsparcie integracyjne i przejrzyste raporty żeby partnerzy wiedzieli co zarabiają.',
+    partner_tier_product: 'Partnerzy produktowi',
+    partner_tier_product_title: 'Wbuduj BulenCoin w swój produkt',
+    partner_tier_product_body:
+      'Wallety, POS-y i narzędzia dev dostają współdzielone docs, sparring SDK i wspólne SLO. 8% success fee przez 90 dni, później 3% z progami jakości.',
+    partner_tier_product_point1: 'Wspólny backlog i QA podpisane przy każdym wydaniu.',
+    partner_tier_product_point2: 'Klucze sandbox + dane mock do dem.',
+    partner_tier_product_point3: 'Co-marketing tylko po udowodnionym uptime.',
+    partner_tier_infra: 'Infra i hosting',
+    partner_tier_infra_title: 'Utrzymuj węzły i gatewaye',
+    partner_tier_infra_body:
+      'Operatorzy publicznych gatewayów/eksplorerów dostają wyższe stawki (do 12%) powiązane z podpisanymi potwierdzeniami uptime i SLO opóźnień.',
+    partner_tier_infra_point1: 'Tokeny telemetryczne + sondy do weryfikacji uptime.',
+    partner_tier_infra_point2: 'Szablony back-pressure i rate limit na starcie.',
+    partner_tier_infra_point3: 'Kanał incydentowy z ludźmi, nie botami.',
+    partner_tier_creator: 'Twórcy i lokalne ekipy',
+    partner_tier_creator_title: 'Ucz, tłumacz, organizuj meetupy',
+    partner_tier_creator_body:
+      'Lokalni liderzy dostają granty + śledzone polecenia gdy warsztaty przekładają się na realne węzły. Comiesięczne dashboardy potwierdzające wpływ.',
+    partner_tier_creator_point1: 'Zestawy startowe: slajdy, dema, materiały z QR.',
+    partner_tier_creator_point2: 'Budżet na tłumaczenia z review zespołu core.',
+    partner_tier_creator_point3: 'ID poleceń mapowane do portfeli dla przejrzystych wypłat.',
+    referral_calc_title: 'Kalkulator poleceń',
+    referral_calc_subtitle:
+      'Szacuj miesięczne wypłaty z limitami. Podstawa + bonus za niezawodność liczony z uptime węzła.',
+    referral_role_label: 'Typ partnera',
+    referral_role_product: 'Produkt / app',
+    referral_role_infra: 'Infra',
+    referral_role_creator: 'Twórca / społeczność',
+    referral_referrals_label: 'Kwalifikowane leady / miesiąc',
+    referral_conversion_label: 'Konwersja (%)',
+    referral_value_label: 'Średni wolumen miesięczny na konwersję (BULEN)',
+    referral_uptime_label: 'Twój uptime (0-100%)',
+    referral_calc_button: 'Policz',
+    referral_metric_monthly: 'Prognoza miesięczna',
+    referral_metric_bonus: 'Bonus za niezawodność',
+    referral_metric_pool: 'Wpływ na pulę ekosystemu',
+    referral_code_title: 'Pobierz kod polecający',
+    referral_code_subtitle:
+      'Wygeneruj deterministyczny kod do udostępnienia; później przypniesz go do portfela bez zmiany linków.',
+    referral_code_handle: 'Twoja marka / ID węzła',
+    referral_code_contact: 'Kontakt (do akceptacji)',
+    referral_code_button: 'Generuj kod',
+    referral_code_result_label: 'Kod',
+    referral_code_note:
+      'Kody używają HMAC + timestamp, więc są unikalne i weryfikowalne; dodaj je do ofert lub onboardingu.',
+    referral_error_inputs: 'Podaj dodatnie liczby dla leadów, konwersji i wolumenu.',
+    referral_code_error: 'Dodaj swoją markę/ID węzła przed wygenerowaniem kodu.',
     onboarding_title: 'Start w 5 minut (testnet)',
     onboarding_body:
       'Weź tokeny testowe, zainstaluj pakiet „jednym kliknięciem”, utwórz portfel z kopią seed i dołącz do sieci na bezpiecznych ustawieniach. Działa na desktopie, gateway i w trybie mobile light.',
@@ -1101,6 +1359,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const preferred =
     (navigator.language || navigator.userLanguage || 'en').slice(0, 2).toLowerCase();
   const dict = () => translations[select.value] || translations.en;
+  const communityApi = (typeof window !== 'undefined' && window.BulenCommunity) || {};
   let rerenderWalletCards = () => {};
   let hydrateFormsWithAddress = () => {};
 
@@ -1131,6 +1390,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const deviceClass = document.getElementById('calc-device').value;
       const uptimeHoursPerDay = Number(document.getElementById('calc-uptime').value || 0);
       const days = Number(document.getElementById('calc-days').value || 0);
+      const ageDays = Number(document.getElementById('calc-age-days').value || 0);
+      const offlineDays = Number(document.getElementById('calc-offline-days').value || 0);
+      const loyaltyPct = Number(document.getElementById('calc-loyalty-pct').value || 0);
+      const loyaltyMonths = Number(document.getElementById('calc-loyalty-months').value || 0);
       if (errorEl) {
         errorEl.hidden = true;
       }
@@ -1145,15 +1408,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const data = await res.json();
         const proj = data.projection || {};
+        const ageMultiplier = communityApi.computeAgeMultiplier
+          ? communityApi.computeAgeMultiplier(ageDays, offlineDays)
+          : 1;
+        const loyaltyMultiplier = communityApi.computeLoyaltyMultiplier
+          ? communityApi.computeLoyaltyMultiplier(loyaltyPct, loyaltyMonths)
+          : 1;
+        const adjusted = communityApi.projectLoyaltyAdjustedRewards
+          ? communityApi.projectLoyaltyAdjustedRewards(proj, { ageMultiplier, loyaltyMultiplier })
+          : proj;
         const fmt = (val) =>
           typeof val === 'number' ? val.toFixed(2).replace(/\.00$/, '') : '–';
-        setText('calc-hourly', fmt(proj.hourly));
-        setText('calc-daily', fmt(proj.daily));
-        setText('calc-weekly', fmt(proj.weekly));
-        setText('calc-period', fmt(proj.periodTotal));
-        setText('calc-badge-loyalty', `Loyalty x${fmt(proj.loyaltyBoost || 1)}`);
+        setText('calc-hourly', fmt(adjusted.hourly || proj.hourly));
+        setText('calc-daily', fmt(adjusted.daily || proj.daily));
+        setText('calc-weekly', fmt(adjusted.weekly || proj.weekly));
+        setText('calc-period', fmt(adjusted.periodTotal || proj.periodTotal));
+        setText('calc-badge-age', `Age x${fmt(ageMultiplier)}`);
+        setText('calc-badge-loyalty', `Loyalty x${fmt(loyaltyMultiplier)}`);
         setText('calc-badge-device', `Device x${fmt(proj.deviceBoost || 1)}`);
         setText('calc-badge-stake', `Stake weight x${fmt(proj.stakeWeight || 1)}`);
+        const total =
+          (proj.deviceBoost || 1) * (proj.stakeWeight || 1) * ageMultiplier * loyaltyMultiplier;
+        setText('calc-badge-total', `Total x${fmt(total)}`);
       } catch (error) {
         console.error('Reward estimate failed', error);
         if (errorEl) {
@@ -1251,6 +1527,135 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadLeaderboard();
+  }
+
+  const communityFeed = document.getElementById('community-feed');
+  if (communityFeed && communityApi.buildCommunitySnapshot) {
+    const contributorsEl = document.getElementById('community-contributors');
+    const hoursEl = document.getElementById('community-hours');
+    const nodesEl = document.getElementById('community-nodes');
+    const emptyText =
+      dict().community_feed_empty ||
+      'No public signals yet — opt in to show your pod and signed uptime receipts.';
+    const renderCommunity = () => {
+      try {
+        const { stats, feed } = communityApi.buildCommunitySnapshot();
+        if (contributorsEl) contributorsEl.textContent = stats.contributors || '0';
+        if (hoursEl) hoursEl.textContent = (stats.mentorHours || 0).toFixed(1).replace(/\.0$/, '');
+        if (nodesEl) nodesEl.textContent = stats.nodes || '0';
+        communityFeed.innerHTML = '';
+        const entries = feed || [];
+        if (!entries.length) {
+          const li = document.createElement('li');
+          li.textContent = emptyText;
+          communityFeed.appendChild(li);
+          return;
+        }
+        entries.forEach((entry) => {
+          const li = document.createElement('li');
+          const title = document.createElement('div');
+          title.textContent = entry.summary || entry.handle || 'Community update';
+          const meta = document.createElement('div');
+          meta.className = 'bc-muted';
+          meta.textContent = `${entry.handle || 'anon'} · ${entry.type || 'pod'} · impact ${entry.impact || '–'}`;
+          li.appendChild(title);
+          li.appendChild(meta);
+          communityFeed.appendChild(li);
+        });
+      } catch (error) {
+        console.error('community render failed', error);
+      }
+    };
+    renderCommunity();
+  }
+
+  const referralForm = document.getElementById('referral-form');
+  if (referralForm) {
+    const roleEl = document.getElementById('partner-role');
+    const leadsEl = document.getElementById('partner-referrals');
+    const conversionEl = document.getElementById('partner-conversion');
+    const valueEl = document.getElementById('partner-value');
+    const uptimeEl = document.getElementById('partner-uptime');
+    const monthlyEl = document.getElementById('referral-monthly');
+    const bonusEl = document.getElementById('referral-bonus');
+    const poolEl = document.getElementById('referral-pool');
+    const errorEl = document.getElementById('referral-error');
+    const setError = (msg) => {
+      if (!errorEl) return;
+      errorEl.textContent = msg || '';
+      errorEl.hidden = !msg;
+    };
+    const fallbackCalc = ({ leads, conversionRate, avgVolume, uptime, role }) => {
+      const conversion = Math.min(100, Math.max(0, conversionRate));
+      const converted = leads * (conversion / 100);
+      const gross = converted * avgVolume;
+      const baseRate = role === 'infra' ? 0.1 : role === 'creator' ? 0.06 : 0.08;
+      const bonusRate = role === 'infra' ? 0.07 : role === 'creator' ? 0.045 : 0.05;
+      const base = gross * baseRate;
+      const bonus = base * bonusRate * Math.min(1.1, Math.max(0.6, uptime / 100));
+      return {
+        monthlyPayout: base + bonus,
+        bonus,
+        poolImpact: gross * 0.02,
+      };
+    };
+    const format = (val) =>
+      typeof val === 'number' && Number.isFinite(val)
+        ? val.toFixed(2).replace(/\.00$/, '')
+        : '–';
+    const runCalc = (event) => {
+      if (event) event.preventDefault();
+      setError('');
+      const role = roleEl?.value || 'product';
+      const leads = Number(leadsEl?.value || 0);
+      const conversionRate = Number(conversionEl?.value || 0);
+      const avgVolume = Number(valueEl?.value || 0);
+      const uptime = Number(uptimeEl?.value || 0);
+      if ([leads, conversionRate, avgVolume].some((n) => !Number.isFinite(n) || n < 0)) {
+        setError(dict().referral_error_inputs || 'Enter positive numbers for the calculator.');
+        return;
+      }
+      try {
+        const result = communityApi.calculatePartnerPayout
+          ? communityApi.calculatePartnerPayout({ role, leads, conversionRate, avgVolume, uptime })
+          : fallbackCalc({ role, leads, conversionRate, avgVolume, uptime });
+        if (monthlyEl) monthlyEl.textContent = format(result.monthlyPayout);
+        if (bonusEl) bonusEl.textContent = format(result.bonus);
+        if (poolEl) poolEl.textContent = format(result.poolImpact);
+      } catch (error) {
+        console.error('referral calc failed', error);
+        setError(dict().referral_error_inputs || 'Enter valid numbers to calculate payouts.');
+      }
+    };
+    referralForm.addEventListener('submit', runCalc);
+    runCalc();
+  }
+
+  const codeBtn = document.getElementById('partner-generate');
+  if (codeBtn) {
+    const handleEl = document.getElementById('partner-handle');
+    const contactEl = document.getElementById('partner-contact');
+    const codeEl = document.getElementById('partner-code');
+    const errorEl = document.getElementById('referral-error');
+    const setError = (msg) => {
+      if (!errorEl) return;
+      errorEl.textContent = msg || '';
+      errorEl.hidden = !msg;
+    };
+    codeBtn.addEventListener('click', () => {
+      setError('');
+      const handle = handleEl?.value || '';
+      const contact = contactEl?.value || '';
+      try {
+        const code = communityApi.generateReferralCode
+          ? communityApi.generateReferralCode(handle, contact)
+          : `BULEN-${(handle || 'PARTNER').toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+        if (codeEl) codeEl.textContent = code;
+      } catch (error) {
+        console.error('referral code error', error);
+        setError(dict().referral_code_error || 'Add your brand/node ID before generating a code.');
+      }
+    });
   }
 
   const walletProfiles = Array.from(document.querySelectorAll('[data-wallet-card]')).map(

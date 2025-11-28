@@ -64,6 +64,8 @@
           <a href="#consensus" data-i18n-label="nav_consensus">Consensus</a>
           <a href="#economics" data-i18n-label="nav_economics">Economics</a>
           <a href="#rewards-calc" data-i18n-label="nav_rewards">Rewards</a>
+          <a href="#community" data-i18n-label="nav_community">Community</a>
+          <a href="#partners" data-i18n-label="nav_partners">Partners</a>
           <a href="#apps" data-i18n-label="nav_apps">Apps</a>
           <a href="#security" data-i18n-label="nav_security">Security</a>
           <a href="#docs" data-i18n-label="nav_docs">Docs</a>
@@ -595,6 +597,17 @@
             (~weekly) after finality, with public calendars and dashboards for burns, pool
             balances and epoch IDs so operators know when to expect rewards.
           </p>
+          <h3 data-i18n="economics_loyalty_title">6.1 Age & loyalty multipliers</h3>
+          <p data-i18n="economics_loyalty_body">
+            Older nodes with continuous uptime and committed stake earn more: +2% per month online
+            (capped 1.5x) minus downtime penalty, plus up to +50% loyalty boost for long-lived stake.
+            Bonuses are transparent, decay after downtime and reset on withdrawals/slashing.
+          </p>
+          <ul class="bc-checklist bc-checklist-muted">
+            <li data-i18n="economics_loyalty_point1">Age score: signed uptime receipts; grace 2 days, decay after.</li>
+            <li data-i18n="economics_loyalty_point2">Loyalty pool: commit 10–50% stake; full maturity at 18 months.</li>
+            <li data-i18n="economics_loyalty_point3">Safety valves: caps (1.5x age, 1.5x loyalty total), reset on fraud.</li>
+          </ul>
         </div>
       </section>
 
@@ -627,6 +640,18 @@
               <label for="calc-days" data-i18n-label="calc_days_label">Projection window (days)</label>
               <input id="calc-days" type="number" min="1" max="30" step="1" value="7" />
 
+              <label for="calc-age-days" data-i18n-label="calc_age_label">Node age (days online)</label>
+              <input id="calc-age-days" type="number" min="0" max="2000" step="1" value="0" />
+
+              <label for="calc-offline-days" data-i18n-label="calc_offline_label">Offline days last 30</label>
+              <input id="calc-offline-days" type="number" min="0" max="30" step="1" value="0" />
+
+              <label for="calc-loyalty-pct" data-i18n-label="calc_loyalty_pct_label">Stake in loyalty pool (%)</label>
+              <input id="calc-loyalty-pct" type="number" min="0" max="50" step="1" value="20" />
+
+              <label for="calc-loyalty-months" data-i18n-label="calc_loyalty_months_label">Months since last withdrawal</label>
+              <input id="calc-loyalty-months" type="number" min="0" max="36" step="1" value="6" />
+
               <button type="submit" class="bc-button" data-i18n-label="calc_button">Calculate</button>
             </form>
           </div>
@@ -654,9 +679,11 @@
               </div>
             </div>
             <div class="bc-pill-row" id="calc-badges">
+              <span class="bc-pill" id="calc-badge-age"></span>
               <span class="bc-pill" id="calc-badge-loyalty"></span>
               <span class="bc-pill" id="calc-badge-device"></span>
               <span class="bc-pill" id="calc-badge-stake"></span>
+              <span class="bc-pill" id="calc-badge-total"></span>
             </div>
             <div class="bc-error" id="calc-error" hidden></div>
           </div>
@@ -706,6 +733,204 @@
                 <li><span class="bc-badge">mobile-hero</span> <span data-i18n="leaderboard_badge_mobile">Mobile / gateway hero</span></li>
                 <li><span class="bc-badge">staker-1k</span> <span data-i18n="leaderboard_badge_staker">Stake ≥ 1000 BULEN</span></li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="community" class="bc-section bc-section-contrast">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="community_title">Community layer: proof, support and visibility</h2>
+            <p data-i18n="community_subtitle">
+              Pods, rituals and public signals so newcomers see who keeps nodes online and where to
+              ask for help.
+            </p>
+          </div>
+          <div class="bc-grid-2 bc-community-grid">
+            <div class="bc-card bc-card-contrast">
+              <h3 data-i18n="community_highlights_title">Live contributions & uptime proof</h3>
+              <p class="bc-muted" data-i18n="community_highlights_body">
+                Rolling feed of merged fixes, docs, meetups and nodes pledged for uptime; metrics
+                below refresh from the community dataset.
+              </p>
+              <div class="bc-community-stats" id="community-stats">
+                <div class="bc-metric">
+                  <span data-i18n="community_metric_contributors">Active contributors</span>
+                  <strong id="community-contributors">–</strong>
+                </div>
+                <div class="bc-metric">
+                  <span data-i18n="community_metric_hours">Mentor hours this week</span>
+                  <strong id="community-hours">–</strong>
+                </div>
+                <div class="bc-metric">
+                  <span data-i18n="community_metric_nodes">Nodes reporting to pods</span>
+                  <strong id="community-nodes">–</strong>
+                </div>
+              </div>
+              <ul class="bc-timeline" id="community-feed">
+                <li>Loading community signals…</li>
+              </ul>
+              <div class="bc-note" data-i18n="community_note">
+                Public feed is opt-in; items expire after 14 days to avoid stale bragging.
+              </div>
+            </div>
+            <div class="bc-card">
+              <h3 data-i18n="community_support_title">Support pods & rituals</h3>
+              <ul class="bc-checklist bc-checklist-muted">
+                <li data-i18n="community_support_point1">Daily health pings + signed uptime receipts.</li>
+                <li data-i18n="community_support_point2">
+                  Weekly office hours (infra + wallet UX) and paired debugging.
+                </li>
+                <li data-i18n="community_support_point3">
+                  Moderated chat: copy/paste ready snippets, not hype.
+                </li>
+                <li data-i18n="community_support_point4">
+                  Local crews run meetups; notes land in docs within 24h.
+                </li>
+              </ul>
+              <div class="bc-pill-row" id="community-tags">
+                <span class="bc-pill" data-i18n="community_tag_docs">docs</span>
+                <span class="bc-pill" data-i18n="community_tag_infra">infra</span>
+                <span class="bc-pill" data-i18n="community_tag_wallets">wallets</span>
+                <span class="bc-pill" data-i18n="community_tag_education">education</span>
+              </div>
+              <p class="bc-muted" data-i18n="community_support_body">
+                Want to help? Join a pod, pick an issue from the board and ship with a mentor who can
+                sign off on uptime and reward traces.
+              </p>
+              <a class="bc-button" href="docs/operator_runbook.md" data-i18n-label="community_cta_join"
+                >Open the operator runbook</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="partners" class="bc-section bc-section-alt">
+        <div class="bc-container">
+          <div class="bc-section-header">
+            <h2 data-i18n="partner_title">Partner & referral program (sane terms)</h2>
+            <p data-i18n="partner_subtitle">
+              Tiered revenue share with caps, hands-on integration help and transparent reporting so
+              partners know what they earn.
+            </p>
+          </div>
+          <div class="bc-partner-grid">
+            <article class="bc-card bc-card-contrast">
+              <span class="bc-doc-pill" data-i18n="partner_tier_product">Product & app partners</span>
+              <h3 data-i18n="partner_tier_product_title">Ship BulenCoin in your product</h3>
+              <p data-i18n="partner_tier_product_body">
+                Wallets, POS apps and dev tools get co-owned docs, SDK pairing and shared SLOs. 8%
+                success fee for 90 days, then 3% with quality gates.
+              </p>
+              <ul class="bc-checklist bc-checklist-muted">
+                <li data-i18n="partner_tier_product_point1">Joint backlog & QA sign-off for each release.</li>
+                <li data-i18n="partner_tier_product_point2">Sandbox keys + mock data for demos.</li>
+                <li data-i18n="partner_tier_product_point3">Co-marketing that ships only after uptime proves out.</li>
+              </ul>
+            </article>
+            <article class="bc-card bc-card-contrast">
+              <span class="bc-doc-pill" data-i18n="partner_tier_infra">Infrastructure & hosting</span>
+              <h3 data-i18n="partner_tier_infra_title">Keep nodes and gateways up</h3>
+              <p data-i18n="partner_tier_infra_body">
+                Operators who maintain public gateways or explorers get boosted referral rates (up to
+                12%) tied to signed uptime receipts and latency SLOs.
+              </p>
+              <ul class="bc-checklist bc-checklist-muted">
+                <li data-i18n="partner_tier_infra_point1">Telemetry tokens + probes to verify uptime.</li>
+                <li data-i18n="partner_tier_infra_point2">Back-pressure & rate-limit templates baked in.</li>
+                <li data-i18n="partner_tier_infra_point3">Incident channel with humans, not bots.</li>
+              </ul>
+            </article>
+            <article class="bc-card bc-card-contrast">
+              <span class="bc-doc-pill" data-i18n="partner_tier_creator">Creators & local crews</span>
+              <h3 data-i18n="partner_tier_creator_title">Teach, translate, host meetups</h3>
+              <p data-i18n="partner_tier_creator_body">
+                Local leaders earn fixed grants + tracked referrals when workshops convert to real
+                nodes. We publish proof-of-impact dashboards monthly.
+              </p>
+              <ul class="bc-checklist bc-checklist-muted">
+                <li data-i18n="partner_tier_creator_point1">Starter kits: slides, demos, QR-ready handouts.</li>
+                <li data-i18n="partner_tier_creator_point2">Translation budget with review from core team.</li>
+                <li data-i18n="partner_tier_creator_point3">Referral IDs mapped to wallets for transparent payouts.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="bc-grid-2 bc-partner-actions">
+            <div class="bc-card bc-card-contrast">
+              <h3 data-i18n="referral_calc_title">Referral calculator</h3>
+              <p data-i18n="referral_calc_subtitle">
+                Estimate monthly payouts with sane caps. Partners get a base share plus a reliability
+                bonus from node uptime.
+              </p>
+              <form class="bc-form" id="referral-form">
+                <label for="partner-role" data-i18n-label="referral_role_label">Partner type</label>
+                <select id="partner-role">
+                  <option value="product" data-i18n-label="referral_role_product">Product / app</option>
+                  <option value="infra" data-i18n-label="referral_role_infra">Infrastructure</option>
+                  <option value="creator" data-i18n-label="referral_role_creator">Creator / community</option>
+                </select>
+
+                <label for="partner-referrals" data-i18n-label="referral_referrals_label">Qualified leads per month</label>
+                <input id="partner-referrals" type="number" min="0" step="1" value="10" />
+
+                <label for="partner-conversion" data-i18n-label="referral_conversion_label">Conversion rate (%)</label>
+                <input id="partner-conversion" type="number" min="1" max="100" step="1" value="35" />
+
+                <label for="partner-value" data-i18n-label="referral_value_label">Avg monthly volume per conversion (BULEN)</label>
+                <input id="partner-value" type="number" min="1" step="1" value="120" />
+
+                <label for="partner-uptime" data-i18n-label="referral_uptime_label">Your uptime (0-100%)</label>
+                <input id="partner-uptime" type="number" min="80" max="100" step="1" value="98" />
+
+                <button type="submit" class="bc-button" data-i18n-label="referral_calc_button">Calculate</button>
+              </form>
+
+              <div class="bc-partner-metrics">
+                <div>
+                  <div class="bc-metric-label" data-i18n="referral_metric_monthly">Projected monthly payout</div>
+                  <div class="bc-metric-value" id="referral-monthly">–</div>
+                </div>
+                <div>
+                  <div class="bc-metric-label" data-i18n="referral_metric_bonus">Reliability bonus</div>
+                  <div class="bc-metric-value" id="referral-bonus">–</div>
+                </div>
+                <div>
+                  <div class="bc-metric-label" data-i18n="referral_metric_pool">Ecosystem pool impact</div>
+                  <div class="bc-metric-value" id="referral-pool">–</div>
+                </div>
+              </div>
+              <div class="bc-error" id="referral-error" hidden></div>
+            </div>
+
+            <div class="bc-card">
+              <h3 data-i18n="referral_code_title">Get your referral code</h3>
+              <p data-i18n="referral_code_subtitle">
+                Generate a deterministic code you can share now; map it to a wallet later without
+                re-issuing links.
+              </p>
+              <div class="bc-form">
+                <label for="partner-handle" data-i18n-label="referral_code_handle">Your brand / node ID</label>
+                <input id="partner-handle" type="text" placeholder="my-node or brand" />
+
+                <label for="partner-contact" data-i18n-label="referral_code_contact">Contact (for approvals)</label>
+                <input id="partner-contact" type="text" placeholder="email or @handle" />
+
+                <button id="partner-generate" type="button" class="bc-button" data-i18n-label="referral_code_button">
+                  Generate code
+                </button>
+
+                <div class="bc-wallet-row">
+                  <div class="bc-wallet-label" data-i18n="referral_code_result_label">Code</div>
+                  <div class="bc-wallet-value" id="partner-code">–</div>
+                </div>
+
+                <div class="bc-note" data-i18n="referral_code_note">
+                  Codes use HMAC + timestamp so they are unique but verifiable; share the code in
+                  proposals or during onboarding.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1243,6 +1468,7 @@
       </div>
     </footer>
 
+    <script src="community_logic.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

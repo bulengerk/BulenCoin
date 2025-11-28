@@ -7,7 +7,8 @@ This document summarises how rewards are computed in the prototype client and ho
 - Base uptime reward: `BULEN_BASE_UPTIME_REWARD` (default: `1` unit/hour).  
 - Profile weights: `server-full=1.0`, `gateway=0.9`, `desktop-full=0.8`, `raspberry=0.75`, `mobile-light=0.5`, `tablet-light=0.6`, `phone-superlight=0.35`.  
 - Device boosts (defaults): `phone=1.15`, `tablet=1.1`, `raspberry=1.12`.  
-- Loyalty boosts: 30d `1.05`, 180d `1.10`, 365d `1.20`, 730d `1.35`, 1825d `1.50`.  
+- Age multiplier: `1 + 0.02 * monthsOnline`, capped at `1.5`; downtime penalty: grace 2 days, then `-3%/day` to floor `0.5x`.  
+- Loyalty multiplier: commit `10–50%` stake; maturity grows over `18` months, capped at `+50%` (reset on withdrawal/slashing).  
 - Stake multiplier: `stakeWeight = min(3, 1 + stake/10000)`.
 
 Protocol-reward splits (prototype defaults, guarded by `enableProtocolRewards`):

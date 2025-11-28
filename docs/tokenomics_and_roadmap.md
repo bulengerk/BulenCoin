@@ -8,7 +8,7 @@
 ## Emission and rewards
 - Inflation proposal: 8% year 1 → 6% year 2 → 4% year 3 → 2.5% year 4 → 1.5% year 5+; decay can be tuned within an approved band.
 - Base block reward (`BULEN_BLOCK_REWARD`, default 10 in `BULEN_SECURITY_PRESET=strict`, 0 in dev) goes to the block producer.
-- Uptime/loyalty currently simulated locally (calculator in `/api/status`); planned on-chain once parameters stabilise.
+- Uptime + age + loyalty: calculator in `/api/status` and UI applies the same rules – age bonus `+2%/month` (cap `1.5x`, 2-day grace, 3% decay per offline day), loyalty bonus up to `+50%` for 10–50% stake held 18 months; reset on withdrawals/slashing. Planned on-chain once parameters stabilise.
 - Reward distribution is **fully autonomous** when `BULEN_ENABLE_PROTOCOL_REWARDS=true`—each block splits fees and base reward without admin actions.
 
 ## Transaction fees (fee burn)
