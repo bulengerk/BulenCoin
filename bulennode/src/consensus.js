@@ -594,10 +594,12 @@ function handleIncomingBlock(context, block, options = {}) {
   if (block.finalityCheckpoint && block.finalityCheckpoint.snapshotHash) {
     const snapshot = snapshotAtHeight(config, candidateEval.state, block.finalityCheckpoint.height);
     const computed = computeSnapshotHash(snapshot);
+    const tolerateCheckpointDrift =
+      !config.securityStrict && allowUnsigned && process.env.NODE_ENV !== 'production';
     if (computed !== block.finalityCheckpoint.snapshotHash) {
-      // In dev/test (allowUnsignedBlocks) we tolerate checkpoint hash drift to keep single-node
-      // environments producing blocks instead of stalling. Production nodes should reject.
-      if (allowUnsigned) {
+      // In dev/test we tolerate checkpoint drift to keep single-node environments producing blocks.
+      // Production/strict nodes must reject.
+      if (tolerateCheckpointDrift) {
         console.warn(
           'Checkpoint snapshot hash mismatch (dev/test tolerated)',
           computed,
