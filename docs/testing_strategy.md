@@ -125,6 +125,21 @@ What it does:
 - for 30 seconds polls health/status and periodically sends faucet + transaction requests,
 - ensures no errors occur and a minimum number of cycles/transactions complete.
 
+## Protocol compatibility (major version)
+
+Command:
+
+```bash
+node --test scripts/tests/protocol_version_compat.test.js
+```
+
+What it does:
+
+- starts a node with `protocolVersion=1.2.0` and P2P token set,
+- sends P2P gossip with protocol header `1.4.3` (accepted), missing header (accepted for backward-compat), and `2.0.0` (rejected with 400).
+
+Result (last local run): passes.
+
 ## Running the churn/chaos soak (local)
 
 Script: `scripts/soak/soak_churn.sh` (bare metal, no Docker). Example (4 validators, 50s):
