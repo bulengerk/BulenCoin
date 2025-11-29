@@ -85,11 +85,13 @@ test('snapshot signing endpoint returns verifiable signature', async (t) => {
   assert.strictEqual(snap.status, 200);
   assert.ok(snap.body.signature);
   assert.ok(snap.body.snapshotHash);
-  const payload = JSON.stringify({
-    height: snap.body.height,
-    hash: snap.body.hash,
-    snapshotHash: snap.body.snapshotHash,
-  });
+  const payload = snap.body.payload;
   const ok = verifyPayload(snap.body.publicKey, payload, snap.body.signature);
   assert.ok(ok, 'signature should verify');
+
+  // Request specific height
+  const snap0 = await fetchJson('http://127.0.0.1:6815/api/snapshot-sign?height=0');
+  assert.strictEqual(snap0.status, 200);
+  const ok0 = verifyPayload(snap0.body.publicKey, snap0.body.payload, snap0.body.signature);
+  assert.ok(ok0, 'signature at height=0 should verify');
 });

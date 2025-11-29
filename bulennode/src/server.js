@@ -333,16 +333,22 @@ function createServer(context) {
   });
 
   app.get('/api/snapshot-sign', (request, response) => {
+    const queryHeight = request.query && request.query.height ? Number(request.query.height) : null;
     const latest = state.blocks[state.blocks.length - 1];
-    const targetHeight = latest ? latest.index : 0;
+    const targetHeight = Number.isFinite(queryHeight) && queryHeight >= 0 ? queryHeight : (latest ? latest.index : 0);
     const snapshot = snapshotAtHeight(config, state, targetHeight);
     if (!snapshot) {
       response.status(404).json({ error: 'No snapshot available' });
       return;
     }
+    const targetBlock = state.blocks.find((b) => b.index === targetHeight);
+    if (!targetBlock) {
+      response.status(404).json({ error: 'No block at requested height' });
+      return;
+    }
     const payload = JSON.stringify({
       height: targetHeight,
-      hash: latest ? latest.hash : null,
+      hash: targetBlock ? targetBlock.hash : null,
       snapshotHash: snapshot.hash,
     });
     const signature = signPayload(context.identity.privateKeyPem, payload);
@@ -353,6 +359,7 @@ function createServer(context) {
       signature,
       publicKey: context.identity.publicKeyPem,
       signer: context.config.validatorAddress || context.config.nodeId,
+      payload,
     });
   });
 
