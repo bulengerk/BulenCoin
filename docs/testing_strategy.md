@@ -84,6 +84,20 @@ What it does:
 
 Result (last local run): passes; surviving node produced a new block after the drop and the status aggregator returned `nodeCount=1` without errors.
 
+## Running the finality/committee resilience test (3-node)
+
+```bash
+node --test scripts/tests/finality_drop_resilience.test.js
+```
+
+What it does:
+
+- starts 3 validators with committee size 3, unsigned blocks disallowed, signatures on,
+- seeds a transaction, waits for height/finality to advance, then kills 2 validators,
+- submits another transaction and checks the surviving validator keeps producing blocks and does not regress finalized height.
+
+Result (last local run): passes; surviving node advanced height after the drop (warnings about P2P broadcast failures are expected in the single-host test net).
+
 ## Running the security guardrails test
 
 Command (from repository root):
