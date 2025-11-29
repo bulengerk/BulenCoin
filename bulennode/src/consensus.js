@@ -504,6 +504,11 @@ function handleIncomingBlock(context, block, options = {}) {
   if (!block.chainId) {
     block.chainId = config.chainId;
   }
+  if (config.validatorAllowlist && config.validatorAllowlist.length) {
+    if (!config.validatorAllowlist.includes(block.validator)) {
+      return { accepted: false, reason: 'Validator not allowed' };
+    }
+  }
   const validatorAccount = ensureAccount(state, block.validator);
   if (block.validatorStake && (!validatorAccount.stake || validatorAccount.stake < block.validatorStake)) {
     validatorAccount.stake = block.validatorStake;
