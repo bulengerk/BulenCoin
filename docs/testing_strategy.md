@@ -124,3 +124,32 @@ What it does:
 - starts BulenNode on dedicated ports,
 - for 30 seconds polls health/status and periodically sends faucet + transaction requests,
 - ensures no errors occur and a minimum number of cycles/transactions complete.
+
+## Running the churn/chaos soak (local)
+
+Script: `scripts/soak/soak_churn.sh` (bare metal, no Docker). Example (4 validators, 50s):
+
+```bash
+NODES=4 DURATION_SEC=50 CHURN_INTERVAL_SEC=10 RESTART_DELAY_SEC=3 BASE_HTTP_PORT=7610 COMMITTEE_SIZE=3 scripts/soak/soak_churn.sh
+```
+
+What it does:
+
+- generates deterministic validator keys + genesis, starts validators on sequential ports,
+- enforces signatures + strict preset with tokens/webhook secret,
+- every `CHURN_INTERVAL_SEC` kills/restarts a subset of nodes (keeps at least one alive),
+- writes a status summary to `scripts/soak/reports/`.
+
+Last local run (Nov 29 2025): 4 iterations completed; height advanced to 4 while nodes were churned, two nodes were restarting during the summary (ECONNREFUSED). Details: `docs/test_reports/soak_churn_local.md`.
+
+## Running the HTTP load benchmark
+
+Script: `scripts/load/tx_benchmark.js`. Target an existing node; default uses `/api/transactions` with faucet funding (if enabled).
+
+Example (single dev node on 7710):
+
+```bash
+node scripts/load/tx_benchmark.js --base http://127.0.0.1:7710/api --duration 30 --rate 12 --concurrency 6 --memoPrefix churn --report scripts/soak/reports/tx_benchmark_20251129.json
+```
+
+Outputs success/failure counts, latency summary, and optional JSON report. Last local run hit HTTP 429 rate limits at ~12 tps (172 ok / 359 total); latency p50 1.97 ms, p90 3.56 ms. See `docs/test_reports/soak_churn_local.md` for details.

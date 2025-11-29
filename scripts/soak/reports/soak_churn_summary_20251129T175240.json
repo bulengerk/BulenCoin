@@ -1,0 +1,157 @@
+{
+  "generatedAt": "2025-11-29T16:52:40.320Z",
+  "statuses": [
+    {
+      "port": 7610,
+      "status": 200,
+      "body": {
+        "chainId": "bulencoin-soak",
+        "nodeId": "val0",
+        "validatorAddress": "addr_8a4d8b5797e321640ddb10dea7cc81496df0b9a8",
+        "nodeRole": "validator",
+        "nodeProfile": "server-full",
+        "deviceClass": "server",
+        "rewardWeight": 1,
+        "height": 0,
+        "latestHash": "62bc3c49865b7941e736167563f47a3aae12c24739f57ac090cb164c64cc5b35",
+        "bestChainWeight": 0,
+        "finalizedHeight": 0,
+        "finalizedHash": "62bc3c49865b7941e736167563f47a3aae12c24739f57ac090cb164c64cc5b35",
+        "peers": [
+          "http://127.0.0.1:7610",
+          "http://127.0.0.1:7620",
+          "http://127.0.0.1:7630",
+          "http://127.0.0.1:7640"
+        ],
+        "mempoolSize": 0,
+        "accountsCount": 4,
+        "totalStake": 4000,
+        "protocolVersion": "0.1.0",
+        "protocolMajor": 0,
+        "metrics": {
+          "startedAt": "2025-11-29T16:52:27.370Z",
+          "uptimeSeconds": 0,
+          "producedBlocks": 0,
+          "powerWatts": null,
+          "uptimeRewardEstimateHourly": 1,
+          "uptimeRewardEstimateTotal": 0,
+          "loyaltyBoost": 1,
+          "deviceBoost": 1,
+          "efficiencyBoost": 1
+        },
+        "rewardProjection": {
+          "hourly": 1.1,
+          "daily": 26.400000000000002,
+          "weekly": 184.8,
+          "periodTotal": 184.8,
+          "stakeWeight": 1.1,
+          "uptimeHoursPerDay": 24,
+          "days": 7
+        },
+        "monetary": {
+          "feeBurnedTotal": 0,
+          "ecosystemPool": 0,
+          "mintedRewardsTotal": 0,
+          "blockReward": 10,
+          "protocolRewardsEnabled": true,
+          "blockProducerRewardFraction": 0.4,
+          "feeBurnFraction": 0.3,
+          "feeEcosystemFraction": 0.1
+        },
+        "payments": {
+          "total": 0,
+          "pending": 0
+        },
+        "reputation": 0,
+        "superLight": false,
+        "superLightSleeping": false,
+        "superLightKeepBlocks": 256,
+        "checkpoint": {
+          "height": 0,
+          "hash": "62bc3c49865b7941e736167563f47a3aae12c24739f57ac090cb164c64cc5b35",
+          "snapshotHash": "1f291ac150a7f7da4b386763255237bc7e3ee9aea808fdc5f66489f1f15494c4"
+        }
+      }
+    },
+    {
+      "port": 7620,
+      "status": 200,
+      "body": {
+        "chainId": "bulencoin-soak",
+        "nodeId": "val1",
+        "validatorAddress": "addr_102b4686669ab65e4e2fe70965950292d21821b4",
+        "nodeRole": "validator",
+        "nodeProfile": "server-full",
+        "deviceClass": "server",
+        "rewardWeight": 1,
+        "height": 4,
+        "latestHash": "912ccda3ee190a72f99650e31f5aa580d65d08070748f620b03ae36e6122be2c",
+        "bestChainWeight": 4000,
+        "finalizedHeight": 0,
+        "finalizedHash": "62bc3c49865b7941e736167563f47a3aae12c24739f57ac090cb164c64cc5b35",
+        "peers": [
+          "http://127.0.0.1:7610",
+          "http://127.0.0.1:7620",
+          "http://127.0.0.1:7630",
+          "http://127.0.0.1:7640"
+        ],
+        "mempoolSize": 0,
+        "accountsCount": 4,
+        "totalStake": 4000,
+        "protocolVersion": "0.1.0",
+        "protocolMajor": 0,
+        "metrics": {
+          "startedAt": "2025-11-29T16:52:27.371Z",
+          "uptimeSeconds": 0,
+          "producedBlocks": 0,
+          "powerWatts": null,
+          "uptimeRewardEstimateHourly": 1,
+          "uptimeRewardEstimateTotal": 0,
+          "loyaltyBoost": 1,
+          "deviceBoost": 1,
+          "efficiencyBoost": 1
+        },
+        "rewardProjection": {
+          "hourly": 1.1,
+          "daily": 26.400000000000002,
+          "weekly": 184.8,
+          "periodTotal": 184.8,
+          "stakeWeight": 1.1,
+          "uptimeHoursPerDay": 24,
+          "days": 7
+        },
+        "monetary": {
+          "feeBurnedTotal": 0,
+          "ecosystemPool": 0,
+          "mintedRewardsTotal": 40,
+          "blockReward": 10,
+          "protocolRewardsEnabled": true,
+          "blockProducerRewardFraction": 0.4,
+          "feeBurnFraction": 0.3,
+          "feeEcosystemFraction": 0.1
+        },
+        "payments": {
+          "total": 0,
+          "pending": 0
+        },
+        "reputation": 0,
+        "superLight": false,
+        "superLightSleeping": false,
+        "superLightKeepBlocks": 256,
+        "checkpoint": {
+          "height": 0,
+          "hash": "62bc3c49865b7941e736167563f47a3aae12c24739f57ac090cb164c64cc5b35",
+          "snapshotHash": "1f291ac150a7f7da4b386763255237bc7e3ee9aea808fdc5f66489f1f15494c4"
+        }
+      }
+    },
+    {
+      "port": 7630,
+      "error": "connect ECONNREFUSED 127.0.0.1:7630"
+    },
+    {
+      "port": 7640,
+      "error": "connect ECONNREFUSED 127.0.0.1:7640"
+    }
+  ]
+}
