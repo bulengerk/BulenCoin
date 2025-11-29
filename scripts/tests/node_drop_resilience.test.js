@@ -72,6 +72,7 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
       BULEN_DATA_DIR: node.dir,
       BULEN_NODE_ID: node.label,
       BULEN_NODE_PROFILE: 'desktop-full',
+      BULEN_ALLOW_UNSIGNED_BLOCKS: 'true',
     };
     const proc = startProcess(node.label, path.join(ROOT, 'bulennode'), ['src/index.js'], env);
     t.after(proc.stop);

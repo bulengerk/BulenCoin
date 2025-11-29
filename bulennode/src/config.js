@@ -280,10 +280,8 @@ const config = {
   committeeSize: getNumberEnv('BULEN_COMMITTEE_SIZE', 3),
   p2pMaxCertificateEntries: getNumberEnv('BULEN_P2P_MAX_CERT_ENTRIES', 64),
   nodeKeyRotateDays: getNumberEnv('BULEN_NODE_KEY_ROTATE_DAYS', 0),
-  allowUnsignedBlocks: getBoolEnv(
-    'BULEN_ALLOW_UNSIGNED_BLOCKS',
-    !securityStrict && process.env.NODE_ENV !== 'production',
-  ),
+  // Default to false everywhere; tests can opt-in via env.
+  allowUnsignedBlocks: getBoolEnv('BULEN_ALLOW_UNSIGNED_BLOCKS', false),
   p2pMaxConcurrent: getNumberEnv('BULEN_P2P_MAX_CONCURRENT', 16),
   get protocolMajor() {
     return getProtocolMajor(this.protocolVersion);

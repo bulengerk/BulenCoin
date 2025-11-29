@@ -51,6 +51,7 @@ test(
       BULEN_ENABLE_FAUCET: 'true',
       BULEN_BLOCK_INTERVAL_MS: '400',
       BULEN_LOG_FORMAT: 'tiny',
+      BULEN_ALLOW_UNSIGNED_BLOCKS: 'true',
     };
     const nodeProc = startProcess('bulennode', path.join(ROOT, 'bulennode'), ['src/index.js'], env);
     t.after(() => nodeProc.stop());
