@@ -67,6 +67,14 @@ function createNodeContext(config) {
   config.validatorAddress = identity.address;
   const state = loadState(config);
   state.enableFaucet = config.enableFaucet;
+  if (Array.isArray(config.genesisValidators) && config.genesisValidators.length) {
+    for (const { address, stake } of config.genesisValidators) {
+      const acc = ensureAccount(state, address);
+      if (!acc.stake || acc.stake < stake) {
+        acc.stake = stake;
+      }
+    }
+  }
   createGenesisBlock(config, state);
   ensureConsensusState(state);
   const mempool = [];
@@ -186,26 +194,26 @@ function startBlockProducer(context) {
     }
     const checkpointHeight = state.finalizedHeight || 0;
     const checkpointHash = state.finalizedHash || null;
-    const snapshotToSign = snapshotAtHeight(config, state, checkpointHeight);
-    const snapshotHash = snapshotToSign && snapshotToSign.hash
-      ? snapshotToSign.hash
-      : computeSnapshotHash(snapshotToSign || { chainId: state.chainId, blocks: [], accounts: {} });
-    if (snapshotToSign) {
-      snapshotToSign.hash = snapshotHash || snapshotToSign.hash;
-      state.finalizedSnapshot = snapshotToSign;
+    let finalityCertificate = null;
+    if (checkpointHash && context.identity && checkpointHeight > 0) {
+      const snapshotToSign = snapshotAtHeight(config, state, checkpointHeight);
+      const snapshotHash = snapshotToSign && snapshotToSign.hash
+        ? snapshotToSign.hash
+        : computeSnapshotHash(snapshotToSign || { chainId: state.chainId, blocks: [], accounts: {} });
+      if (snapshotToSign) {
+        snapshotToSign.hash = snapshotHash || snapshotToSign.hash;
+        state.finalizedSnapshot = snapshotToSign;
+      }
+      const checkpointPayload = JSON.stringify({ height: checkpointHeight, hash: checkpointHash, snapshotHash });
+      finalityCertificate = {
+        height: checkpointHeight,
+        hash: checkpointHash,
+        signer: context.identity.address,
+        publicKey: context.identity.publicKeyPem,
+        snapshotHash,
+        signature: signBlockHash(context.identity, checkpointPayload),
+      };
     }
-    const checkpointPayload = JSON.stringify({ height: checkpointHeight, hash: checkpointHash, snapshotHash });
-    const finalityCertificate =
-      checkpointHash && context.identity
-        ? {
-            height: checkpointHeight,
-            hash: checkpointHash,
-            signer: context.identity.address,
-            publicKey: context.identity.publicKeyPem,
-            snapshotHash,
-            signature: signBlockHash(context.identity, checkpointPayload),
-          }
-        : null;
     const block = createBlock(
       config,
       state,

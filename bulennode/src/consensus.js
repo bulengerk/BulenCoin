@@ -157,7 +157,7 @@ function verifyCommitteeCertificate(config, state, block) {
     ? block.committee
     : selectCommittee(config, state, block.previousHash);
   const certs = Array.isArray(block.certificate) ? block.certificate : [];
-  const threshold = quorumForCommittee(committee);
+  const threshold = config.allowSingleValidatorCertificate ? 1 : quorumForCommittee(committee);
   const maxCerts = Number.isFinite(config.p2pMaxCertificateEntries)
     ? config.p2pMaxCertificateEntries
     : 64;
@@ -563,11 +563,6 @@ function handleIncomingBlock(context, block, options = {}) {
     return { accepted: false, reason: 'Monetary summary mismatch' };
   }
 
-  const equivocation = recordEquivocationAndSlash(state, block, config);
-  if (equivocation.equivocated) {
-    return { accepted: false, reason: 'Equivocation detected' };
-  }
-
   if (typeof state.finalizedHeight === 'number' && block.index <= state.finalizedHeight) {
     return { accepted: false, reason: 'Block is not allowed below finalized height' };
   }
@@ -609,6 +604,11 @@ function handleIncomingBlock(context, block, options = {}) {
         return { accepted: false, reason: 'Checkpoint snapshot hash mismatch' };
       }
     }
+  }
+
+  const equivocation = recordEquivocationAndSlash(state, block, config);
+  if (equivocation.equivocated) {
+    return { accepted: false, reason: 'Equivocation detected' };
   }
 
   const better = isBetterChain(candidateEval, currentEval);

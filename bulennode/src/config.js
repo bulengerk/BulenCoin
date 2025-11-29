@@ -299,6 +299,10 @@ const config = {
   // Default to false everywhere; tests can opt-in via env.
   allowUnsignedBlocks: getBoolEnv('BULEN_ALLOW_UNSIGNED_BLOCKS', false),
   allowEmptyBlocks: getBoolEnv('BULEN_ALLOW_EMPTY_BLOCKS', true),
+  allowSingleValidatorCertificate: getBoolEnv(
+    'BULEN_ALLOW_SINGLE_VALIDATOR_CERT',
+    !securityStrict && process.env.NODE_ENV !== 'production',
+  ),
   p2pMaxConcurrent: getNumberEnv('BULEN_P2P_MAX_CONCURRENT', 16),
   genesisValidators: parseGenesisValidators(getEnv('BULEN_GENESIS_VALIDATORS', '')),
   get protocolMajor() {
