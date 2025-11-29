@@ -210,7 +210,12 @@ const translations = {
       'New integration level that runs BulenNode, the explorer and the status service together and produces a block.',
     downloads_title: 'Downloads',
     downloads_subtitle:
-      'One-command installers for laptops, servers, Raspberry Pi, macOS and Windows. Mobile builds (APK/TestFlight) are in flight; signed packages (.exe/.pkg/.deb/.rpm) will follow.',
+      'Android APK is ready alongside one-command installers for laptops, servers, Raspberry Pi, macOS and Windows. Signed desktop packages (.exe/.pkg/.deb/.rpm) will follow.',
+    download_android_pill: 'Android',
+    download_android_title: 'Mobile app (APK)',
+    download_android_body:
+      'Redesigned 2025 dashboard for monitoring your BulenNode and rewards. Side-load the APK or push it to your test device.',
+    download_android_note: 'APK stays out of git; rebuild locally when you refresh the app.',
     download_linux_cli_pill: 'Linux CLI',
     download_linux_cli_title: 'Laptop/server one-liner',
     download_linux_cli_body: 'Debian/Ubuntu, installs Node 18+ if missing, sets up bulennode.',
@@ -627,7 +632,12 @@ const translations = {
       'Nuevo nivel de pruebas que ejecuta BulenNode, el explorador y el servicio de estado juntos y genera un bloque.',
     downloads_title: 'Descargas',
     downloads_subtitle:
-      'Instaladores de un comando para portátiles, servidores, Raspberry Pi, macOS y Windows. Builds móviles (APK/TestFlight) en camino; los paquetes firmados (.exe/.pkg/.deb/.rpm) llegarán después.',
+      'APK de Android listo junto a instaladores de un comando para portátiles, servidores, Raspberry Pi, macOS y Windows. Los paquetes firmados (.exe/.pkg/.deb/.rpm) llegarán después.',
+    download_android_pill: 'Android',
+    download_android_title: 'App móvil (APK)',
+    download_android_body:
+      'Panel 2025 rediseñado para monitorizar tu BulenNode y recompensas. Carga lateralmente el APK o envíalo a tu dispositivo de pruebas.',
+    download_android_note: 'El APK se mantiene fuera de git; reconstruye localmente cuando actualices la app.',
     download_linux_cli_pill: 'CLI Linux',
     download_linux_cli_title: 'Un comando en portátil/servidor',
     download_linux_cli_body:
@@ -1077,7 +1087,12 @@ const translations = {
       'Nowy poziom testów: jednoczesne uruchomienie BulenNode, eksploratora i statusu z produkcją bloku.',
     downloads_title: 'Pobierz',
     downloads_subtitle:
-      'Instalatory jednym poleceniem dla laptopów, serwerów, Raspberry Pi, macOS i Windows. Buildy mobilne (APK/TestFlight) w drodze; podpisane pakiety (.exe/.pkg/.deb/.rpm) później.',
+      'Gotowy APK na Androida plus instalatory jednym poleceniem dla laptopów, serwerów, Raspberry Pi, macOS i Windows. Podpisane pakiety (.exe/.pkg/.deb/.rpm) dodamy później.',
+    download_android_pill: 'Android',
+    download_android_title: 'Aplikacja mobilna (APK)',
+    download_android_body:
+      'Przeprojektowany panel 2025 do monitoringu BulenNode i nagród. Zainstaluj APK obok lub wypchnij na urządzenie testowe.',
+    download_android_note: 'APK zostaje poza gitem; zbuduj lokalnie, gdy odświeżasz aplikację.',
     download_linux_cli_pill: 'CLI Linux',
     download_linux_cli_title: 'Jedna komenda na laptop/serwer',
     download_linux_cli_body:

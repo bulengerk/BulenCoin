@@ -83,6 +83,11 @@ If you just need a working production-ish setup fast, follow the 10-step runbook
 
 Set via `BULEN_NODE_PROFILE`. Profiles pick ports, faucet default and reward weight; override with env vars.
 
+## Mobile toolchains (prep)
+
+- Android: run `./scripts/setup_mobile_toolchains.sh` to fetch cmdline-tools, build-tools 34 and NDK locally under `.android-sdk/`. Export `ANDROID_SDK_ROOT` and update `PATH` as printed. Then build your Android client (Gradle/React Native/Capacitor) against the prepared SDK.
+- iOS/TestFlight: must be built on macOS with Xcode; follow the notes printed by the script (cannot produce iOS artifacts from Linux runners).
+
 ## Minimums & security defaults
 
 - Node.js 18+, Debian/Ubuntu 22.04+; for servers/gateways: 2 vCPU / 4 GB RAM / 40 GB SSD (4 vCPU / 8 GB recommended). Pi: Pi 4 (4 GB) + microSD/SSD.
