@@ -300,6 +300,8 @@ const config = {
   p2pPeerRateLimitWindowMs: getNumberEnv('BULEN_P2P_PEER_WINDOW_MS', 5000),
   p2pPeerRateLimitMax: getNumberEnv('BULEN_P2P_PEER_MAX_REQUESTS', 40),
   p2pBadCertBanMinutes: getNumberEnv('BULEN_P2P_BAD_CERT_BAN_MIN', 10),
+  // If set (comma-separated addresses), only these validators can produce blocks.
+  // Leave empty for permissionless mode.
   validatorAllowlist: parsePeers(getEnv('BULEN_VALIDATOR_ALLOWLIST', '')).filter(Boolean),
   nodeKeyRotateDays: getNumberEnv('BULEN_NODE_KEY_ROTATE_DAYS', 0),
   // Default to false everywhere; tests can opt-in via env.
