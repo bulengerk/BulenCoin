@@ -282,6 +282,7 @@ const config = {
   nodeKeyRotateDays: getNumberEnv('BULEN_NODE_KEY_ROTATE_DAYS', 0),
   // Default to false everywhere; tests can opt-in via env.
   allowUnsignedBlocks: getBoolEnv('BULEN_ALLOW_UNSIGNED_BLOCKS', false),
+  allowEmptyBlocks: getBoolEnv('BULEN_ALLOW_EMPTY_BLOCKS', true),
   p2pMaxConcurrent: getNumberEnv('BULEN_P2P_MAX_CONCURRENT', 16),
   get protocolMajor() {
     return getProtocolMajor(this.protocolVersion);

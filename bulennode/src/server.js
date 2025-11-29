@@ -158,7 +158,7 @@ function startBlockProducer(context) {
     if (context.superLightSleeping) {
       return;
     }
-    if (!mempool.length) {
+    if (!mempool.length && !config.allowEmptyBlocks) {
       return;
     }
     const validatorAddress = config.validatorAddress || config.nodeId;
