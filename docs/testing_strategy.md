@@ -69,6 +69,21 @@ What it does:
 - verifies explorer homepage and status aggregation,
 - performs wallet challenge/verify using a real signature and checks session retrieval.
 
+## Running the node drop resilience test
+
+```bash
+node --test scripts/tests/node_drop_resilience.test.js
+```
+
+What it does:
+
+- starts three BulenNodes on isolated ports with fast block intervals,
+- seeds a transaction, then starts the Status service pointed at all three nodes,
+- abruptly stops two nodes and asserts the Status service gracefully reports the single survivor,
+- submits another transaction post-drop to ensure the surviving node continues to produce blocks (height keeps advancing).
+
+Result (last local run): passes; surviving node produced a new block after the drop and the status aggregator returned `nodeCount=1` without errors.
+
 ## Running the security guardrails test
 
 Command (from repository root):
