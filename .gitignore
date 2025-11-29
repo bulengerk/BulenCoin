@@ -53,6 +53,7 @@ scripts/tests/.tmp-logs
 
 docs/deployment_plan_production.pdf
 docs/deployment_plan_production.md
+docs/legal_poland_research.md
 
 # Mobile app artifacts
 scripts/cleanup_android_build.sh
