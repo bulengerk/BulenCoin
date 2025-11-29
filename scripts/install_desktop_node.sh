@@ -28,9 +28,10 @@ Recommended environment (example for a validator on a laptop/PC):
 
   export BULEN_NODE_PROFILE=desktop-full
   export BULEN_REQUIRE_SIGNATURES=true
-  export BULEN_ENABLE_FAUCET=true
-  # Optional, for multi-node setups:
-  # export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_ENABLE_FAUCET=false
+  export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_STATUS_TOKEN='replace-with-strong-status-token'
+  export BULEN_METRICS_TOKEN='replace-with-strong-metrics-token'
 
 Then run:
 
@@ -38,4 +39,3 @@ Then run:
   npm start
 
 EOF
-

@@ -28,8 +28,9 @@ Recommended environment (example for a home Raspberry Pi node):
   export BULEN_NODE_PROFILE=raspberry
   export BULEN_REQUIRE_SIGNATURES=true
   export BULEN_ENABLE_FAUCET=false
-  # Optional, for trusted P2P connectivity:
-  # export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_STATUS_TOKEN='replace-with-strong-status-token'
+  export BULEN_METRICS_TOKEN='replace-with-strong-metrics-token'
 
 Then run:
 
@@ -41,4 +42,3 @@ For 24/7 operation, consider:
 - using a process manager (systemd, pm2) to restart the node on failure or reboot.
 
 EOF
-

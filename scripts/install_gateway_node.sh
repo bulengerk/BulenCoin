@@ -29,6 +29,8 @@ Recommended environment (example for a public API gateway):
   export BULEN_REQUIRE_SIGNATURES=true
   export BULEN_ENABLE_FAUCET=false
   export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_STATUS_TOKEN='replace-with-strong-status-token'
+  export BULEN_METRICS_TOKEN='replace-with-strong-metrics-token'
 
 Then run:
 
@@ -41,4 +43,3 @@ This node should typically be:
 - configured without faucet and with strict logging/retention policies.
 
 EOF
-

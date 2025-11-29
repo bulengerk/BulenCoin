@@ -30,6 +30,8 @@ Recommended environment (example for a validator on a Linux server):
   export BULEN_REQUIRE_SIGNATURES=true
   export BULEN_ENABLE_FAUCET=false
   export BULEN_P2P_TOKEN='replace-with-strong-secret-token'
+  export BULEN_STATUS_TOKEN='replace-with-strong-status-token'
+  export BULEN_METRICS_TOKEN='replace-with-strong-metrics-token'
 
 Then run:
 
@@ -42,4 +44,3 @@ For long-running setups, consider adding a systemd service that:
 - executes: /usr/bin/env npm start
 
 EOF
-

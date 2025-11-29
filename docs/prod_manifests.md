@@ -42,6 +42,16 @@ server {
   # Rate limiting (nginx zone required)
   limit_req zone=api burst=20 nodelay;
 
+  # Status/metrics require tokens – inject via headers
+  location /api/status {
+    proxy_set_header x-bulen-status-token STATUS_TOKEN_PLACEHOLDER;
+    proxy_pass http://127.0.0.1:5100;
+  }
+  location /metrics {
+    proxy_set_header x-bulen-metrics-token METRICS_TOKEN_PLACEHOLDER;
+    proxy_pass http://127.0.0.1:5100;
+  }
+
   location / {
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -61,6 +71,8 @@ Traefik/ingress: same principles—TLS, HSTS, rate-limit middleware, optional fo
 - `BULEN_MAX_BODY_SIZE_BYTES` (~128kb)
 - `BULEN_CORS_ORIGINS=https://api.bulen.example,https://explorer.bulen.example`
 - `BULEN_ENABLE_FAUCET=false` on public hosts
+- `BULEN_STATUS_TOKEN`, `BULEN_METRICS_TOKEN` required; reverse proxy must inject headers for status/metrics
+- `BULEN_P2P_TOKEN` required on public/sentry nodes
 - `BULEN_PEERS=https://sentry1.bulen.example,https://sentry2.bulen.example`
 - `BULEN_PEER_SYNC_INTERVAL_MS=5000` (Rust node)
 
@@ -106,8 +118,8 @@ Traefik/ingress: same principles—TLS, HSTS, rate-limit middleware, optional fo
 4. Install service deps: `npm install` in `bulennode/`, `explorer/`, `status/`, `rewards-hub/`.
 5. Copy `.env.prod` from docs (tokens, ports, disable faucet, protocol version).
 6. Obtain certs: `certbot certonly --nginx -d api.bulen.example -d explorer...`.
-7. Configure nginx (see snippet above) proxying 5410/5420/5430/4400 with HSTS + rate limits +
-   `proxy_set_header x-bulen-status-token ...` where needed.
+7. Configure nginx (see snippet above) proxying 5410/5420/5430/4400 with HSTS + rate limits,
+   injecting `x-bulen-status-token`/`x-bulen-metrics-token` for status/metrics routes.
 8. Start stack: `BULEN_HTTP_PORT=5410 EXPLORER_PORT=5420 STATUS_PORT=5430 docker-compose up -d`.
 9. Smoke test: `/api/status` with token, explorer home, status HTML/JSON, rewards leaderboard.
 10. Add Prometheus scrape + backup cron (rsync `data/` to S3). Document restore and upgrade
