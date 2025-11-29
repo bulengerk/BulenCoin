@@ -239,6 +239,8 @@ const config = {
   p2pTlsEnabled: getBoolEnv('BULEN_P2P_TLS_ENABLED', false),
   p2pTlsKeyFile: getEnv('BULEN_P2P_TLS_KEY_FILE', ''),
   p2pTlsCertFile: getEnv('BULEN_P2P_TLS_CERT_FILE', ''),
+  p2pTlsCaFile: getEnv('BULEN_P2P_TLS_CA_FILE', ''),
+  p2pTlsMutualEnabled: getBoolEnv('BULEN_P2P_TLS_MUTUAL', false),
   p2pTlsAllowSelfSigned: getBoolEnv('BULEN_P2P_TLS_ALLOW_SELF_SIGNED', false),
   p2pQuicEnabled: getBoolEnv('BULEN_P2P_QUIC_ENABLED', false),
   p2pQuicPort: getNumberEnv(
@@ -294,6 +296,9 @@ const config = {
   blockProducerRewardFraction: getNumberEnv('BULEN_BLOCK_PRODUCER_FRACTION', 0.4),
   committeeSize: getNumberEnv('BULEN_COMMITTEE_SIZE', 3),
   p2pMaxCertificateEntries: getNumberEnv('BULEN_P2P_MAX_CERT_ENTRIES', 64),
+  p2pPeerRateLimitWindowMs: getNumberEnv('BULEN_P2P_PEER_WINDOW_MS', 5000),
+  p2pPeerRateLimitMax: getNumberEnv('BULEN_P2P_PEER_MAX_REQUESTS', 40),
+  p2pBadCertBanMinutes: getNumberEnv('BULEN_P2P_BAD_CERT_BAN_MIN', 10),
   nodeKeyRotateDays: getNumberEnv('BULEN_NODE_KEY_ROTATE_DAYS', 0),
   // Default to false everywhere; tests can opt-in via env.
   allowUnsignedBlocks: getBoolEnv('BULEN_ALLOW_UNSIGNED_BLOCKS', false),

@@ -87,6 +87,8 @@ function createNodeContext(config) {
     metrics: createMetrics(config),
     timers: [],
     peerSessions: new Map(),
+    peerRateCounters: new Map(),
+    peerBans: new Map(),
     superLightSleeping: false,
     lastBatteryLevel: null,
     identity,
@@ -298,6 +300,16 @@ function createServer(context) {
   );
   app.use(morgan(config.logFormat || 'dev'));
   app.use(bodyParser.json({ limit: config.maxBodySize }));
+  app.use((request, response, next) => {
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    response.setHeader('X-Frame-Options', 'DENY');
+    response.setHeader('Referrer-Policy', 'no-referrer');
+    response.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+    if (request.secure) {
+      response.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    }
+    next();
+  });
 
   app.get('/healthz', (request, response) => {
     response.json({ status: 'ok' });
@@ -320,6 +332,39 @@ function createServer(context) {
   });
 
   const guardP2P = (handler) => async (request, response) => {
+    const peerIp = request.socket && request.socket.remoteAddress ? request.socket.remoteAddress : 'unknown';
+    const now = Date.now();
+    const banEntry = context.peerBans.get(peerIp);
+    if (banEntry && banEntry.until > now) {
+      response.status(403).json({ error: 'Peer banned' });
+      return;
+    }
+    if (banEntry && banEntry.until <= now) {
+      context.peerBans.delete(peerIp);
+    }
+    if (config.p2pTlsMutualEnabled && request.socket && request.socket.encrypted) {
+      if (!request.socket.authorized) {
+        context.peerBans.set(peerIp, {
+          until: now + (config.p2pBadCertBanMinutes || 10) * 60 * 1000,
+          reason: 'unauthorized-cert',
+        });
+        response.status(401).json({ error: 'Client certificate required' });
+        return;
+      }
+    }
+    const rateWindow = Number(config.p2pPeerRateLimitWindowMs || 5000);
+    const rateMax = Number(config.p2pPeerRateLimitMax || 40);
+    const rate = context.peerRateCounters.get(peerIp) || { windowStart: now, count: 0 };
+    if (now - rate.windowStart > rateWindow) {
+      rate.windowStart = now;
+      rate.count = 0;
+    }
+    rate.count += 1;
+    context.peerRateCounters.set(peerIp, rate);
+    if (rate.count > rateMax) {
+      response.status(429).json({ error: 'P2P peer rate limit' });
+      return;
+    }
     if (context.p2pInFlight >= config.p2pMaxConcurrent) {
       response.status(503).json({ error: 'P2P busy, backpressure engaged' });
       return;
@@ -1097,8 +1142,9 @@ function createServer(context) {
       const tlsOptions = {
         key: fs.readFileSync(config.p2pTlsKeyFile, 'utf8'),
         cert: fs.readFileSync(config.p2pTlsCertFile, 'utf8'),
-        requestCert: false,
-        rejectUnauthorized: false,
+        ca: config.p2pTlsCaFile ? fs.readFileSync(config.p2pTlsCaFile, 'utf8') : undefined,
+        requestCert: config.p2pTlsMutualEnabled,
+        rejectUnauthorized: config.p2pTlsMutualEnabled ? true : false,
       };
       server = https.createServer(tlsOptions, app).listen(config.httpPort, () => {
         console.log(

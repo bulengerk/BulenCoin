@@ -186,7 +186,12 @@ function tlsOptions(config) {
   if (!config.p2pTlsEnabled) {
     return {};
   }
-  return { rejectUnauthorized: !config.p2pTlsAllowSelfSigned };
+  return {
+    rejectUnauthorized: !config.p2pTlsAllowSelfSigned,
+    key: config.p2pTlsKeyFile ? fs.readFileSync(config.p2pTlsKeyFile, 'utf8') : undefined,
+    cert: config.p2pTlsCertFile ? fs.readFileSync(config.p2pTlsCertFile, 'utf8') : undefined,
+    ca: config.p2pTlsCaFile ? fs.readFileSync(config.p2pTlsCaFile, 'utf8') : undefined,
+  };
 }
 
 function baseHeaders(config) {
