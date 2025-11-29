@@ -15,6 +15,7 @@ dist/
 .android-sdk-user/
 .jdks/
 mobile_build/
+mobile/
 
 # Editor / OS
 .DS_Store
@@ -51,8 +52,11 @@ addresses*.csv
 scripts/tests/.tmp-logs
 
 docs/deployment_plan_production.pdf
+docs/deployment_plan_production.md
 
 # Mobile app artifacts
+scripts/cleanup_android_build.sh
+scripts/gen_deployment_plan_pdf.sh
 mobile/android/
 mobile/ios/
 mobile/.expo/
