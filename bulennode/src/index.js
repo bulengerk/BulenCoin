@@ -26,6 +26,9 @@ function validateProductionConfig(conf) {
   if (conf.requireWebhookSecret && !conf.webhookSecret) {
     throw new Error('Production/strict mode requires BULEN_WEBHOOK_SECRET for signed webhooks');
   }
+  if (conf.allowSingleValidatorCertificate && process.env.NODE_ENV === 'production') {
+    throw new Error('Production/strict mode requires full committee certificates (BULEN_ALLOW_SINGLE_VALIDATOR_CERT=false)');
+  }
 }
 
 function main() {
