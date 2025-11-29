@@ -1,0 +1,22 @@
+{
+  "chainId": "bulencoin-deterministic-1",
+  "validators": [
+    {
+      "name": "validator1",
+      "address": "addr_50b2ca973e0626d7000cacecc36f3b383765b453",
+      "stake": 1000
+    },
+    {
+      "name": "validator2",
+      "address": "addr_717f068b5d541fc33b4c0084378393ca7533e44e",
+      "stake": 1000
+    },
+    {
+      "name": "validator3",
+      "address": "addr_824e72cfb70724791df13e1a6a21b7805cf8b8c3",
+      "stake": 1000
+    }
+  ],
+  "bulenGenesisValidators": "addr_50b2ca973e0626d7000cacecc36f3b383765b453:1000,addr_717f068b5d541fc33b4c0084378393ca7533e44e:1000,addr_824e72cfb70724791df13e1a6a21b7805cf8b8c3:1000",
+  "snapshotHash": "929bf54ad046a45264447cd494e62d0e4ea3d46ccbafcaa4ff654643c5db89d9"
+}
