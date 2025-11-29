@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "name": "bulencoin-status-service",
+  "dependencies": {
+    "axios": {
+      "version": "1.13.2",
+      "resolved": "https://registry.npmjs.org/axios/-/axios-1.13.2.tgz",
+      "overridden": false
+    },
+    "express": {
+      "version": "4.21.2",
+      "resolved": "https://registry.npmjs.org/express/-/express-4.21.2.tgz",
+      "overridden": false
+    },
+    "morgan": {
+      "version": "1.10.1",
+      "resolved": "https://registry.npmjs.org/morgan/-/morgan-1.10.1.tgz",
+      "overridden": false
+    }
+  }
+}
