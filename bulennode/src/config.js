@@ -264,6 +264,7 @@ const config = {
   finalityMinDepth: getNumberEnv('BULEN_FINALITY_MIN_DEPTH', 2),
   slashPenalty: getNumberEnv('BULEN_SLASH_PENALTY', 0.25),
   mempoolMaxSize: getNumberEnv('BULEN_MEMPOOL_MAX_SIZE', 1000),
+  mempoolMinFee: getNumberEnv('BULEN_MEMPOOL_MIN_FEE', 0),
   p2pRequireTls: getBoolEnv('BULEN_P2P_REQUIRE_TLS', false),
   metricsToken: defaultMetricsToken,
   statusToken: defaultStatusToken,

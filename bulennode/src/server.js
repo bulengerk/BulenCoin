@@ -178,6 +178,7 @@ function startBlockProducer(context) {
     }
     const pending = mempool.splice(0, mempool.length);
     const transactionsToInclude = [];
+    pending.sort((a, b) => (b.fee || 0) - (a.fee || 0));
     for (const tx of pending) {
       const validation = validateTransaction(state, tx);
       if (!validation.ok) {
@@ -642,6 +643,10 @@ function createServer(context) {
   });
 
   app.post('/api/transactions', async (request, response) => {
+    if (typeof request.body?.fee === 'number' && request.body.fee < config.mempoolMinFee) {
+      response.status(400).json({ error: 'Fee below minimum' });
+      return;
+    }
     if (mempool.length >= config.mempoolMaxSize) {
       response.status(429).json({ error: 'Mempool full, try later' });
       return;
@@ -995,6 +1000,10 @@ function createServer(context) {
         return;
       }
     } else if (!verifyP2PToken(config, request, response)) {
+      return;
+    }
+    if (typeof request.body?.transaction?.fee === 'number' && request.body.transaction.fee < config.mempoolMinFee) {
+      response.status(400).json({ error: 'Fee below minimum' });
       return;
     }
     const remoteTransaction = request.body.transaction;
