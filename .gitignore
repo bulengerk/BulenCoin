@@ -11,6 +11,10 @@ coverage/
 logs/
 *.log
 data/
+dist/
+.android-sdk-user/
+.jdks/
+mobile_build/
 
 # Editor / OS
 .DS_Store
@@ -45,3 +49,12 @@ addresses*.txt
 addresses*.csv
 
 scripts/tests/.tmp-logs
+
+docs/deployment_plan_production.pdf
+
+# Mobile app artifacts
+mobile/android/
+mobile/ios/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
