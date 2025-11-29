@@ -1,6 +1,6 @@
 {
   "name": "bulencoin-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Minimal JS/TS client for BulenCoin prototype APIs (payments, payment links/QR, status).",
   "main": "bulencoin-sdk.js",
   "types": "bulencoin-sdk.d.ts",
