@@ -9,6 +9,17 @@ function deriveAddressFromPublicKey(publicKeyPem) {
 }
 
 function ensureNodeKeys(config) {
+  // Highest priority: explicit PEM in env
+  if (config.nodeKeyPem) {
+    const publicKeyPem = crypto.createPublicKey(config.nodeKeyPem).export({ type: 'spki', format: 'pem' });
+    return {
+      privateKeyPem: config.nodeKeyPem,
+      publicKeyPem,
+      address: deriveAddressFromPublicKey(publicKeyPem),
+      keyPath: null,
+    };
+  }
+
   const keyPath = config.nodeKeyPath || path.join(config.dataDir, 'node_key.pem');
   const rotateDays = Number(config.nodeKeyRotateDays || 0);
   let privateKeyPem;

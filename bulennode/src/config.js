@@ -105,6 +105,21 @@ function parseDeviceBoosts(rawBoosts) {
   }, {});
 }
 
+function parseGenesisValidators(raw) {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [address, stakeStr] = entry.split(':').map((v) => v.trim());
+      const stake = Number(stakeStr || 0);
+      if (!address) return null;
+      return { address, stake: Number.isNaN(stake) ? 0 : stake };
+    })
+    .filter(Boolean);
+}
+
 const projectRoot = path.resolve(__dirname, '..', '..');
 
 const profileDefaults = {
@@ -199,6 +214,7 @@ const config = {
   p2pPort: getNumberEnv('BULEN_P2P_PORT', selectedProfile.p2pPort),
   dataDir: getEnv('BULEN_DATA_DIR', path.join(projectRoot, 'data', nodeProfile)),
   nodeKeyPath: getEnv('BULEN_NODE_KEY_FILE', path.join(projectRoot, 'data', nodeProfile, 'node_key.pem')),
+  nodeKeyPem: getEnv('BULEN_NODE_PRIVATE_KEY', ''),
   peers: parsePeers(getEnv('BULEN_PEERS', '')),
   blockIntervalMs: getNumberEnv('BULEN_BLOCK_INTERVAL_MS', selectedProfile.blockIntervalMs),
   maxBodySize: getEnv('BULEN_MAX_BODY_SIZE', '128kb'),
@@ -284,6 +300,7 @@ const config = {
   allowUnsignedBlocks: getBoolEnv('BULEN_ALLOW_UNSIGNED_BLOCKS', false),
   allowEmptyBlocks: getBoolEnv('BULEN_ALLOW_EMPTY_BLOCKS', true),
   p2pMaxConcurrent: getNumberEnv('BULEN_P2P_MAX_CONCURRENT', 16),
+  genesisValidators: parseGenesisValidators(getEnv('BULEN_GENESIS_VALIDATORS', '')),
   get protocolMajor() {
     return getProtocolMajor(this.protocolVersion);
   },

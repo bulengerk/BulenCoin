@@ -28,10 +28,17 @@ function saveJson(filePath, value) {
 
 function computeSnapshotHash(snapshot) {
   const crypto = require('crypto');
+  const accounts = snapshot.accounts || {};
+  const sortedAccounts = Object.keys(accounts)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = accounts[key];
+      return acc;
+    }, {});
   const payload = {
     chainId: snapshot.chainId,
     blocks: snapshot.blocks || [],
-    accounts: snapshot.accounts || {},
+    accounts: sortedAccounts,
     feeBurnedTotal: snapshot.feeBurnedTotal || 0,
     ecosystemPool: snapshot.ecosystemPool || 0,
     mintedRewardsTotal: snapshot.mintedRewardsTotal || 0,
