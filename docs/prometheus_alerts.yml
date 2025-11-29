@@ -1,0 +1,56 @@
+groups:
+  - name: bulencoin-node-health
+    rules:
+      - alert: BulenHeightStalled
+        expr: bulen_blocks_height offset 2m < bulen_blocks_height
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BulenNode height stalled on {{ $labels.instance }}"
+          description: "bulen_blocks_height not increasing for >2m. Check consensus, peers, disk."
+
+      - alert: BulenFinalityStalled
+        expr: bulen_blocks_finalized_height offset 5m < bulen_blocks_finalized_height
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Finality stalled on {{ $labels.instance }}"
+          description: "bulen_blocks_finalized_height unchanged for >5m. Peers/quorum may be down."
+
+      - alert: BulenLowPeers
+        expr: bulen_peers < 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low peer count on {{ $labels.instance }}"
+          description: "Peers below 2 for 3m. Check P2P token, network, firewalls."
+
+      - alert: BulenHigh5xx
+        expr: sum(rate(bulen_http_requests_total{code=~"5.."}[5m])) by (instance) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP 5xx elevated on {{ $labels.instance }}"
+          description: "More than 1 req/s with 5xx over 5m. Check logs."
+
+      - alert: BulenHigh429
+        expr: sum(rate(bulen_http_requests_total{code="429"}[5m])) by (instance) > 2
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "HTTP 429 throttling on {{ $labels.instance }}"
+          description: "Requests hitting rate limits; clients may be too chatty or under attack."
+
+      - alert: BulenNoMetrics
+        expr: up{job="bulen"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Metrics down for {{ $labels.instance }}"
+          description: "Prometheus cannot scrape /metrics. Node may be down or token missing."

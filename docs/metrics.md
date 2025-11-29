@@ -24,4 +24,6 @@ curl -H "x-bulen-metrics-token: $BULEN_METRICS_TOKEN" http://localhost:4100/metr
 
 For Grafana, add a Prometheus data source scraping `/metrics` and plot the series above; the labels allow filtering per chain/node/profile.
 
+Alerting rules: see `docs/prometheus_alerts.yml` for starter Alertmanager/Prometheus rules covering stalled height/finality, low peers and elevated 5xx/429.
+
 Sample dashboard: see `docs/grafana-dashboard.json` for a starter layout (height/finality, mempool size, total stake, security counters).
