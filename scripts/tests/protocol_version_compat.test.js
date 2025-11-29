@@ -8,6 +8,7 @@ const fs = require('node:fs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'protocol-compat-live');
+const STATUS_TOKEN = 'status-token';
 
 function startProcess(label, env) {
   const child = spawn('node', ['src/index.js'], {
@@ -38,7 +39,9 @@ async function waitForStatus(port, { timeoutMs = 15000 } = {}) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(`http://127.0.0.1:${port}/api/status`);
+      const res = await fetch(`http://127.0.0.1:${port}/api/status`, {
+        headers: { 'x-bulen-status-token': STATUS_TOKEN },
+      });
       if (res.ok) return true;
     } catch (_err) {
       // ignore until timeout
@@ -64,6 +67,8 @@ test('protocol compatibility: same major accepted, missing header accepted, diff
     BULEN_LOG_FORMAT: 'tiny',
     BULEN_PEERS: '',
     BULEN_BLOCK_INTERVAL_MS: '700',
+    BULEN_STATUS_TOKEN: STATUS_TOKEN,
+    BULEN_METRICS_TOKEN: 'metrics-token',
   };
 
   const node = startProcess('proto-main', {

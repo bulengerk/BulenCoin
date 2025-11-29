@@ -24,6 +24,7 @@ const p2pPort = args.get('p2pPort') || '5511';
 const apiBase = args.get('apiBase') || `http://127.0.0.1:${httpPort}/api`;
 const faucetAmount = Number(args.get('faucetAmount') || 500000);
 const accounts = ['soak-alice', 'soak-bob'];
+const statusToken = args.get('statusToken') || process.env.BULEN_STATUS_TOKEN || 'status-token';
 
 // ---- Helpers ----------------------------------------------------------------
 function nowMs() {
@@ -66,6 +67,9 @@ async function main() {
     BULEN_DATA_DIR: path.join(ROOT, 'data', 'soak-node'),
     BULEN_ENABLE_FAUCET: 'true',
     BULEN_BLOCK_INTERVAL_MS: '800',
+    BULEN_STATUS_TOKEN: statusToken,
+    BULEN_METRICS_TOKEN: process.env.BULEN_METRICS_TOKEN || 'metrics-token',
+    BULEN_P2P_TOKEN: process.env.BULEN_P2P_TOKEN || 'p2p-token',
   };
 
   const node = spawn('node', ['src/index.js'], {
@@ -147,7 +151,9 @@ async function main() {
     if (stop) return;
     try {
       const t0 = nowMs();
-      const res = await fetchWithTimeout(`${apiBase}/status`, {}, 4000);
+      const res = await fetchWithTimeout(`${apiBase}/status`, {
+        headers: statusToken ? { 'x-bulen-status-token': statusToken } : {},
+      }, 4000);
       const json = res.ok ? await res.json() : null;
       stats.health.push({
         ts: new Date().toISOString(),

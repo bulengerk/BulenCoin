@@ -203,6 +203,13 @@ function getProtocolMajor(version) {
 const securityPreset = getEnv('BULEN_SECURITY_PRESET', 'dev').toLowerCase();
 const securityStrict = ['strict', 'prod', 'production', 'mainnet'].includes(securityPreset);
 
+const defaultStatusToken =
+  getEnv('BULEN_STATUS_TOKEN', process.env.NODE_ENV === 'test' ? 'status-token' : 'bulen-status');
+const defaultMetricsToken =
+  getEnv('BULEN_METRICS_TOKEN', process.env.NODE_ENV === 'test' ? 'metrics-token' : 'bulen-metrics');
+const defaultP2PToken =
+  getEnv('BULEN_P2P_TOKEN', process.env.NODE_ENV === 'test' ? 'p2p-token' : 'bulen-p2p');
+
 const config = {
   chainId: getEnv('BULEN_CHAIN_ID', 'bulencoin-devnet-1'),
   nodeId: getEnv('BULEN_NODE_ID', `node-${Math.random().toString(16).slice(2)}`),
@@ -222,16 +229,8 @@ const config = {
     'BULEN_REQUIRE_SIGNATURES',
     securityStrict || (process.env.NODE_ENV === 'production' ? true : false),
   ),
-  enableFaucet: getBoolEnv('BULEN_ENABLE_FAUCET', (() => {
-    if (securityStrict || process.env.NODE_ENV === 'production') {
-      return false;
-    }
-    if (typeof selectedProfile.enableFaucet === 'boolean') {
-      return selectedProfile.enableFaucet;
-    }
-    return process.env.NODE_ENV !== 'production';
-  })()),
-  p2pToken: getEnv('BULEN_P2P_TOKEN', ''),
+  enableFaucet: getBoolEnv('BULEN_ENABLE_FAUCET', false),
+  p2pToken: defaultP2PToken,
   p2pTokens: parsePeers(getEnv('BULEN_P2P_TOKENS', '')).filter(Boolean),
   p2pRequireHandshake: getBoolEnv(
     'BULEN_P2P_REQUIRE_HANDSHAKE',
@@ -264,8 +263,8 @@ const config = {
   slashPenalty: getNumberEnv('BULEN_SLASH_PENALTY', 0.25),
   mempoolMaxSize: getNumberEnv('BULEN_MEMPOOL_MAX_SIZE', 1000),
   p2pRequireTls: getBoolEnv('BULEN_P2P_REQUIRE_TLS', false),
-  metricsToken: getEnv('BULEN_METRICS_TOKEN', ''),
-  statusToken: getEnv('BULEN_STATUS_TOKEN', ''),
+  metricsToken: defaultMetricsToken,
+  statusToken: defaultStatusToken,
   p2pMaxPeers: getNumberEnv('BULEN_P2P_MAX_PEERS', 50),
   p2pFanout: getNumberEnv('BULEN_P2P_FANOUT', 8),
   webhookSecret: getEnv('BULEN_WEBHOOK_SECRET', ''),

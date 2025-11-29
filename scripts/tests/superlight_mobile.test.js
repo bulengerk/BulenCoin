@@ -8,6 +8,8 @@ const fs = require('node:fs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'superlight-test');
+const STATUS_TOKEN = 'status-token';
+const METRICS_TOKEN = 'metrics-token';
 
 function startNode(env) {
   const child = spawn('node', ['src/index.js'], {
@@ -52,6 +54,8 @@ test('super-light profile sleeps on low battery and resumes', async (t) => {
     BULEN_SUPERLIGHT_KEEP_BLOCKS: '64',
     BULEN_SUPERLIGHT_BATTERY_THRESHOLD: '0.2',
     BULEN_ENABLE_FAUCET: 'false',
+    BULEN_STATUS_TOKEN: STATUS_TOKEN,
+    BULEN_METRICS_TOKEN: METRICS_TOKEN,
   };
 
   const node = startNode(env);
@@ -60,7 +64,9 @@ test('super-light profile sleeps on low battery and resumes', async (t) => {
   const status1 = await waitFor(
     async () => {
       try {
-        const res = await fetchJson('http://127.0.0.1:5250/api/status');
+        const res = await fetchJson('http://127.0.0.1:5250/api/status', {
+          headers: { 'x-bulen-status-token': STATUS_TOKEN },
+        });
         return res.body && res.body.superLight ? res : null;
       } catch (error) {
         return null;
@@ -79,7 +85,9 @@ test('super-light profile sleeps on low battery and resumes', async (t) => {
   assert.strictEqual(low.status, 200);
   assert.strictEqual(low.body.sleeping, true);
 
-  const afterLow = await fetchJson('http://127.0.0.1:5250/api/status');
+  const afterLow = await fetchJson('http://127.0.0.1:5250/api/status', {
+    headers: { 'x-bulen-status-token': STATUS_TOKEN },
+  });
   assert.strictEqual(afterLow.body.superLightSleeping, true);
 
   const high = await fetchJson('http://127.0.0.1:5250/api/device/battery', {
@@ -90,6 +98,8 @@ test('super-light profile sleeps on low battery and resumes', async (t) => {
   assert.strictEqual(high.status, 200);
   assert.strictEqual(high.body.sleeping, false);
 
-  const afterResume = await fetchJson('http://127.0.0.1:5250/api/status');
+  const afterResume = await fetchJson('http://127.0.0.1:5250/api/status', {
+    headers: { 'x-bulen-status-token': STATUS_TOKEN },
+  });
   assert.strictEqual(afterResume.body.superLightSleeping, false);
 });

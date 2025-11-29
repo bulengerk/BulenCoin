@@ -32,6 +32,8 @@ This document describes the current test levels for BulenCoin services.
 
 8. **UI/UX (to add):** automated browser tests for landing/Explorer basic flows; visual/snapshot checks for regressions.
 
+Note: status/metrics/P2P endpoints now require tokens by default. Tests pass `BULEN_STATUS_TOKEN` / `BULEN_METRICS_TOKEN` / `BULEN_P2P_TOKEN` in env and use headers (`x-bulen-status-token`, `x-bulen-metrics-token`, `x-bulen-p2p-token`) for calls to `/api/status` and P2P gossip.
+
 ## Running the full-stack smoke test
 
 Prerequisites:

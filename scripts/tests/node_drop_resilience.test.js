@@ -8,6 +8,9 @@ const fs = require('node:fs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'resilience-drop');
+const STATUS_TOKEN = 'status-token';
+const METRICS_TOKEN = 'metrics-token';
+const P2P_TOKEN = 'p2p-token';
 
 function startProcess(label, cwd, args, env) {
   const child = spawn('node', args, {
@@ -40,8 +43,8 @@ async function waitFor(fn, { timeoutMs = 20000, intervalMs = 400, label = 'condi
   throw error;
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url);
+async function fetchJson(url, options) {
+  const response = await fetch(url, options);
   const body = await response.json();
   return { status: response.status, body };
 }
@@ -56,6 +59,9 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
     BULEN_LOG_FORMAT: 'tiny',
     BULEN_BLOCK_INTERVAL_MS: '500',
     BULEN_ENABLE_FAUCET: 'true',
+    BULEN_STATUS_TOKEN: STATUS_TOKEN,
+    BULEN_METRICS_TOKEN: METRICS_TOKEN,
+    BULEN_P2P_TOKEN: P2P_TOKEN,
   };
 
   const nodes = [
@@ -84,7 +90,9 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
   // Wait until all nodes respond
   for (const node of nodes) {
     await waitFor(async () => {
-      const res = await fetchJson(`http://127.0.0.1:${node.http}/api/status`);
+      const res = await fetchJson(`http://127.0.0.1:${node.http}/api/status`, {
+        headers: { 'x-bulen-status-token': STATUS_TOKEN },
+      });
       return res.status === 200 ? res : null;
     }, { label: `${node.label} status` });
   }
@@ -106,6 +114,7 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
     ...baseEnv,
     STATUS_PORT: '5750',
     STATUS_NODES: nodes.map((n) => `http://127.0.0.1:${n.http}/api/status`).join(','),
+    STATUS_TOKEN,
   };
   const statusProc = startProcess('status', path.join(ROOT, 'status'), ['src/server.js'], statusEnv);
   t.after(statusProc.stop);
@@ -131,7 +140,9 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
   assert.strictEqual(singleNodeStatus.body.aggregate.nodeCount, 1);
 
   // Surviving node should keep producing blocks after the drop
-  const before = await fetchJson(`http://127.0.0.1:${nodes[0].http}/api/status`);
+  const before = await fetchJson(`http://127.0.0.1:${nodes[0].http}/api/status`, {
+    headers: { 'x-bulen-status-token': STATUS_TOKEN },
+  });
   const beforeHeight = before.body.height || before.body.blockHeight || 0;
 
   // Submit a fresh tx post-drop to force block production
@@ -142,7 +153,9 @@ test('resilience: surviving node continues when 2/3 nodes drop', { timeout: 6000
   });
 
   await waitFor(async () => {
-    const r = await fetchJson(`http://127.0.0.1:${nodes[0].http}/api/status`);
+    const r = await fetchJson(`http://127.0.0.1:${nodes[0].http}/api/status`, {
+      headers: { 'x-bulen-status-token': STATUS_TOKEN },
+    });
     const height = r.body.height || r.body.blockHeight || 0;
     return height > beforeHeight;
   }, { label: 'height advances after drop', timeoutMs: 15000 });

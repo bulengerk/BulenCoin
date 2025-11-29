@@ -11,6 +11,8 @@ const { canonicalTransactionPayload, deriveAddressFromPublicKey } = require('../
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'security-guardrails');
+const STATUS_TOKEN = 'status-token';
+const METRICS_TOKEN = 'metrics-token';
 
 function startProcess(label, cwd, args, env) {
   const child = spawn('node', args, {
@@ -85,6 +87,8 @@ test(
       BULEN_P2P_TOKEN: 'secret-token',
       BULEN_LOG_FORMAT: 'tiny',
       BULEN_BLOCK_INTERVAL_MS: '1200',
+      BULEN_STATUS_TOKEN: STATUS_TOKEN,
+      BULEN_METRICS_TOKEN: METRICS_TOKEN,
     };
 
     const nodeProc = startProcess('bulennode', path.join(ROOT, 'bulennode'), ['src/index.js'], nodeEnv);
@@ -93,10 +97,12 @@ test(
 
     await waitFor(
       async () => {
-        const result = await fetchJson('http://127.0.0.1:5310/api/status');
+        const result = await fetchJson('http://127.0.0.1:5310/api/status', {
+          headers: { 'x-bulen-status-token': STATUS_TOKEN },
+        });
         return result.body ? result : null;
       },
-    { label: 'bulennode status endpoint' },
+      { label: 'bulennode status endpoint' },
     );
 
     // Fund account so signature validation is reached instead of balance checks.
@@ -171,7 +177,9 @@ test(
     // 4) Rate limiter triggers 429 after burst.
     let got429 = false;
     for (let i = 0; i < 80; i += 1) {
-      const res = await fetch('http://127.0.0.1:5310/api/status');
+      const res = await fetch('http://127.0.0.1:5310/api/status', {
+        headers: { 'x-bulen-status-token': STATUS_TOKEN },
+      });
       if (res.status === 429) {
         got429 = true;
         break;

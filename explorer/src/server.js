@@ -12,6 +12,7 @@ const defaultConfig = {
   explorerTitle: process.env.EXPLORER_TITLE || 'BulenCoin Explorer',
   rewardsHubBase:
     process.env.REWARDS_HUB_BASE || process.env.REWARDS_HUB || 'http://localhost:4400',
+  statusToken: process.env.EXPLORER_STATUS_TOKEN || process.env.BULEN_STATUS_TOKEN || '',
 };
 
 function escapeHtml(value) {
@@ -23,14 +24,19 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-async function fetchStatus(nodeApiBase) {
-  const response = await axios.get(`${nodeApiBase}/status`);
+async function fetchStatus(nodeApiBase, statusToken) {
+  const headers = {};
+  if (statusToken) {
+    headers['x-bulen-status-token'] = statusToken;
+  }
+  const response = await axios.get(`${nodeApiBase}/status`, { headers });
   return response.data;
 }
 
-async function fetchPeers(nodeApiBase) {
+async function fetchPeers(nodeApiBase, statusToken) {
   try {
-    const response = await axios.get(`${nodeApiBase}/status`);
+    const headers = statusToken ? { 'x-bulen-status-token': statusToken } : {};
+    const response = await axios.get(`${nodeApiBase}/status`, { headers });
     return response.data.peers || [];
   } catch (error) {
     return [];
@@ -147,10 +153,10 @@ function createServer(configOverrides = {}) {
     try {
       const [status, blocksPage, mempool, peers, leaderboard] =
         await Promise.all([
-          fetchStatus(config.nodeApiBase),
+          fetchStatus(config.nodeApiBase, config.statusToken),
           fetchBlocks(config.nodeApiBase, 20, 0),
           fetchMempool(config.nodeApiBase),
-          fetchPeers(config.nodeApiBase),
+          fetchPeers(config.nodeApiBase, config.statusToken),
           fetchLeaderboard(config.rewardsHubBase),
         ]);
       const rows = blocksPage.blocks

@@ -8,6 +8,8 @@ const fs = require('node:fs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'load-30s');
+const STATUS_TOKEN = 'status-token';
+const METRICS_TOKEN = 'metrics-token';
 
 function startProcess(label, cwd, args, env) {
   const child = spawn('node', args, {
@@ -52,6 +54,8 @@ test(
       BULEN_BLOCK_INTERVAL_MS: '400',
       BULEN_LOG_FORMAT: 'tiny',
       BULEN_ALLOW_UNSIGNED_BLOCKS: 'true',
+      BULEN_STATUS_TOKEN: STATUS_TOKEN,
+      BULEN_METRICS_TOKEN: METRICS_TOKEN,
     };
     const nodeProc = startProcess('bulennode', path.join(ROOT, 'bulennode'), ['src/index.js'], env);
     t.after(() => nodeProc.stop());
@@ -83,7 +87,9 @@ test(
       const health = await fetchJson('http://127.0.0.1:5510/api/health');
       if (health.status >= 500) errors.push(`health ${health.status}`);
 
-      const status = await fetchJson('http://127.0.0.1:5510/api/status');
+      const status = await fetchJson('http://127.0.0.1:5510/api/status', {
+        headers: { 'x-bulen-status-token': STATUS_TOKEN },
+      });
       if (status.status >= 500) errors.push(`status ${status.status}`);
       statusCount += 1;
 

@@ -9,6 +9,9 @@ const crypto = require('node:crypto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKDIR = path.join(ROOT, 'data', 'fullstack-all');
+const STATUS_TOKEN = 'status-token';
+const METRICS_TOKEN = 'metrics-token';
+const P2P_TOKEN = 'p2p-token';
 
 function startProcess(label, cwd, args, env) {
   const child = spawn('node', args, {
@@ -78,6 +81,9 @@ test(
       BULEN_BLOCK_INTERVAL_MS: '600',
       BULEN_LOG_FORMAT: 'tiny',
       BULEN_ALLOW_UNSIGNED_BLOCKS: 'true',
+      BULEN_STATUS_TOKEN: STATUS_TOKEN,
+      BULEN_METRICS_TOKEN: METRICS_TOKEN,
+      BULEN_P2P_TOKEN: P2P_TOKEN,
     };
     const explorerEnv = {
       ...baseEnv,
@@ -85,11 +91,13 @@ test(
       BULENNODE_API_BASE: 'http://127.0.0.1:5410/api',
       EXPLORER_TITLE: 'Fullstack All Explorer',
       EXPLORER_LOG_FORMAT: 'tiny',
+      EXPLORER_STATUS_TOKEN: STATUS_TOKEN,
     };
     const statusEnv = {
       ...baseEnv,
       STATUS_PORT: '5430',
       STATUS_NODES: 'http://127.0.0.1:5410/api/status',
+      STATUS_TOKEN,
     };
 
     const nodeProc = startProcess('bulennode', path.join(ROOT, 'bulennode'), ['src/index.js'], nodeEnv);
@@ -101,7 +109,9 @@ test(
     t.after(() => fs.rmSync(WORKDIR, { recursive: true, force: true }));
 
     await waitFor(async () => {
-      const r = await fetchJson('http://127.0.0.1:5410/api/status');
+      const r = await fetchJson('http://127.0.0.1:5410/api/status', {
+        headers: { 'x-bulen-status-token': STATUS_TOKEN },
+      });
       return r.body ? r : null;
     }, { label: 'node status' });
 

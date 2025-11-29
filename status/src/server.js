@@ -4,6 +4,7 @@ const axios = require('axios');
 
 const defaultPort = Number(process.env.STATUS_PORT || '4300');
 const nodesEnv = process.env.STATUS_NODES || '';
+const statusToken = process.env.STATUS_TOKEN || '';
 
 const nodeStatusUrls = nodesEnv
   .split(',')
@@ -11,7 +12,11 @@ const nodeStatusUrls = nodesEnv
   .filter((value) => value.length > 0);
 
 async function fetchStatus(url) {
-  const response = await axios.get(url, { timeout: 3000 });
+  const headers = {};
+  if (statusToken) {
+    headers['x-bulen-status-token'] = statusToken;
+  }
+  const response = await axios.get(url, { timeout: 3000, headers });
   return response.data;
 }
 
