@@ -662,5 +662,6 @@ module.exports = {
   recordEquivocationAndSlash,
   slashValidator,
   selectCommittee,
+  quorumForCommittee,
   snapshotAtHeight,
 };

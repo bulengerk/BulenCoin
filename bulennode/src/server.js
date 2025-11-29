@@ -34,6 +34,7 @@ const {
   handleIncomingBlock,
   selectCommittee,
   snapshotAtHeight,
+  quorumForCommittee,
 } = require('./consensus');
 const {
   createMetrics,
@@ -479,6 +480,8 @@ function createServer(context) {
       superLight: config.superLightMode,
       superLightSleeping: context.superLightSleeping || false,
       superLightKeepBlocks: config.superLightKeepBlocks,
+      certificateCount: latest && Array.isArray(latest.certificate) ? latest.certificate.length : 0,
+      committeeThreshold: quorumForCommittee(selectCommittee(config, state, latest ? latest.previousHash : null)),
       checkpoint: state.finalizedSnapshot
         ? {
             height: state.finalizedHeight || 0,
@@ -525,6 +528,12 @@ function createServer(context) {
     );
     lines.push(
       `bulen_blocks_height${formatLabels()} ${latest ? latest.index : 0}`,
+    );
+    lines.push(
+      `bulen_blocks_certificate_count${formatLabels()} ${latest && Array.isArray(latest.certificate) ? latest.certificate.length : 0}`,
+    );
+    lines.push(
+      `bulen_blocks_certificate_threshold${formatLabels()} ${quorumForCommittee(selectCommittee(config, state, latest ? latest.previousHash : null))}`,
     );
     lines.push(`bulen_blocks_total${formatLabels()} ${state.blocks.length}`);
     lines.push(

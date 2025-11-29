@@ -182,6 +182,9 @@ test(
     );
     assert.strictEqual(statusResult.status, 200);
     assert.ok(statusResult.body.aggregate);
+    const nodeEntry = statusResult.body.nodes.find((n) => n.nodeId === 'fullstack-node');
+    assert.ok(nodeEntry);
+    assert.ok(typeof nodeEntry.certificateCount === 'number');
 
     const accountBob = await fetchJson('http://127.0.0.1:5210/api/accounts/bob-fullstack');
     assert.ok(accountBob.body.balance >= 120);
