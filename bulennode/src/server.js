@@ -44,7 +44,7 @@ const {
 const payments = require('./payments');
 const wallets = require('./wallets');
 const QRCode = require('qrcode');
-const { ensureNodeKeys } = require('./identity');
+const { ensureNodeKeys, signPayload, verifyPayload } = require('./identity');
 
 function requireOptionalToken(token, headerName, request, response) {
   if (!token) {
@@ -329,6 +329,30 @@ function createServer(context) {
       height: state.finalizedHeight || 0,
       hash: state.finalizedHash || null,
       snapshotHash: state.finalizedSnapshot.hash || null,
+    });
+  });
+
+  app.get('/api/snapshot-sign', (request, response) => {
+    const latest = state.blocks[state.blocks.length - 1];
+    const targetHeight = latest ? latest.index : 0;
+    const snapshot = snapshotAtHeight(config, state, targetHeight);
+    if (!snapshot) {
+      response.status(404).json({ error: 'No snapshot available' });
+      return;
+    }
+    const payload = JSON.stringify({
+      height: targetHeight,
+      hash: latest ? latest.hash : null,
+      snapshotHash: snapshot.hash,
+    });
+    const signature = signPayload(context.identity.privateKeyPem, payload);
+    response.json({
+      height: targetHeight,
+      hash: latest ? latest.hash : null,
+      snapshotHash: snapshot.hash,
+      signature,
+      publicKey: context.identity.publicKeyPem,
+      signer: context.config.validatorAddress || context.config.nodeId,
     });
   });
 
