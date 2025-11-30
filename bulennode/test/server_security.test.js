@@ -43,6 +43,23 @@ async function fetchJson(url, options) {
   return { status: response.status, body };
 }
 
+async function waitFor(fn, label, timeoutMs = 5000, intervalMs = 200) {
+  const start = Date.now();
+  let lastError;
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const value = await fn();
+      if (value) return value;
+    } catch (error) {
+      lastError = error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  const error = new Error(`Timed out waiting for ${label}`);
+  if (lastError) error.cause = lastError;
+  throw error;
+}
+
 test('security and functional behaviours', async () => {
   // 1. Faucet disabled returns 403
   config.enableFaucet = false;
@@ -108,13 +125,14 @@ test('security and functional behaviours', async () => {
   const bobFunctional = `bob-functional-${uniqueSuffix}`;
 
   // Fund alice again
-  await fetchJson(`${baseUrl}/api/faucet`, {
+  result = await fetchJson(`${baseUrl}/api/faucet`, {
     method: 'POST',
     body: JSON.stringify({ address: aliceFunctional, amount: 500 }),
   });
+  assert.strictEqual(result.status, 200);
 
   // Submit simple transaction
-  await fetchJson(`${baseUrl}/api/transactions`, {
+  result = await fetchJson(`${baseUrl}/api/transactions`, {
     method: 'POST',
     body: JSON.stringify({
       from: aliceFunctional,
@@ -123,9 +141,13 @@ test('security and functional behaviours', async () => {
       fee: 0,
     }),
   });
+  assert.strictEqual(result.status, 202);
 
-  // Wait for at least one block interval
-  await new Promise((resolve) => setTimeout(resolve, 700));
+  // Wait for balance update (block production + apply)
+  await waitFor(async () => {
+    const status = await fetchJson(`${baseUrl}/api/status`, { method: 'GET' });
+    return status.body && status.body.height >= 1;
+  }, 'block production');
 
   // Check account balance for bob-functional
   result = await fetchJson(`${baseUrl}/api/accounts/${bobFunctional}`, {
