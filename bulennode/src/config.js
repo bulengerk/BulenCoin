@@ -226,7 +226,7 @@ const config = {
     'BULEN_REQUIRE_SIGNATURES',
     securityStrict || (process.env.NODE_ENV === 'production' ? true : false),
   ),
-  enableFaucet: getBoolEnv('BULEN_ENABLE_FAUCET', false),
+  enableFaucet: getBoolEnv('BULEN_ENABLE_FAUCET', process.env.NODE_ENV === 'test'),
   p2pToken: defaultP2PToken,
   p2pTokens: parsePeers(getEnv('BULEN_P2P_TOKENS', '')).filter(Boolean),
   p2pRequireHandshake: getBoolEnv(
