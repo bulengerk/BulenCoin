@@ -46,6 +46,9 @@ jobs:
           CI: "true"
           BULEN_BLOCK_INTERVAL_MS: "500"
           NODE_TEST_TIMEOUT: "30000"
+          BULEN_STATUS_TOKEN: ""
+          BULEN_METRICS_TOKEN: ""
+          BULEN_P2P_TOKEN: ""
         timeout-minutes: 25
         run: |
           rm -rf ../data
@@ -77,6 +80,9 @@ jobs:
         env:
           ALLOW_STATE_MIGRATION: "true"
           NODE_TEST_TIMEOUT: "30000"
+          BULEN_STATUS_TOKEN: ""
+          BULEN_METRICS_TOKEN: ""
+          BULEN_P2P_TOKEN: ""
         timeout-minutes: 10
         run: node --test --test-timeout=30000
 
