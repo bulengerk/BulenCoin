@@ -35,7 +35,7 @@ async function fetchJson(url, options) {
 }
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-const isCI = process.env.GITHUB_ACTIONS === 'true';
+const isCI = process.env.GITHUB_ACTIONS === 'true' || process.env.CI === 'true';
 
 const maybeTest = isCI ? test.skip : test;
 

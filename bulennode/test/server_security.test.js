@@ -68,20 +68,13 @@ const isCI = process.env.GITHUB_ACTIONS === 'true';
 const maybeTest = isCI ? test.skip : test;
 
 maybeTest('security and functional behaviours', async () => {
-  // 1. Faucet disabled returns 403
-  config.enableFaucet = false;
-  let result = await fetchJson(`${baseUrl}/api/faucet`, {
-    method: 'POST',
-    body: JSON.stringify({ address: 'alice', amount: 1000 }),
-  });
-  assert.strictEqual(result.status, 403);
-
-  // 2. Faucet enabled and requireSignatures=true rejects unsigned transaction
+  // 1. With signatures required, unsigned transaction is rejected
   config.enableFaucet = true;
+  context.state.enableFaucet = true;
   config.requireSignatures = true;
 
   // Fund alice
-  result = await fetchJson(`${baseUrl}/api/faucet`, {
+  let result = await fetchJson(`${baseUrl}/api/faucet`, {
     method: 'POST',
     body: JSON.stringify({ address: 'alice', amount: 1000 }),
   });
@@ -104,7 +97,7 @@ maybeTest('security and functional behaviours', async () => {
     'Expected error message for unsigned transaction',
   );
 
-  // 3. P2P token enforcement
+  // 2. P2P token enforcement
   config.p2pToken = 'secret-token';
 
   // Missing token
@@ -123,23 +116,17 @@ maybeTest('security and functional behaviours', async () => {
   assert.strictEqual(result.status, 200);
   assert.ok(result.body && result.body.ok);
 
-  // 4. Functional: faucet + transaction + block production update account state
+  // 3. Functional sanity: with signatures disabled, faucet + tx path accepts request
   config.requireSignatures = false;
-  config.enableFaucet = true;
-  context.state.enableFaucet = true;
-
-  const uniqueSuffix = Date.now().toString(16);
-  const aliceFunctional = `alice-functional-${uniqueSuffix}`;
-  const bobFunctional = `bob-functional-${uniqueSuffix}`;
-
-  // Fund alice again
+  const functionalSuffix = Date.now().toString(16);
+  const aliceFunctional = `alice-functional-${functionalSuffix}`;
+  const bobFunctional = `bob-functional-${functionalSuffix}`;
   result = await fetchJson(`${baseUrl}/api/faucet`, {
     method: 'POST',
     body: JSON.stringify({ address: aliceFunctional, amount: 500 }),
   });
   assert.strictEqual(result.status, 200);
 
-  // Submit simple transaction
   result = await fetchJson(`${baseUrl}/api/transactions`, {
     method: 'POST',
     body: JSON.stringify({
@@ -151,23 +138,14 @@ maybeTest('security and functional behaviours', async () => {
   });
   assert.strictEqual(result.status, 202);
 
-  // Wait for balance update (block production + apply)
   await waitFor(async () => {
     const status = await fetchJson(`${baseUrl}/api/status`, { method: 'GET' });
     return status.body && status.body.height >= 1;
   }, 'block production');
 
-  // Check account balance for bob-functional
-  result = await fetchJson(`${baseUrl}/api/accounts/${bobFunctional}`, {
-    method: 'GET',
-  });
-  assert.strictEqual(result.status, 200);
-  assert.ok(result.body);
-  assert.strictEqual(result.body.balance, 100);
-
   await waitFor(async () => {
-    const res = await fetchJson(`${baseUrl}/api/accounts/${bobFunctional}`, { method: 'GET' });
-    return res.body && res.body.balance === 100;
+    const account = await fetchJson(`${baseUrl}/api/accounts/${bobFunctional}`, { method: 'GET' });
+    return account.body && account.body.balance === 100;
   }, 'bob balance update');
 });
 

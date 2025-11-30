@@ -24,23 +24,28 @@ function loadConfig(env) {
   return JSON.parse(result.stdout.trim());
 }
 
+function buildEnv(overrides) {
+  const env = { ...process.env };
+  delete env.BULEN_ENABLE_FAUCET;
+  delete env.BULEN_REQUIRE_SIGNATURES;
+  return { ...env, ...overrides };
+}
+
 test('production defaults enforce signatures and disable faucet', () => {
-  const env = {
-    ...process.env,
+  const env = buildEnv({
     NODE_ENV: 'production',
     BULEN_P2P_TOKEN: 'token-test',
-  };
+  });
   const cfg = loadConfig(env);
   assert.strictEqual(cfg.requireSignatures, true);
   assert.strictEqual(cfg.enableFaucet, false);
 });
 
 test('development defaults keep faucet/profile behaviour', () => {
-  const env = {
-    ...process.env,
+  const env = buildEnv({
     NODE_ENV: 'development',
     BULEN_P2P_TOKEN: '',
-  };
+  });
   const cfg = loadConfig(env);
   assert.strictEqual(cfg.requireSignatures, false);
 });
@@ -50,14 +55,13 @@ test('startup fails in production when guardrails are missing', () => {
     'node',
     [path.join(__dirname, '..', 'src', 'index.js')],
     {
-      env: {
-        ...process.env,
+      env: buildEnv({
         NODE_ENV: 'production',
         BULEN_HTTP_PORT: '0',
         BULEN_P2P_PORT: '0',
         BULEN_ENABLE_FAUCET: 'true',
         BULEN_REQUIRE_SIGNATURES: 'false',
-      },
+      }),
       encoding: 'utf-8',
     },
   );
