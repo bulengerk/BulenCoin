@@ -203,12 +203,9 @@ function getProtocolMajor(version) {
 const securityPreset = getEnv('BULEN_SECURITY_PRESET', 'dev').toLowerCase();
 const securityStrict = ['strict', 'prod', 'production', 'mainnet'].includes(securityPreset);
 
-const defaultStatusToken =
-  getEnv('BULEN_STATUS_TOKEN', process.env.NODE_ENV === 'test' ? 'status-token' : 'bulen-status');
-const defaultMetricsToken =
-  getEnv('BULEN_METRICS_TOKEN', process.env.NODE_ENV === 'test' ? 'metrics-token' : 'bulen-metrics');
-const defaultP2PToken =
-  getEnv('BULEN_P2P_TOKEN', process.env.NODE_ENV === 'test' ? 'p2p-token' : 'bulen-p2p');
+const defaultStatusToken = getEnv('BULEN_STATUS_TOKEN', process.env.NODE_ENV === 'test' ? '' : 'bulen-status');
+const defaultMetricsToken = getEnv('BULEN_METRICS_TOKEN', process.env.NODE_ENV === 'test' ? '' : 'bulen-metrics');
+const defaultP2PToken = getEnv('BULEN_P2P_TOKEN', process.env.NODE_ENV === 'test' ? '' : 'bulen-p2p');
 
 const config = {
   chainId: getEnv('BULEN_CHAIN_ID', 'bulencoin-devnet-1'),
@@ -300,6 +297,17 @@ const config = {
   p2pPeerRateLimitWindowMs: getNumberEnv('BULEN_P2P_PEER_WINDOW_MS', 5000),
   p2pPeerRateLimitMax: getNumberEnv('BULEN_P2P_PEER_MAX_REQUESTS', 40),
   p2pBadCertBanMinutes: getNumberEnv('BULEN_P2P_BAD_CERT_BAN_MIN', 10),
+  // Stable asset (BULCOS) config
+  bulcosMode: getEnv('BULCOS_MODE', 'fiat'),
+  bulcosSupplyCap: getNumberEnv('BULCOS_SUPPLY_CAP', 0),
+  bulcosDailyMintCap: getNumberEnv('BULCOS_DAILY_MINT_CAP', 0),
+  bulcosMinReserveRatio: getNumberEnv('BULCOS_MIN_RESERVE_RATIO', 0),
+  bulcosPauseOnOracleStale: getBoolEnv('BULCOS_PAUSE_ON_ORACLE_STALE', true),
+  bulcosIssuerKeys: parsePeers(getEnv('BULCOS_ISSUER_KEYS', '')),
+  bulcosOracleKeys: parsePeers(getEnv('BULCOS_ORACLE_KEYS', '')),
+  bulcosAdminKey: getEnv('BULCOS_ADMIN_KEY', ''),
+  bulcosOracleMaxAgeMs: getNumberEnv('BULCOS_ORACLE_MAX_AGE_MS', 5 * 60 * 1000),
+  bulcosInitialReserves: getNumberEnv('BULCOS_INITIAL_RESERVES', 0),
   // If set (comma-separated addresses), only these validators can produce blocks.
   // Leave empty for permissionless mode.
   validatorAllowlist: parsePeers(getEnv('BULEN_VALIDATOR_ALLOWLIST', '')).filter(Boolean),
