@@ -9,6 +9,7 @@ on:
 jobs:
   node-sdks-and-services:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,27 +43,34 @@ jobs:
         working-directory: bulennode
         env:
           ALLOW_STATE_MIGRATION: "true"
+          CI: "true"
+          BULEN_BLOCK_INTERVAL_MS: "500"
+        timeout-minutes: 25
         run: |
           rm -rf ../data
-          npm test -- --test-timeout=30000
+          node --test --test-timeout=30000 --test-concurrency=1
 
       - name: Test explorer
         working-directory: explorer
-        run: npm test -- --test-timeout=30000
+        timeout-minutes: 10
+        run: node --test --test-timeout=30000
 
       - name: Test status
         working-directory: status
-        run: npm test -- --test-timeout=30000
+        timeout-minutes: 10
+        run: node --test --test-timeout=30000
 
       - name: Test rewards-hub
         working-directory: rewards-hub
-        run: npm test -- --test-timeout=30000
+        timeout-minutes: 10
+        run: node --test --test-timeout=30000
 
       - name: Test JS SDK
         working-directory: sdk
         env:
           ALLOW_STATE_MIGRATION: "true"
-        run: npm test -- --test-timeout=30000
+        timeout-minutes: 10
+        run: node --test --test-timeout=30000
 
   rust-sdk:
     runs-on: ubuntu-latest
