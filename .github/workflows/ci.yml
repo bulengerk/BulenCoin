@@ -40,23 +40,29 @@ jobs:
 
       - name: Test bulennode
         working-directory: bulennode
-        run: npm test
+        env:
+          ALLOW_STATE_MIGRATION: "true"
+        run: |
+          rm -rf ../data
+          npm test -- --test-timeout=30000
 
       - name: Test explorer
         working-directory: explorer
-        run: npm test
+        run: npm test -- --test-timeout=30000
 
       - name: Test status
         working-directory: status
-        run: npm test
+        run: npm test -- --test-timeout=30000
 
       - name: Test rewards-hub
         working-directory: rewards-hub
-        run: npm test
+        run: npm test -- --test-timeout=30000
 
       - name: Test JS SDK
         working-directory: sdk
-        run: npm test
+        env:
+          ALLOW_STATE_MIGRATION: "true"
+        run: npm test -- --test-timeout=30000
 
   rust-sdk:
     runs-on: ubuntu-latest
