@@ -49,6 +49,7 @@ jobs:
           BULEN_STATUS_TOKEN: ""
           BULEN_METRICS_TOKEN: ""
           BULEN_P2P_TOKEN: ""
+          BULEN_ENABLE_FAUCET: "true"
         timeout-minutes: 25
         run: |
           rm -rf ../data
