@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install deps (bulennode)
         working-directory: bulennode
@@ -49,28 +49,28 @@ jobs:
         timeout-minutes: 25
         run: |
           rm -rf ../data
-          node --test
+          node --test --test-timeout=30000 --test-concurrency=1
 
       - name: Test explorer
         working-directory: explorer
         env:
           NODE_TEST_TIMEOUT: "30000"
         timeout-minutes: 10
-        run: node --test
+        run: node --test --test-timeout=30000
 
       - name: Test status
         working-directory: status
         env:
           NODE_TEST_TIMEOUT: "30000"
         timeout-minutes: 10
-        run: node --test
+        run: node --test --test-timeout=30000
 
       - name: Test rewards-hub
         working-directory: rewards-hub
         env:
           NODE_TEST_TIMEOUT: "30000"
         timeout-minutes: 10
-        run: node --test
+        run: node --test --test-timeout=30000
 
       - name: Test JS SDK
         working-directory: sdk
@@ -78,7 +78,7 @@ jobs:
           ALLOW_STATE_MIGRATION: "true"
           NODE_TEST_TIMEOUT: "30000"
         timeout-minutes: 10
-        run: node --test
+        run: node --test --test-timeout=30000
 
   rust-sdk:
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
       - name: Setup Node.js (for bulennode used in integration test)
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install deps (bulennode)
         working-directory: bulennode
