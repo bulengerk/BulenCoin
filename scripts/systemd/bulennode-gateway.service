@@ -1,0 +1,16 @@
+[Unit]
+Description=BulenCoin gateway node (API observer)
+After=network.target
+
+[Service]
+Type=simple
+User=bulen
+WorkingDirectory=/opt/bulencoin/bulennode
+EnvironmentFile=/opt/bulencoin/bulennode/.env.gateway
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -19,6 +19,13 @@ cd "${REPO_ROOT}/bulennode"
 echo "[BulenCoin] Installing npm dependencies for bulennode..."
 npm install
 
+ENV_EXAMPLE="${REPO_ROOT}/bulennode/.env.gateway.example"
+if [[ -f "${ENV_EXAMPLE}" ]]; then
+  echo "[BulenCoin] Gateway env template available at ${ENV_EXAMPLE}"
+else
+  echo "[BulenCoin] Missing ${ENV_EXAMPLE} (should be in repo)."
+fi
+
 cat <<EOF
 
 [BulenCoin] Gateway node installation finished.
@@ -36,6 +43,14 @@ Then run:
 
   cd "${REPO_ROOT}/bulennode"
   npm start
+
+Systemd template (copy/edit as root):
+
+  sudo cp scripts/systemd/bulennode-gateway.service /etc/systemd/system/
+  sudo mkdir -p /opt/bulencoin/bulennode
+  sudo cp -r bulennode/* /opt/bulencoin/bulennode/
+  sudo cp bulennode/.env.gateway.example /opt/bulencoin/bulennode/.env.gateway
+  sudo systemctl daemon-reload && sudo systemctl enable --now bulennode-gateway
 
 This node should typically be:
 - placed behind a reverse proxy with TLS termination (nginx/Traefik),

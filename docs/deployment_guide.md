@@ -121,6 +121,13 @@ ExecStart=/usr/bin/node src/index.js
 Restart=always
 ``` 
 
+Gateway quick start (API observer, bez faucet):
+
+- Skopiuj env: `cp bulennode/.env.gateway.example bulennode/.env.gateway` i uzupełnij tokeny/porty/CORS.
+- Skopiuj usługę: `sudo cp scripts/systemd/bulennode-gateway.service /etc/systemd/system/` (dostosuj ścieżki jeśli instalujesz poza `/opt/bulencoin`).
+- Kopiuj kod: `sudo rsync -av bulennode/ /opt/bulencoin/bulennode/ && sudo systemctl daemon-reload && sudo systemctl enable --now bulennode-gateway`.
+- Wystaw przez nginx/caddy z TLS + rate limit; do status/metrics dodaj nagłówki tokenów (`x-bulen-status-token`, `x-bulen-metrics-token`); faucet off.
+
 # 5. Observability and metrics
 
 - Prometheus metrics at `/metrics` (protected by token): chain height, mempool, reward

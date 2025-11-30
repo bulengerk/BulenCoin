@@ -96,6 +96,30 @@ Keep `BULEN_PROTOCOL_VERSION` aligned; nodes reject mismatched major versions.
 10) Security checklist: faucet off, P2P token set, TLS on, status/metrics tokens required,
 rate-limit on proxy, non-root service users, log rotation enabled.
 
+# 1.2 Gateway-only deployment (API observer)
+
+Goal: single API gateway behind TLS + rate limits, no faucet, signatures required. Use this
+for exchanges/integrators that need read/write API with stricter defaults.
+
+1) Install deps (Node 18+, npm). Optional: `./scripts/install_gateway_node.sh` (installs npm deps).
+2) Copy env template and fill tokens/hosts:
+```bash
+cp bulennode/.env.gateway.example bulennode/.env.gateway
+# edit tokens (P2P/status/metrics), CORS, ports, protocol version
+```
+3) Systemd template (adjust paths if needed):
+```bash
+sudo cp scripts/systemd/bulennode-gateway.service /etc/systemd/system/
+sudo mkdir -p /opt/bulencoin/bulennode
+sudo rsync -av bulennode/ /opt/bulencoin/bulennode/
+sudo systemctl daemon-reload
+sudo systemctl enable --now bulennode-gateway.service
+```
+4) TLS + proxy: put nginx/caddy in front of port 4130, add rate limit, HSTS, and inject
+`x-bulen-status-token` / `x-bulen-metrics-token` headers where needed. Keep faucet off.
+5) Healthcheck: `curl -H "x-bulen-status-token: $BULEN_STATUS_TOKEN" https://api.<domain>/api/status`
+should return height/finality and peers. Monitor `/metrics` with token.
+
 # 2. Running the static website
 
 For local development:
