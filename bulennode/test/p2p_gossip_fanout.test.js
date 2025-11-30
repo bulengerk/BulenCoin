@@ -57,8 +57,17 @@ test('blocks propagate with limited fanout', async () => {
         p2pMaxPeers: 8,
         requireSignatures: false,
         allowUnsignedBlocks: false,
+        statusToken: '',
+        metricsToken: '',
+        bulcosSupplyCap: 0,
+        bulcosDailyMintCap: 0,
+        bulcosMinReserveRatio: 0,
+        enableFaucet: true,
       });
+      process.env.ALLOW_STATE_MIGRATION = 'true';
       const context = createNodeContext(config);
+      context.config.enableFaucet = true;
+      context.state.enableFaucet = true;
       const server = createServer(context);
       // Only node 0 will produce blocks to avoid competing forks in this test
       if (i === 0) {
@@ -122,5 +131,6 @@ test('blocks propagate with limited fanout', async () => {
         // ignore cleanup issues
       }
     });
+    delete process.env.ALLOW_STATE_MIGRATION;
   }
 });

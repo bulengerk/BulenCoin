@@ -41,6 +41,7 @@ test('block produced on node A is propagated to node B via P2P', async () => {
 
   const dataDirA = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-p2p-A-'));
   const dataDirB = fs.mkdtempSync(path.join(os.tmpdir(), 'bulen-p2p-B-'));
+  process.env.ALLOW_STATE_MIGRATION = 'true';
 
   const configA = cloneConfig({
     nodeId: 'node-A',
@@ -51,9 +52,17 @@ test('block produced on node A is propagated to node B via P2P', async () => {
     p2pToken: 'p2p-secret',
     requireSignatures: false,
     allowUnsignedBlocks: true,
+    statusToken: '',
+    metricsToken: '',
+    bulcosSupplyCap: 0,
+    bulcosDailyMintCap: 0,
+    bulcosMinReserveRatio: 0,
+    enableFaucet: true,
   });
 
   const contextA = createNodeContext(configA);
+  contextA.config.enableFaucet = true;
+  contextA.state.enableFaucet = true;
   const serverA = createServer(contextA);
   startBlockProducer(contextA);
   startUptimeSampler(contextA);
@@ -68,8 +77,16 @@ test('block produced on node A is propagated to node B via P2P', async () => {
     p2pToken: 'p2p-secret',
     requireSignatures: false,
     allowUnsignedBlocks: true,
+    statusToken: '',
+    metricsToken: '',
+    bulcosSupplyCap: 0,
+    bulcosDailyMintCap: 0,
+    bulcosMinReserveRatio: 0,
+    enableFaucet: true,
   });
   const contextB = createNodeContext(configB);
+  contextB.config.enableFaucet = true;
+  contextB.state.enableFaucet = true;
   const serverB = createServer(contextB);
   startBlockProducer(contextB);
   startUptimeSampler(contextB);

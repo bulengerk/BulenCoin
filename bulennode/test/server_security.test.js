@@ -121,6 +121,7 @@ test('security and functional behaviours', async () => {
   // 4. Functional: faucet + transaction + block production update account state
   config.requireSignatures = false;
   config.enableFaucet = true;
+  context.state.enableFaucet = true;
 
   const uniqueSuffix = Date.now().toString(16);
   const aliceFunctional = `alice-functional-${uniqueSuffix}`;
@@ -165,4 +166,5 @@ test.after(() => {
     context.timers.forEach((handle) => clearInterval(handle));
   }
   server.close();
+  config.enableFaucet = true;
 });
