@@ -4,8 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-process.env.NODE_ENV = 'test';
-
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer, startBlockProducer } = require('../src/server');
 const { startUptimeSampler } = require('../src/rewards');
@@ -36,7 +34,8 @@ async function fetchJson(url, options) {
   return { status: response.status, body };
 }
 
-const isCI = process.env.CI === 'true';
+process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+const isCI = process.env.GITHUB_ACTIONS === 'true';
 
 const maybeTest = isCI ? test.skip : test;
 
