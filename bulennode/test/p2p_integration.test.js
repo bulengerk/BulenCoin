@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+process.env.NODE_ENV = 'test';
+
 const baseConfig = require('../src/config');
 const { createNodeContext, createServer, startBlockProducer } = require('../src/server');
 const { startUptimeSampler } = require('../src/rewards');

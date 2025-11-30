@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+process.env.NODE_ENV = 'test';
+
 // Configure environment before requiring config/server
 process.env.BULEN_NODE_PROFILE = 'desktop-full';
 process.env.BULEN_HTTP_PORT = '0';
