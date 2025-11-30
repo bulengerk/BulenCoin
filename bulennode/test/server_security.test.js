@@ -19,6 +19,7 @@ const context = createNodeContext(config);
 config.blockIntervalMs = 200;
 config.p2pRequireHandshake = false;
 config.allowEmptyBlocks = false;
+config.statusToken = '';
 
 const server = createServer(context);
 startBlockProducer(context);
