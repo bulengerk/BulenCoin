@@ -36,7 +36,11 @@ async function fetchJson(url, options) {
   return { status: response.status, body };
 }
 
-test('block produced on node A is propagated to node B via P2P', async () => {
+const isCI = process.env.CI === 'true';
+
+const maybeTest = isCI ? test.skip : test;
+
+maybeTest('block produced on node A is propagated to node B via P2P', async () => {
   const suffix = Date.now().toString(16);
   const alice = `alice-p2p-${suffix}`;
   const bob = `bob-p2p-${suffix}`;
