@@ -18,6 +18,7 @@ const context = createNodeContext(config);
 // Speed up block production for tests
 config.blockIntervalMs = 200;
 config.p2pRequireHandshake = false;
+config.allowEmptyBlocks = false;
 
 const server = createServer(context);
 startBlockProducer(context);
@@ -156,7 +157,9 @@ test('security and functional behaviours', async () => {
   assert.strictEqual(result.status, 200);
   assert.ok(result.body);
   assert.strictEqual(result.body.balance, 100);
+});
 
+test.after(() => {
   if (Array.isArray(context.timers)) {
     context.timers.forEach((handle) => clearInterval(handle));
   }

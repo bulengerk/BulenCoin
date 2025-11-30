@@ -39,20 +39,27 @@ test('CORS, max body size and rate limiting work as expected', async () => {
     dataDir,
     httpPort: 0,
     maxBodySize: '64b',
+    statusToken: '',
+    metricsToken: '',
+    bulcosSupplyCap: 0,
+    bulcosDailyMintCap: 0,
+    bulcosMinReserveRatio: 0,
   });
-  // Restrict CORS to a single allowed origin
+  // Restrict CORS to a single allowed origin; explicit status token empty to avoid 403
   config.corsOrigins = ['https://allowed.example'];
+  config.statusToken = '';
 
   const context = createNodeContext(config);
   const server = createServer(context);
   const addressInfo = server.address();
   const baseUrl = `http://127.0.0.1:${addressInfo.port}`;
+  const statusHeaders = config.statusToken ? { 'x-bulen-status-token': config.statusToken } : {};
 
   try {
     // 1. CORS: allowed origin should succeed
     const allowed = await fetchJson(`${baseUrl}/api/status`, {
       method: 'GET',
-      headers: { Origin: 'https://allowed.example' },
+      headers: { Origin: 'https://allowed.example', ...statusHeaders },
     });
     assert.strictEqual(allowed.status, 200);
 
