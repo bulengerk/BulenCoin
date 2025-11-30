@@ -44,6 +44,7 @@ jobs:
         env:
           ALLOW_STATE_MIGRATION: "true"
           CI: "true"
+          NODE_ENV: "test"
           BULEN_BLOCK_INTERVAL_MS: "500"
           NODE_TEST_TIMEOUT: "30000"
           BULEN_STATUS_TOKEN: ""

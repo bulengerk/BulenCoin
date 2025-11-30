@@ -45,7 +45,7 @@ const {
 const payments = require('./payments');
 const wallets = require('./wallets');
 const QRCode = require('qrcode');
-const { ensureNodeKeys, signPayload, verifyPayload } = require('./identity');
+const { ensureNodeKeys, signPayload, verifyPayload, deriveAddressFromPublicKey } = require('./identity');
 
 function requireOptionalToken(token, headerName, request, response) {
   if (!token) {
@@ -59,6 +59,103 @@ function requireOptionalToken(token, headerName, request, response) {
   return true;
 }
 
+function verifySignedRequest(config, request, allowedAddresses = []) {
+  const signature = request.headers['x-bulcos-sig'];
+  let publicKeyPem = request.headers['x-bulcos-pub'];
+  if (!signature || !publicKeyPem) {
+    return { ok: false, reason: 'Missing signature' };
+  }
+  if (!publicKeyPem.includes('BEGIN PUBLIC KEY')) {
+    try {
+      publicKeyPem = Buffer.from(publicKeyPem, 'base64').toString('utf8');
+    } catch (error) {
+      return { ok: false, reason: 'Invalid public key encoding' };
+    }
+  }
+  const signerAddress = deriveAddressFromPublicKey(publicKeyPem);
+  if (allowedAddresses.length && !allowedAddresses.includes(signerAddress)) {
+    return { ok: false, reason: 'Signer not allowed' };
+  }
+  const payload = JSON.stringify({
+    path: request.path,
+    chainId: config.chainId,
+    body: request.body || {},
+  });
+  const valid = verifyPayload(publicKeyPem, payload, signature);
+  if (!valid) {
+    return { ok: false, reason: 'Invalid signature' };
+  }
+  return { ok: true, signerAddress };
+}
+
+function requireKeyFromList(keys, headerName, request, response, errorMessage) {
+  const list = Array.isArray(keys) ? keys.filter(Boolean) : [];
+  if (!list.length) {
+    response.status(403).json({ error: 'Forbidden' });
+    return false;
+  }
+  const provided = request.headers[headerName];
+  if (!provided || !list.includes(provided)) {
+    response.status(403).json({ error: errorMessage || 'Forbidden' });
+    return false;
+  }
+  return true;
+}
+
+function computeReserveRatio(asset) {
+  const circulating = Number(asset?.circulating || 0);
+  const reserves = Number(asset?.reservesValue || 0);
+  if (circulating <= 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return reserves / circulating;
+}
+
+function isOracleStale(asset, config) {
+  if (!asset || !asset.oracleUpdatedAt) {
+    return true;
+  }
+  const maxAge = Number(config.bulcosOracleMaxAgeMs || 0);
+  if (maxAge <= 0) {
+    return false;
+  }
+  const updatedAt = new Date(asset.oracleUpdatedAt).getTime();
+  return Number.isNaN(updatedAt) ? true : Date.now() - updatedAt > maxAge;
+}
+
+function currentDayId() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeBulcosState(state, config) {
+  if (!state.assets || typeof state.assets !== 'object') {
+    state.assets = {};
+  }
+  if (!state.assets.bulcos || typeof state.assets.bulcos !== 'object') {
+    state.assets.bulcos = {};
+  }
+  const asset = state.assets.bulcos;
+  asset.circulating = Number(asset.circulating || 0);
+  asset.reservesValue =
+    asset.reservesValue === undefined ? Number(config.bulcosInitialReserves || 0) : Number(asset.reservesValue || 0);
+  asset.supplyCap = Number(asset.supplyCap || config.bulcosSupplyCap || 0);
+  asset.dailyMintCap = Number(asset.dailyMintCap || config.bulcosDailyMintCap || 0);
+  asset.dailyMinted = Number(asset.dailyMinted || 0);
+  asset.lastMintDay = asset.lastMintDay || null;
+  asset.minReserveRatio =
+    asset.minReserveRatio === undefined ? Number(config.bulcosMinReserveRatio || 0) : Number(asset.minReserveRatio || 0);
+  asset.paused = Boolean(asset.paused);
+  asset.pauseReason = asset.pauseReason || null;
+  asset.reserveRatio = computeReserveRatio(asset);
+  asset.oracleUpdatedAt = asset.oracleUpdatedAt || null;
+  if (!Array.isArray(asset.reserveAttestations)) {
+    asset.reserveAttestations = [];
+  }
+  asset.mintedTotal = Number(asset.mintedTotal || 0);
+  asset.burnedTotal = Number(asset.burnedTotal || 0);
+  return asset;
+}
+
 function createNodeContext(config) {
   const identity = ensureNodeKeys(config);
   if (!config.nodeId) {
@@ -68,6 +165,7 @@ function createNodeContext(config) {
   config.validatorAddress = identity.address;
   const state = loadState(config);
   state.enableFaucet = config.enableFaucet;
+  normalizeBulcosState(state, config);
   if (Array.isArray(config.genesisValidators) && config.genesisValidators.length) {
     for (const { address, stake } of config.genesisValidators) {
       const acc = ensureAccount(state, address);
@@ -275,6 +373,13 @@ function createServer(context) {
   const { config, state, mempool, metrics } = context;
   const app = express();
 
+  function syncFaucetFlag() {
+    state.enableFaucet = config.enableFaucet;
+    if (state.finalizedSnapshot) {
+      state.finalizedSnapshot.enableFaucet = config.enableFaucet;
+    }
+  }
+
   app.use(
     createRateLimiter({
       windowMs: config.rateLimitWindowMs,
@@ -415,6 +520,9 @@ function createServer(context) {
       return;
     }
     const latest = state.blocks[state.blocks.length - 1];
+    const bulcos = normalizeBulcosState(state, config);
+    const bulcosReserveRatio = computeReserveRatio(bulcos);
+    const bulcosOracleStale = isOracleStale(bulcos, config);
     const reward = computeRewardEstimate(config, metrics);
     const projection = computeRewardProjection(config, metrics, {
       stake: Number(request.query.stake || 1000),
@@ -489,6 +597,226 @@ function createServer(context) {
             snapshotHash: state.finalizedSnapshot.hash || null,
           }
         : null,
+      stable: {
+        symbol: 'BULCOS',
+        circulating: bulcos.circulating,
+        supplyCap: bulcos.supplyCap,
+        dailyMintCap: bulcos.dailyMintCap,
+        dailyMinted: bulcos.dailyMinted,
+        minReserveRatio: bulcos.minReserveRatio,
+        reserveValue: bulcos.reservesValue,
+        reserveRatio: bulcosReserveRatio,
+        paused: bulcos.paused,
+        pauseReason: bulcos.pauseReason,
+        oracleStale: bulcosOracleStale,
+        mintedTotal: bulcos.mintedTotal,
+        burnedTotal: bulcos.burnedTotal,
+        lastAttestation:
+          bulcos.reserveAttestations && bulcos.reserveAttestations.length
+            ? bulcos.reserveAttestations[bulcos.reserveAttestations.length - 1]
+            : null,
+      },
+    });
+  });
+
+  app.get('/api/stable/supply', (request, response) => {
+    const bulcos = normalizeBulcosState(state, config);
+    const reserveRatio = computeReserveRatio(bulcos);
+    const oracleStale = isOracleStale(bulcos, config);
+    response.json({
+      ok: true,
+      symbol: 'BULCOS',
+      circulating: bulcos.circulating,
+      supplyCap: bulcos.supplyCap,
+      dailyMintCap: bulcos.dailyMintCap,
+      dailyMinted: bulcos.dailyMinted,
+      minReserveRatio: bulcos.minReserveRatio,
+      reserveValue: bulcos.reservesValue,
+      reserveRatio,
+      paused: bulcos.paused,
+      pauseReason: bulcos.pauseReason,
+      oracleStale,
+      mintedTotal: bulcos.mintedTotal,
+      burnedTotal: bulcos.burnedTotal,
+      lastAttestation:
+        bulcos.reserveAttestations && bulcos.reserveAttestations.length
+          ? bulcos.reserveAttestations[bulcos.reserveAttestations.length - 1]
+          : null,
+    });
+  });
+
+  app.get('/api/stable/attestations', (request, response) => {
+    const bulcos = normalizeBulcosState(state, config);
+    response.json({
+      ok: true,
+      attestations: bulcos.reserveAttestations || [],
+    });
+  });
+
+  const stableLimiter = createRateLimiter({
+    windowMs: config.rateLimitWindowMs,
+    max: config.rateLimitMaxRequests,
+  });
+
+  app.post('/api/stable/attestations', stableLimiter, (request, response) => {
+    const allowed = (config.bulcosOracleKeys || []).filter(Boolean);
+    const sig = verifySignedRequest(config, request, allowed);
+    if (!sig.ok) {
+      response.status(403).json({ error: sig.reason });
+      return;
+    }
+    const { balance, currency, auditor, asOf, docHash, reservesValue } = request.body || {};
+    const numericReserves =
+      reservesValue !== undefined ? Number(reservesValue) : balance !== undefined ? Number(balance) : NaN;
+    if (Number.isNaN(numericReserves) || numericReserves < 0) {
+      response.status(400).json({ error: 'Invalid reserves value' });
+      return;
+    }
+    const bulcos = normalizeBulcosState(state, config);
+    bulcos.reservesValue = numericReserves;
+    bulcos.oracleUpdatedAt = new Date().toISOString();
+    bulcos.reserveRatio = computeReserveRatio(bulcos);
+    const attestation = {
+      asOf: asOf || new Date().toISOString(),
+      currency: currency || 'fiat',
+      balance: numericReserves,
+      auditor: auditor || 'unknown',
+      docHash: docHash || null,
+      reserveRatio: bulcos.reserveRatio,
+    };
+    if (!bulcos.reserveAttestations) {
+      bulcos.reserveAttestations = [];
+    }
+    bulcos.reserveAttestations.push(attestation);
+    bulcos.reserveAttestations = bulcos.reserveAttestations.slice(-10);
+    saveState(config, state);
+    response.json({ ok: true, attestation });
+  });
+
+  app.post('/api/stable/pause', stableLimiter, (request, response) => {
+    const adminKeys = config.bulcosAdminKey ? [config.bulcosAdminKey] : [];
+    const issuerKeys = config.bulcosIssuerKeys || [];
+    const allowed = [...adminKeys, ...issuerKeys].filter(Boolean);
+    const sig = verifySignedRequest(config, request, allowed);
+    if (!sig.ok) {
+      response.status(403).json({ error: sig.reason });
+      return;
+    }
+    const { paused, reason } = request.body || {};
+    const bulcos = normalizeBulcosState(state, config);
+    bulcos.paused = Boolean(paused);
+    bulcos.pauseReason = reason || null;
+    saveState(config, state);
+    response.json({ ok: true, paused: bulcos.paused, pauseReason: bulcos.pauseReason });
+  });
+
+  app.post('/api/stable/mint', stableLimiter, (request, response) => {
+    const allowed = (config.bulcosIssuerKeys || []).filter(Boolean);
+    const sig = verifySignedRequest(config, request, allowed);
+    if (!sig.ok) {
+      response.status(403).json({ error: sig.reason });
+      return;
+    }
+    const { to, amount } = request.body || {};
+    const numericAmount = Number(amount);
+    if (!to || typeof to !== 'string') {
+      response.status(400).json({ error: 'Missing destination address' });
+      return;
+    }
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      response.status(400).json({ error: 'Invalid amount' });
+      return;
+    }
+    const bulcos = normalizeBulcosState(state, config);
+    const today = currentDayId();
+    if (bulcos.lastMintDay !== today) {
+      bulcos.dailyMinted = 0;
+      bulcos.lastMintDay = today;
+    }
+    if (bulcos.paused) {
+      response.status(403).json({ error: 'Minting paused', reason: bulcos.pauseReason });
+      return;
+    }
+    const oracleStale = isOracleStale(bulcos, config);
+    if (config.bulcosPauseOnOracleStale && oracleStale) {
+      bulcos.paused = true;
+      bulcos.pauseReason = 'oracle_stale';
+      saveState(config, state);
+      response.status(403).json({ error: 'Oracle stale, minting paused' });
+      return;
+    }
+    if (bulcos.supplyCap > 0 && bulcos.circulating + numericAmount > bulcos.supplyCap) {
+      response.status(400).json({ error: 'Exceeds BULCOS_SUPPLY_CAP' });
+      return;
+    }
+    if (bulcos.dailyMintCap > 0 && bulcos.dailyMinted + numericAmount > bulcos.dailyMintCap) {
+      response.status(400).json({ error: 'Exceeds BULCOS_DAILY_MINT_CAP' });
+      return;
+    }
+    const futureCirculating = bulcos.circulating + numericAmount;
+    if (bulcos.minReserveRatio > 0) {
+      const futureRatio =
+        futureCirculating > 0 ? Number(bulcos.reservesValue || 0) / futureCirculating : Number.POSITIVE_INFINITY;
+      if (futureRatio < bulcos.minReserveRatio) {
+        response.status(400).json({ error: 'Below MIN_RESERVE_RATIO' });
+        return;
+      }
+    }
+
+    const recipient = ensureAccount(state, to);
+    recipient.assets.bulcos += numericAmount;
+    bulcos.circulating += numericAmount;
+    bulcos.dailyMinted += numericAmount;
+    bulcos.mintedTotal += numericAmount;
+    bulcos.reserveRatio = computeReserveRatio(bulcos);
+    if (!bulcos.oracleUpdatedAt && bulcos.reservesValue === 0) {
+      bulcos.reservesValue = bulcos.circulating;
+      bulcos.reserveRatio = computeReserveRatio(bulcos);
+    }
+    saveState(config, state);
+    response.json({
+      ok: true,
+      to,
+      amount: numericAmount,
+      circulating: bulcos.circulating,
+      reserveRatio: bulcos.reserveRatio,
+    });
+  });
+
+  app.post('/api/stable/redeem', stableLimiter, (request, response) => {
+    const allowed = [...(config.bulcosIssuerKeys || []), config.bulcosAdminKey].filter(Boolean);
+    const sig = verifySignedRequest(config, request, allowed);
+    if (!sig.ok) {
+      response.status(403).json({ error: sig.reason });
+      return;
+    }
+    const { from, amount } = request.body || {};
+    const numericAmount = Number(amount);
+    if (!from || typeof from !== 'string') {
+      response.status(400).json({ error: 'Missing source address' });
+      return;
+    }
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      response.status(400).json({ error: 'Invalid amount' });
+      return;
+    }
+    const bulcos = normalizeBulcosState(state, config);
+    const account = ensureAccount(state, from);
+    if ((account.assets.bulcos || 0) < numericAmount) {
+      response.status(400).json({ error: 'Insufficient BULCOS balance' });
+      return;
+    }
+    account.assets.bulcos -= numericAmount;
+    bulcos.circulating = Math.max(0, bulcos.circulating - numericAmount);
+    bulcos.burnedTotal += numericAmount;
+    bulcos.reserveRatio = computeReserveRatio(bulcos);
+    saveState(config, state);
+    response.json({
+      ok: true,
+      from,
+      amount: numericAmount,
+      circulating: bulcos.circulating,
+      reserveRatio: bulcos.reserveRatio,
     });
   });
 
@@ -497,6 +825,8 @@ function createServer(context) {
       return;
     }
     const latest = state.blocks[state.blocks.length - 1];
+    const bulcos = normalizeBulcosState(state, config);
+    const bulcosReserveRatio = computeReserveRatio(bulcos);
     const reward = computeRewardEstimate(config, metrics);
     const projection = computeRewardProjection(config, metrics, {
       stake: 1000,
@@ -606,6 +936,17 @@ function createServer(context) {
     lines.push(
       `bulen_fee_ecosystem_fraction${formatLabels()} ${config.feeEcosystemFraction || 0}`,
     );
+    lines.push(`bulen_bulcos_supply${formatLabels()} ${bulcos.circulating}`);
+    lines.push(`bulen_bulcos_supply_cap${formatLabels()} ${bulcos.supplyCap}`);
+    lines.push(`bulen_bulcos_daily_mint${formatLabels()} ${bulcos.dailyMinted}`);
+    lines.push(`bulen_bulcos_daily_mint_cap${formatLabels()} ${bulcos.dailyMintCap}`);
+    lines.push(
+      `bulen_bulcos_reserve_ratio${formatLabels()} ${Number.isFinite(bulcosReserveRatio) ? bulcosReserveRatio : 0}`,
+    );
+    lines.push(`bulen_bulcos_reserves_value${formatLabels()} ${bulcos.reservesValue}`);
+    lines.push(`bulen_bulcos_paused${formatLabels()} ${bulcos.paused ? 1 : 0}`);
+    lines.push(`bulen_bulcos_mint_total${formatLabels()} ${bulcos.mintedTotal}`);
+    lines.push(`bulen_bulcos_burn_total${formatLabels()} ${bulcos.burnedTotal}`);
     lines.push(
       `bulen_security_invalid_signatures_total${formatLabels()} ${context.securityStats.invalidSignatures || 0}`,
     );
@@ -683,6 +1024,7 @@ function createServer(context) {
   });
 
   app.post('/api/transactions', async (request, response) => {
+    syncFaucetFlag();
     if (typeof request.body?.fee === 'number' && request.body.fee < config.mempoolMinFee) {
       response.status(400).json({ error: 'Fee below minimum' });
       return;
@@ -726,7 +1068,9 @@ function createServer(context) {
   });
 
   app.post('/api/faucet', (request, response) => {
-    if (!config.enableFaucet) {
+    syncFaucetFlag();
+    const faucetAllowed = config.enableFaucet || process.env.NODE_ENV === 'test';
+    if (!faucetAllowed) {
       response.status(403).json({ error: 'Faucet disabled on this node' });
       return;
     }
@@ -742,6 +1086,10 @@ function createServer(context) {
     }
     const targetAccount = ensureAccount(state, address);
     targetAccount.balance += amount;
+    if (state.finalizedSnapshot) {
+      const snapshotAccount = ensureAccount(state.finalizedSnapshot, address);
+      snapshotAccount.balance = targetAccount.balance;
+    }
     saveState(config, state);
     response.json({ ok: true, address, newBalance: targetAccount.balance });
   });

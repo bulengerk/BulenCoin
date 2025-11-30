@@ -159,6 +159,11 @@ test('security and functional behaviours', async () => {
   assert.strictEqual(result.status, 200);
   assert.ok(result.body);
   assert.strictEqual(result.body.balance, 100);
+
+  await waitFor(async () => {
+    const res = await fetchJson(`${baseUrl}/api/accounts/${bobFunctional}`, { method: 'GET' });
+    return res.body && res.body.balance === 100;
+  }, 'bob balance update');
 });
 
 test.after(() => {
